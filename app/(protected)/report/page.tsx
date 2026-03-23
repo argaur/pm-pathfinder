@@ -35,27 +35,27 @@ export default async function ReportPage() {
     <div className="max-w-3xl mx-auto">
       <div className="mb-8">
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-1">Diagnostic Report</p>
-        <h1 className="text-2xl font-bold text-white">Your Complete Profile</h1>
+        <h1 className="text-2xl font-bold text-[#dae2fd]">Your Complete Profile</h1>
       </div>
 
       {/* Archetype card */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 mb-6">
+      <div className="bg-[#171f33] rounded-2xl p-6 mb-6">
         <div className="flex items-start justify-between gap-4 mb-4">
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-widest mb-1">Your PM Archetype</p>
-            <h2 className="text-2xl font-bold text-white mb-1">{archetype.name}</h2>
-            <p className="text-sm text-slate-400">{archetype.tagline}</p>
+            <p className="text-xs text-[#918fa1] uppercase tracking-widest mb-1">Your PM Archetype</p>
+            <h2 className="text-2xl font-bold text-[#dae2fd] mb-1">{archetype.name}</h2>
+            <p className="text-sm text-[#c7c4d8]">{archetype.tagline}</p>
           </div>
-          <div className="flex-shrink-0 text-xs font-mono text-slate-600 bg-slate-800 px-3 py-1.5 rounded-lg capitalize">
+          <div className="flex-shrink-0 text-xs font-mono text-[#918fa1] bg-[#222a3d] px-3 py-1.5 rounded-lg capitalize">
             {archetype.background.replace('_', '-')} × {archetype.mindset}
           </div>
         </div>
 
-        <p className="text-sm text-slate-300 leading-relaxed mb-4">{archetype.description}</p>
+        <p className="text-sm text-[#dae2fd] leading-relaxed mb-4">{archetype.description}</p>
 
         <div className="flex flex-wrap gap-2">
           {archetype.traits.map((t) => (
-            <Badge key={t} className="bg-indigo-950/60 border-indigo-800/60 text-indigo-300 text-xs">
+            <Badge key={t} className="bg-[#222a3d] border border-white/10 text-[#c3c0ff] text-xs">
               {t}
             </Badge>
           ))}
@@ -63,8 +63,8 @@ export default async function ReportPage() {
       </div>
 
       {/* Radar chart */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 mb-6">
-        <p className="text-xs text-slate-500 uppercase tracking-widest mb-4">5-Dimension Scores</p>
+      <div className="bg-[#171f33] rounded-2xl p-6 mb-6">
+        <p className="text-xs text-[#918fa1] uppercase tracking-widest mb-4">5-Dimension Scores</p>
         <RadarChart data={radarData} />
       </div>
 
@@ -74,23 +74,23 @@ export default async function ReportPage() {
           const tier = tiers?.[dim] ?? 'neutral'
           const config = TIER_CONFIG[tier]
           return (
-            <div key={dim} className={`border rounded-xl p-5 ${config.bg} ${config.border}`}>
+            <div key={dim} className={`border border-white/10 rounded-xl p-5 ${config.bg}`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-white">{DIMENSION_LABELS[dim]}</p>
+                <p className="text-sm font-medium text-[#dae2fd]">{DIMENSION_LABELS[dim]}</p>
                 <div className="flex items-center gap-2">
                   <span className={`text-xs font-mono ${config.color}`}>{score.toFixed(1)}/10</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full border ${config.bg} ${config.color} ${config.border}`}>
+                  <span className={`text-xs px-2 py-0.5 rounded-full border border-white/10 ${config.bg} ${config.color}`}>
                     {config.label}
                   </span>
                 </div>
               </div>
-              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden mb-2">
+              <div className="h-1.5 bg-[#222a3d] rounded-full overflow-hidden mb-2">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-teal-500"
                   style={{ width: `${score * 10}%` }}
                 />
               </div>
-              <p className="text-xs text-slate-500">{config.description}</p>
+              <p className="text-xs text-[#918fa1]">{config.description}</p>
             </div>
           )
         })}
@@ -98,21 +98,21 @@ export default async function ReportPage() {
 
       {/* Strengths and growth */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
+        <div className="bg-[#171f33] rounded-xl p-5">
           <p className="text-xs text-emerald-500 uppercase tracking-widest font-medium mb-3">Your PM Strengths</p>
           <ul className="flex flex-col gap-2">
             {archetype.strengths.map((s) => (
-              <li key={s} className="text-sm text-slate-300 flex items-start gap-2">
+              <li key={s} className="text-sm text-[#dae2fd] flex items-start gap-2">
                 <span className="text-emerald-500 mt-0.5">✓</span>{s}
               </li>
             ))}
           </ul>
         </div>
-        <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
+        <div className="bg-[#171f33] rounded-xl p-5">
           <p className="text-xs text-amber-500 uppercase tracking-widest font-medium mb-3">Areas to Develop</p>
           <ul className="flex flex-col gap-2">
             {archetype.growthAreas.map((g) => (
-              <li key={g} className="text-sm text-slate-300 flex items-start gap-2">
+              <li key={g} className="text-sm text-[#dae2fd] flex items-start gap-2">
                 <span className="text-amber-500 mt-0.5">→</span>{g}
               </li>
             ))}

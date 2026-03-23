@@ -111,14 +111,18 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-slate-950">
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+      {/* Atmospheric orbs */}
+      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed top-0 left-0 w-[400px] h-[400px] bg-teal-500/[0.07] rounded-full blur-[100px] pointer-events-none -z-10" />
+
       {/* Progress dots */}
       <div className="flex gap-2 mb-12">
         {STEPS.map((_, i) => (
           <div
             key={i}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i <= currentStep ? 'w-8 bg-indigo-500' : 'w-4 bg-slate-800'
+            className={`h-1 rounded-full transition-all duration-300 ${
+              i <= currentStep ? 'w-8 bg-teal-400' : 'w-4 bg-[#222a3d]'
             }`}
           />
         ))}
@@ -134,22 +138,26 @@ export default function OnboardingPage() {
           className="w-full max-w-lg"
         >
           <div className="mb-8">
-            <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-3">
+            <p className="text-xs uppercase tracking-widest text-teal-400 font-mono mb-3">
               Step {currentStep + 1} of {STEPS.length}
             </p>
-            <h2 className="text-2xl font-semibold text-white mb-2">{step.question}</h2>
-            {step.subtext && <p className="text-sm text-slate-500">{step.subtext}</p>}
+            <h2 className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight mb-2">
+              {step.question}
+            </h2>
+            {step.subtext && (
+              <p className="text-sm text-[#918fa1] leading-relaxed">{step.subtext}</p>
+            )}
           </div>
 
-          <div className="flex flex-col gap-2 mb-8">
+          <div className="flex flex-col gap-2.5 mb-8">
             {step.options.map((option) => (
               <button
                 key={option}
                 onClick={() => handleSelect(option)}
-                className={`w-full text-left px-4 py-3.5 rounded-xl border text-sm transition-all duration-150 ${
+                className={`w-full text-left px-5 py-4 rounded-2xl text-sm transition-all duration-150 ${
                   selected === option
-                    ? 'border-indigo-500 bg-indigo-950/60 text-white'
-                    : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-600 hover:text-slate-300'
+                    ? 'border-2 border-[#4fdbc8] bg-[#222a3d] text-[#dae2fd] shadow-[0_0_20px_rgba(79,219,200,0.1)]'
+                    : 'border border-white/5 bg-[#171f33] text-[#c7c4d8] hover:bg-[#1a2236] hover:border-white/10'
                 }`}
               >
                 {option}
@@ -160,7 +168,7 @@ export default function OnboardingPage() {
           <Button
             onClick={handleNext}
             disabled={!selected || loading}
-            className="w-full h-12 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl disabled:opacity-40"
+            className="w-full h-14 bg-[#4fdbc8] hover:bg-teal-400 disabled:bg-[#222a3d] disabled:text-[#918fa1] text-slate-950 font-semibold text-base rounded-2xl shadow-[0_0_32px_rgba(79,219,200,0.2)] disabled:shadow-none transition-all active:scale-[0.98]"
           >
             {loading ? 'Saving...' : currentStep < STEPS.length - 1 ? 'Continue' : 'Show my insights'}
             {!loading && <ArrowRight className="ml-2 w-4 h-4" />}

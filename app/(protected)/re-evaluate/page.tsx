@@ -27,20 +27,20 @@ export default async function ReEvaluatePage() {
     <div className="max-w-3xl mx-auto">
       <div className="mb-8">
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-1">Re-evaluation</p>
-        <h1 className="text-2xl font-bold text-white mb-2">Track your progress</h1>
-        <p className="text-sm text-slate-400">
+        <h1 className="text-2xl font-bold text-[#dae2fd] mb-2">Track your progress</h1>
+        <p className="text-sm text-[#c7c4d8]">
           Retake the diagnostic to see how your scores have shifted since you started.
         </p>
       </div>
 
       {/* Score history */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 mb-6">
-        <p className="text-xs uppercase tracking-widest text-slate-500 font-medium mb-4">Score History</p>
+      <div className="bg-[#171f33] rounded-2xl p-6 mb-6">
+        <p className="text-xs uppercase tracking-widest text-[#918fa1] font-medium mb-4">Score History</p>
 
         {assessments.map((a, i) => (
           <div key={a.id} className="mb-4 last:mb-0">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-[#918fa1]">
                 {i === 0 ? 'Latest' : `Assessment ${assessments.length - i}`}
                 {' · '}
                 {new Date(a.taken_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -55,16 +55,16 @@ export default async function ReEvaluatePage() {
 
                 return (
                   <div key={dim} className="flex items-center gap-3">
-                    <span className="text-xs text-slate-600 w-36 flex-shrink-0">{DIMENSION_LABELS[dim]}</span>
-                    <div className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
+                    <span className="text-xs text-[#918fa1] w-36 flex-shrink-0">{DIMENSION_LABELS[dim]}</span>
+                    <div className="flex-1 h-1 bg-[#222a3d] rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-teal-500"
                         style={{ width: `${score * 10}%` }}
                       />
                     </div>
-                    <span className="text-xs font-mono text-slate-500 w-8 text-right">{score.toFixed(1)}</span>
+                    <span className="text-xs font-mono text-[#918fa1] w-8 text-right">{score.toFixed(1)}</span>
                     {delta !== null && (
-                      <span className={`text-xs font-mono w-10 text-right ${delta > 0 ? 'text-emerald-400' : delta < 0 ? 'text-rose-400' : 'text-slate-600'}`}>
+                      <span className={`text-xs font-mono w-10 text-right ${delta > 0 ? 'text-emerald-400' : delta < 0 ? 'text-rose-400' : 'text-[#918fa1]'}`}>
                         {delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)}
                       </span>
                     )}
@@ -77,13 +77,13 @@ export default async function ReEvaluatePage() {
       </div>
 
       {/* CTA */}
-      <div className="bg-indigo-950/30 border border-indigo-900/60 rounded-2xl p-6 text-center">
-        <p className="text-sm font-medium text-white mb-1">Ready to measure your growth?</p>
-        <p className="text-xs text-slate-400 mb-5">
+      <div className="bg-[#222a3d] border border-white/10 rounded-2xl p-6 text-center">
+        <p className="text-sm font-medium text-[#dae2fd] mb-1">Ready to measure your growth?</p>
+        <p className="text-xs text-[#c7c4d8] mb-5">
           Retake the diagnostic to update your scores. Best done after completing a roadmap milestone.
         </p>
         <Link href="/quiz/diagnostic">
-          <Button className="bg-indigo-600 hover:bg-indigo-500 text-white h-11 px-8 rounded-xl">
+          <Button className="bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-semibold h-12 px-8 rounded-2xl shadow-[0_0_24px_rgba(79,219,200,0.2)] transition-all active:scale-[0.98]">
             Retake the diagnostic
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>

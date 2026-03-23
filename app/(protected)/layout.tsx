@@ -24,7 +24,7 @@ export default async function ProtectedLayout({
     .single()
 
   return (
-    <div className="flex h-screen bg-slate-950 overflow-hidden">
+    <div className="flex h-screen bg-[#0b1326] overflow-hidden">
       <Sidebar archetype={profile?.archetype ?? null} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <TopBar

@@ -53,25 +53,25 @@ export default async function DashboardPage() {
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-1">
           Welcome back
         </p>
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-[#dae2fd] font-[family-name:var(--font-space-grotesk)]">
           {profile?.display_name?.split(' ')[0] ?? 'Hey'}&apos;s Dashboard
         </h1>
       </div>
 
       {/* Archetype + score summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="md:col-span-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
-          <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">Your Archetype</p>
-          <h2 className="text-xl font-bold text-white mb-1">{archetype.name}</h2>
-          <p className="text-sm text-slate-400 mb-4">{archetype.tagline}</p>
+        <div className="md:col-span-2 bg-[#171f33] rounded-2xl p-6">
+          <p className="text-xs text-[#918fa1] uppercase tracking-widest mb-2">Your Archetype</p>
+          <h2 className="text-xl font-bold text-[#dae2fd] mb-1">{archetype.name}</h2>
+          <p className="text-sm text-[#c7c4d8] mb-4">{archetype.tagline}</p>
           <div className="flex flex-col gap-2">
             {(Object.entries(dimensionScores) as [Dimension, number][]).map(([dim, score]) => {
               const tier = tiers?.[dim] ?? 'neutral'
               const config = TIER_CONFIG[tier]
               return (
                 <div key={dim} className="flex items-center gap-3">
-                  <span className="text-xs text-slate-500 w-36 flex-shrink-0">{DIMENSION_LABELS[dim]}</span>
-                  <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <span className="text-xs text-[#918fa1] w-36 flex-shrink-0">{DIMENSION_LABELS[dim]}</span>
+                  <div className="flex-1 h-1.5 bg-[#222a3d] rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-teal-500"
                       style={{ width: `${score * 10}%` }}
@@ -87,17 +87,17 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex-1">
-            <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">Videos Done</p>
+          <div className="bg-[#171f33] rounded-2xl p-5 flex-1">
+            <p className="text-xs text-[#918fa1] uppercase tracking-widest mb-2">Videos Done</p>
             <p className="text-3xl font-bold font-mono text-indigo-400">{completedVideos ?? 0}</p>
-            <p className="text-xs text-slate-600 mt-1">roadmap items completed</p>
+            <p className="text-xs text-[#918fa1] mt-1">roadmap items completed</p>
           </div>
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex-1">
-            <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">Assessments</p>
+          <div className="bg-[#171f33] rounded-2xl p-5 flex-1">
+            <p className="text-xs text-[#918fa1] uppercase tracking-widest mb-2">Assessments</p>
             <p className="text-3xl font-bold font-mono text-teal-400">
               {latestAssessment.version}
             </p>
-            <p className="text-xs text-slate-600 mt-1">taken so far</p>
+            <p className="text-xs text-[#918fa1] mt-1">taken so far</p>
           </div>
         </div>
       </div>
@@ -108,14 +108,14 @@ export default async function DashboardPage() {
           <Link
             key={href}
             href={href}
-            className="bg-slate-900/40 border border-slate-800 rounded-xl p-4 hover:border-slate-700 hover:bg-slate-900/60 transition-all group"
+            className="bg-[#171f33] rounded-xl p-4 hover:bg-[#222a3d] transition-all group"
           >
             <div className="flex items-center justify-between mb-2">
               <Icon className="w-4 h-4 text-indigo-400" />
-              <ArrowRight className="w-3.5 h-3.5 text-slate-700 group-hover:text-slate-500 transition-colors" />
+              <ArrowRight className="w-3.5 h-3.5 text-[#918fa1] group-hover:text-[#c7c4d8] transition-colors" />
             </div>
-            <p className="text-sm font-medium text-white mb-0.5">{label}</p>
-            <p className="text-xs text-slate-500">{desc}</p>
+            <p className="text-sm font-medium text-[#dae2fd] mb-0.5">{label}</p>
+            <p className="text-xs text-[#918fa1]">{desc}</p>
           </Link>
         ))}
       </div>

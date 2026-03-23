@@ -79,20 +79,20 @@ export default function DeepDivePage() {
     return (
       <div className="max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center">
+          <div className="bg-[#171f33] rounded-2xl p-8 text-center">
             <div className="text-4xl mb-4">✓</div>
-            <h2 className="text-xl font-semibold text-white mb-2">Deep dive complete</h2>
-            <p className="text-sm text-slate-400 mb-6">
+            <h2 className="text-xl font-semibold text-[#dae2fd] mb-2">Deep dive complete</h2>
+            <p className="text-sm text-[#c7c4d8] mb-6">
               Your {DIMENSION_LABELS[selectedDimension]} sub-category breakdown has been saved.
               This will refine your roadmap recommendations.
             </p>
             <div className="flex gap-3 justify-center">
               <Button onClick={() => { setDone(false); setSelectedDimension(null); setCurrentQ(0); setAnswers({}) }}
-                variant="outline" className="border-slate-700 text-slate-400">
+                variant="outline" className="border-white/10 text-[#c7c4d8]">
                 Dive into another dimension
               </Button>
               <Button onClick={() => router.push('/roadmap/text')}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white">
+                className="bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-semibold rounded-xl">
                 See my roadmap
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
@@ -111,22 +111,22 @@ export default function DeepDivePage() {
     return (
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
-          <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-[#222a3d] rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-indigo-500 to-teal-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-xs font-mono text-slate-600">{currentQ + 1}/{questions.length}</span>
+          <span className="text-xs font-mono text-[#918fa1]">{currentQ + 1}/{questions.length}</span>
         </div>
 
         <AnimatePresence mode="wait">
-          <motion.div key={currentQ} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
-            <p className="text-xs uppercase tracking-widest text-indigo-400 mb-2">{q.subCategory}</p>
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 mb-5">
-              <p className="text-base font-medium text-white">{q.question}</p>
-            </div>
-            <div className="flex flex-col gap-2">
+          <motion.div key={currentQ} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }}>
+            <p className="text-xs uppercase tracking-widest text-teal-400 font-mono mb-4">{q.subCategory}</p>
+            <h2 className="text-xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight mb-7 leading-snug">
+              {q.question}
+            </h2>
+            <div className="flex flex-col gap-2.5">
               {q.options.map((opt, i) => (
                 <button key={i} onClick={() => handleAnswer(opt)}
-                  className="w-full text-left px-4 py-3.5 rounded-xl border border-slate-800 bg-slate-900/40 text-slate-400 hover:border-indigo-700 hover:text-white text-sm transition-all">
+                  className="w-full text-left px-5 py-4 rounded-2xl border border-white/5 bg-[#171f33] text-[#c7c4d8] hover:bg-[#1a2236] hover:border-white/10 text-sm transition-all">
                   {opt}
                 </button>
               ))}
@@ -141,8 +141,8 @@ export default function DeepDivePage() {
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-1">Deep Dive</p>
-        <h1 className="text-2xl font-bold text-white mb-2">Go deeper on a dimension</h1>
-        <p className="text-sm text-slate-400">
+        <h1 className="text-2xl font-bold text-[#dae2fd] mb-2">Go deeper on a dimension</h1>
+        <p className="text-sm text-[#c7c4d8]">
           Pick a dimension to break down your sub-category strengths and gaps with 3 targeted questions.
         </p>
       </div>
@@ -153,12 +153,12 @@ export default function DeepDivePage() {
           const config = tier ? TIER_CONFIG[tier as keyof typeof TIER_CONFIG] : TIER_CONFIG.neutral
           return (
             <button key={dim} onClick={() => { setSelectedDimension(dim); setCurrentQ(0); setAnswers({}) }}
-              className="w-full text-left flex items-center justify-between px-5 py-4 rounded-xl border border-slate-800 bg-slate-900/40 hover:border-indigo-800 hover:bg-indigo-950/20 transition-all group">
+              className="w-full text-left flex items-center justify-between px-5 py-4 rounded-2xl border border-white/5 bg-[#171f33] hover:bg-[#1a2236] hover:border-white/10 transition-all group">
               <div>
-                <p className="text-sm font-medium text-white">{DIMENSION_LABELS[dim]}</p>
+                <p className="text-sm font-medium text-[#dae2fd]">{DIMENSION_LABELS[dim]}</p>
                 {tier && <p className={`text-xs mt-0.5 ${config.color}`}>{config.label}</p>}
               </div>
-              <ArrowRight className="w-4 h-4 text-slate-700 group-hover:text-indigo-400 transition-colors" />
+              <ArrowRight className="w-4 h-4 text-[#918fa1] group-hover:text-indigo-400 transition-colors" />
             </button>
           )
         })}

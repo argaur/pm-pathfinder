@@ -51,14 +51,14 @@ export default function VideoRoadmapClient({ archetype, getRoadmapContent, progr
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-1">Video Roadmap</p>
-        <h1 className="text-2xl font-bold text-white mb-1">{archetype.name} Path</h1>
-        <p className="text-sm text-slate-400">
+        <h1 className="text-2xl font-bold text-[#dae2fd] mb-1">{archetype.name} Path</h1>
+        <p className="text-sm text-[#c7c4d8]">
           {completedCount} of {weeks.length} weeks completed
         </p>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden mb-6">
+      <div className="h-1.5 bg-[#222a3d] rounded-full overflow-hidden mb-6">
         <div
           className="h-full bg-gradient-to-r from-indigo-500 to-teal-500 rounded-full transition-all duration-500"
           style={{ width: `${(completedCount / weeks.length) * 100}%` }}
@@ -73,8 +73,8 @@ export default function VideoRoadmapClient({ archetype, getRoadmapContent, progr
             onClick={() => setTimeline(m)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               timeline === m
-                ? 'bg-indigo-600 text-white'
-                : 'bg-slate-900/60 text-slate-400 border border-slate-800 hover:border-slate-700'
+                ? 'bg-[#4f46e5] text-[#dae2fd]'
+                : 'bg-[#171f33] text-[#c7c4d8] hover:bg-[#222a3d]'
             }`}
           >
             {m} month{m > 1 ? 's' : ''}
@@ -92,8 +92,8 @@ export default function VideoRoadmapClient({ archetype, getRoadmapContent, progr
           return (
             <div
               key={week.week}
-              className={`border rounded-xl overflow-hidden transition-all ${
-                isDone ? 'border-emerald-900/60 bg-emerald-950/20' : 'border-slate-800 bg-slate-900/40'
+              className={`rounded-xl overflow-hidden transition-all ${
+                isDone ? 'bg-[#0d2b1a]' : 'bg-[#171f33]'
               }`}
             >
               <div className="flex items-center gap-4 p-4">
@@ -104,17 +104,17 @@ export default function VideoRoadmapClient({ archetype, getRoadmapContent, progr
                   {isDone ? (
                     <CheckCircle className="w-5 h-5 text-emerald-500" />
                   ) : (
-                    <Circle className="w-5 h-5 text-slate-700 hover:text-slate-500 transition-colors" />
+                    <Circle className="w-5 h-5 text-[#918fa1] hover:text-[#c7c4d8] transition-colors" />
                   )}
                 </button>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-mono text-slate-600">Week {week.week}</span>
-                    <span className="text-xs text-slate-700">·</span>
+                    <span className="text-xs font-mono text-[#918fa1]">Week {week.week}</span>
+                    <span className="text-xs text-[#918fa1]">·</span>
                     <span className="text-xs text-indigo-500">{week.dimension}</span>
                   </div>
-                  <p className={`text-sm font-medium ${isDone ? 'text-slate-500 line-through' : 'text-white'}`}>
+                  <p className={`text-sm font-medium ${isDone ? 'text-[#918fa1] line-through' : 'text-[#dae2fd]'}`}>
                     {week.title}
                   </p>
                 </div>
@@ -131,7 +131,7 @@ export default function VideoRoadmapClient({ archetype, getRoadmapContent, progr
               {/* Inline video embed */}
               {isActive && (
                 <div className="px-4 pb-4">
-                  <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden">
+                  <div className="aspect-video bg-[#222a3d] rounded-lg overflow-hidden">
                     <iframe
                       src={`https://www.youtube.com/embed/${week.videoId}`}
                       title={week.title}

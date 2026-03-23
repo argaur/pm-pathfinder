@@ -2,161 +2,250 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowRight, Users, Zap, MapPin } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ArrowRight } from 'lucide-react'
 
 const PAIN_POINTS = [
   {
+    icon: '😤',
     quote: "I've been preparing for months but still don't feel ready to apply.",
-    role: 'Senior Engineer → Aspiring PM',
+    persona: 'The Over-Prepper',
+    accent: { bg: 'bg-indigo-500/10', text: 'text-indigo-400', line: 'bg-indigo-500/40' },
   },
   {
-    quote: "Every resource I find is generic. Nothing speaks to my background.",
-    role: 'UX Designer → Aspiring PM',
+    icon: '🧭',
+    quote: "I have the skills but I don't know which type of PM role I actually fit into.",
+    persona: 'The Generalist',
+    accent: { bg: 'bg-teal-500/10', text: 'text-teal-400', line: 'bg-teal-500/40' },
   },
   {
-    quote: "I don't know if I'm qualified. There's no way to measure where I stand.",
-    role: 'Business Analyst → Aspiring PM',
+    icon: '📭',
+    quote: "I'm applying to dozens of roles but getting zero feedback. My background doesn't translate.",
+    persona: 'The Transitioner',
+    accent: { bg: 'bg-amber-500/10', text: 'text-amber-400', line: 'bg-amber-500/40' },
   },
 ]
 
-const HOW_IT_WORKS = [
+const STEPS = [
   {
-    step: '01',
-    icon: Zap,
+    num: '01',
     title: 'Take the Assessment',
-    description: '10 scenario-based questions. No PM jargon required. Takes 8 minutes.',
+    desc: '10 scenario-based questions. No PM jargon required. Takes 8 minutes.',
+    color: 'bg-indigo-600',
+    glow: 'shadow-[0_0_24px_rgba(79,70,229,0.5)]',
   },
   {
-    step: '02',
-    icon: Users,
+    num: '02',
     title: 'Get Your PM Archetype',
-    description: 'One of 6 archetypes based on your background and mindset. Built on primary research.',
+    desc: 'One of 6 archetypes based on your background and mindset. Built on primary research.',
+    color: 'bg-teal-500',
+    glow: 'shadow-[0_0_24px_rgba(79,219,200,0.5)]',
   },
   {
-    step: '03',
-    icon: MapPin,
+    num: '03',
     title: 'Follow Your Path',
-    description: 'A roadmap targeting your specific skill gaps. Video + text resources, week by week.',
+    desc: 'A roadmap of concepts, frameworks and exercises targeting your specific skill gaps.',
+    color: 'bg-[#ffb95f]',
+    glow: 'shadow-[0_0_24px_rgba(255,185,95,0.5)]',
   },
 ]
 
 export default function LandingPage() {
   return (
-    <main className="flex flex-col min-h-screen">
-      {/* ── Hero ───────────────────────────────────────────── */}
-      <section className="relative flex flex-col items-center justify-center px-6 pt-24 pb-20 text-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-950 to-teal-950 -z-10" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.15),transparent_70%)] -z-10" />
+    <main className="flex flex-col min-h-screen overflow-x-hidden">
+      {/* Atmosphere */}
+      <div className="fixed -top-40 -right-40 w-[700px] h-[700px] bg-indigo-600/10 rounded-full blur-[130px] pointer-events-none -z-10" />
+      <div className="fixed bottom-0 -left-40 w-[500px] h-[500px] bg-teal-500/[0.06] rounded-full blur-[120px] pointer-events-none -z-10" />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-2xl"
-        >
-          <div className="inline-block text-xs font-medium tracking-widest uppercase text-indigo-400 bg-indigo-950/60 border border-indigo-800/50 px-3 py-1 rounded-full mb-6">
-            Built for career switchers
-          </div>
+      {/* Nav */}
+      <nav className="fixed top-0 w-full z-50 bg-[#0b1326]/80 backdrop-blur-xl border-b border-white/5 px-8 h-16 flex items-center justify-between">
+        <span className="text-xl font-bold tracking-tighter text-[#dae2fd] font-[family-name:var(--font-space-grotesk)]">
+          PM Pathfinder
+        </span>
+        <Link href="/quiz">
+          <button className="text-sm text-[#c7c4d8] hover:text-[#dae2fd] transition-colors">
+            Take the assessment →
+          </button>
+        </Link>
+      </nav>
 
-          <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight mb-4">
-            Discover Your{' '}
-            <span className="bg-gradient-to-r from-indigo-400 to-teal-400 bg-clip-text text-transparent">
-              PM Archetype
-            </span>
-          </h1>
+      {/* Hero */}
+      <section className="relative pt-36 pb-28 px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Left */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="space-y-8"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[#c3c0ff] text-xs font-mono tracking-widest uppercase">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-400" />
+              </span>
+              Built for career switchers
+            </div>
 
-          <p className="text-lg text-slate-400 mb-8 leading-relaxed">
-            Take a 10-minute assessment. Get your personalised career roadmap — built from{' '}
-            <span className="text-slate-300">your background</span>, not a generic template.
-          </p>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold font-[family-name:var(--font-space-grotesk)] leading-[1.05] tracking-tighter text-[#dae2fd]">
+              Discover Your{' '}
+              <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#c3c0ff] to-[#4fdbc8]">
+                PM Archetype
+              </span>
+            </h1>
 
-          <Link href="/quiz">
-            <Button
-              size="lg"
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-base h-14 px-8 rounded-xl shadow-lg shadow-amber-900/30 transition-all"
-            >
-              Assess Where You Are
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
+            <p className="text-xl text-[#c7c4d8] font-light max-w-lg leading-relaxed">
+              Take a 10-minute assessment. Get your personalised career roadmap built from{' '}
+              <span className="text-[#dae2fd] font-medium">your background</span>, not a generic template.
+            </p>
 
-          <p className="mt-4 text-sm text-slate-500">
-            Free · No credit card required · 2,847 assessments completed
-          </p>
-        </motion.div>
-      </section>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <Link href="/quiz">
+                <button className="px-10 py-5 bg-[#ffb95f] hover:bg-amber-400 text-slate-950 font-bold text-lg rounded-full transition-all active:scale-95 shadow-[0_0_32px_rgba(255,185,95,0.3)]">
+                  Assess Where You Are
+                </button>
+              </Link>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-sm font-medium text-[#dae2fd]">Free. No credit card required.</span>
+                <span className="text-xs text-[#918fa1] font-mono">2,847 assessments completed</span>
+              </div>
+            </div>
+          </motion.div>
 
-      {/* ── Pain Point Mirror ───────────────────────────────── */}
-      <section className="px-6 py-16 max-w-5xl mx-auto w-full">
-        <p className="text-center text-xs uppercase tracking-widest text-slate-500 mb-10">
-          We hear this all the time
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {PAIN_POINTS.map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm"
-            >
-              <p className="text-slate-300 text-sm leading-relaxed mb-4 italic">
-                &ldquo;{item.quote}&rdquo;
-              </p>
-              <p className="text-xs text-slate-500">{item.role}</p>
-            </motion.div>
-          ))}
+          {/* Right — preview card */}
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative hidden lg:block"
+          >
+            <div className="absolute -inset-6 bg-gradient-to-br from-indigo-600/20 to-teal-500/20 rounded-3xl blur-3xl" />
+            <div className="relative bg-[#131b2e] border border-white/8 rounded-2xl p-8">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="font-[family-name:var(--font-space-grotesk)] font-bold text-xl text-[#dae2fd]">
+                    Current Trajectory
+                  </h3>
+                  <p className="text-xs text-[#918fa1] uppercase tracking-widest font-mono mt-1">
+                    Navigator Analytics
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/15 flex items-center justify-center text-xl">
+                  📊
+                </div>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { label: 'TECHNICAL DEPTH', value: 82, bar: 'bg-[#c3c0ff]', val: 'text-[#c3c0ff]' },
+                  { label: 'PRODUCT STRATEGY', value: 64, bar: 'bg-[#4fdbc8]', val: 'text-[#4fdbc8]' },
+                  { label: 'USER EMPATHY', value: 91, bar: 'bg-[#ffb95f]', val: 'text-[#ffb95f]' },
+                ].map((item) => (
+                  <div key={item.label} className="bg-[#171f33] p-4 rounded-xl space-y-2.5">
+                    <div className="flex justify-between text-xs font-mono">
+                      <span className="text-[#918fa1]">{item.label}</span>
+                      <span className={item.val}>{item.value}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-[#222a3d] rounded-full overflow-hidden">
+                      <div className={`h-full ${item.bar} rounded-full`} style={{ width: `${item.value}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
+                <span className="text-xs text-[#918fa1] font-mono">ARCHETYPE MATCH</span>
+                <span className="text-sm font-bold text-[#dae2fd] font-[family-name:var(--font-space-grotesk)]">
+                  The Strategist
+                </span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ── How It Works ────────────────────────────────────── */}
-      <section className="px-6 py-16 max-w-3xl mx-auto w-full">
-        <p className="text-center text-xs uppercase tracking-widest text-slate-500 mb-10">
-          How it works
-        </p>
-        <div className="flex flex-col gap-6">
-          {HOW_IT_WORKS.map((item, i) => {
-            const Icon = item.icon
-            return (
+      {/* Pain Points */}
+      <section className="py-24 px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
+              The Career Gap is Real
+            </h2>
+            <p className="text-[#c7c4d8] max-w-2xl mx-auto leading-relaxed">
+              Standard training leaves candidates lost in the in-between. We help you bridge the gap with data-driven clarity.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {PAIN_POINTS.map((item, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: -16 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="flex items-start gap-5"
+                className="group p-8 rounded-2xl bg-[#131b2e] border border-white/5 hover:bg-[#171f33] hover:border-white/10 transition-all duration-500"
               >
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-indigo-950/60 border border-indigo-800/50 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-indigo-400" />
+                <div className={`mb-6 p-3 rounded-xl w-fit ${item.accent.bg}`}>
+                  <span className="text-2xl">{item.icon}</span>
                 </div>
-                <div>
-                  <div className="text-xs font-mono text-indigo-500 mb-1">{item.step}</div>
-                  <h3 className="font-semibold text-white mb-1">{item.title}</h3>
-                  <p className="text-sm text-slate-400">{item.description}</p>
+                <p className="text-lg font-medium text-[#dae2fd] italic leading-relaxed mb-6">
+                  &ldquo;{item.quote}&rdquo;
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className={`h-px w-10 ${item.accent.line}`} />
+                  <span className={`text-xs font-mono uppercase tracking-tighter ${item.accent.text}`}>
+                    {item.persona}
+                  </span>
                 </div>
               </motion.div>
-            )
-          })}
-        </div>
-
-        <div className="mt-12 text-center">
-          <Link href="/quiz">
-            <Button
-              size="lg"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold h-12 px-8 rounded-xl"
-            >
-              Start the Assessment
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────── */}
-      <footer className="mt-auto border-t border-slate-900 px-6 py-8 text-center text-sm text-slate-600">
-        Built for career switchers, by career switchers.
+      {/* How It Works */}
+      <section className="py-24 bg-[#060e20]/60">
+        <div className="max-w-5xl mx-auto px-8">
+          <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] text-center mb-20 tracking-tight">
+            Your Navigation Path
+          </h2>
+          <div className="relative">
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-indigo-500 via-teal-500 to-transparent -translate-x-1/2 hidden md:block" />
+            <div className="space-y-20">
+              {STEPS.map((step, i) => (
+                <div
+                  key={i}
+                  className={`relative flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-8 md:gap-0`}
+                >
+                  <div className={`md:w-1/2 ${i % 2 === 0 ? 'md:pr-24 md:text-right' : 'md:pl-24'}`}>
+                    <h3 className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] mb-3">
+                      {step.title}
+                    </h3>
+                    <p className="text-[#c7c4d8] leading-relaxed">{step.desc}</p>
+                  </div>
+                  <div className={`z-10 w-16 h-16 rounded-full ${step.color} flex items-center justify-center font-bold text-slate-950 text-base font-mono ${step.glow}`}>
+                    {step.num}
+                  </div>
+                  <div className={`md:w-1/2 ${i % 2 === 0 ? 'md:pl-24' : 'md:pr-24 md:text-right'} hidden md:block`}>
+                    <span className="text-8xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd]/5 select-none">
+                      {step.num}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mt-20 text-center">
+            <Link href="/quiz">
+              <button className="px-10 py-5 bg-[#ffb95f] hover:bg-amber-400 text-slate-950 font-bold text-lg rounded-full transition-all active:scale-95 shadow-[0_0_32px_rgba(255,185,95,0.3)]">
+                Start the Assessment
+                <ArrowRight className="inline ml-2 w-5 h-5" />
+              </button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <footer className="mt-auto border-t border-white/5 px-8 py-8 text-center text-sm text-[#918fa1]">
+        PM Pathfinder · Built for career switchers, by career switchers.
       </footer>
     </main>
   )
