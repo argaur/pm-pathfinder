@@ -27,7 +27,7 @@ export default function MigratePage() {
         console.warn('[migrate] no session token in localStorage')
       }
 
-      router.replace('/dashboard')
+      router.replace('/reveal')
     }
 
     migrate()
