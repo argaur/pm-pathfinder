@@ -91,7 +91,7 @@ export default function DeepDivePage() {
                 variant="outline" className="border-white/10 text-[#c7c4d8]">
                 Dive into another dimension
               </Button>
-              <Button onClick={() => router.push('/roadmap/text')}
+              <Button onClick={() => router.push('/roadmap')}
                 className="bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-semibold rounded-xl">
                 See my roadmap
                 <ArrowRight className="ml-2 w-4 h-4" />
