@@ -13,18 +13,19 @@ export const TOPIC_VIDEO_MAP: Record<string, string> = {
   'User Research':       'mB3ud5u_9WM', // same as Product Sense — user nuance
   'Customer Empathy':    'mB3ud5u_9WM', // same — understanding users
 
-  // ── TODO: find from channel ──────────────────────────────────────────────
-  // Visit https://www.youtube.com/@TheSwagWalaPM/videos and search for each topic
-  'Guesstimates':          'dQw4w9WgXcQ', // TODO
-  'Tech Fundamentals':     'dQw4w9WgXcQ', // TODO
+  // ── Partial fills (IGotAnOffer channel) ─────────────────────────────────
+  'Guesstimates':          '0azG-_4mYXg', // "How to answer market estimation questions"
+  'Prioritisation':        'VBfJayYLSkE', // "Prioritization mock interview — WhatsApp features"
+  'UX Thinking':           'oGqz-TMQNR4', // "Design a fitness app for Meta — PM mock interview"
+  'Tech Fundamentals':     'uhtREgMnOFw', // "How does Google Calendar work? — technical PM"
+  'Data & SQL':            '-TNeIdOc1F8', // "Metrics mock interview — Instagram engagement drop"
+  'Competitive Analysis':  'nrM6AwYOrBc', // "Uber strategy PM mock interview"
+
+  // ── TODO: fill manually ──────────────────────────────────────────────────
   'Product Storytelling':  'dQw4w9WgXcQ', // TODO
-  'Prioritisation':        'dQw4w9WgXcQ', // TODO
   'Stakeholder Influence': 'dQw4w9WgXcQ', // TODO
-  'UX Thinking':           'dQw4w9WgXcQ', // TODO
-  'Competitive Analysis':  'dQw4w9WgXcQ', // TODO
   'Go-to-Market':          'dQw4w9WgXcQ', // TODO
   'Stakeholder Management':'dQw4w9WgXcQ', // TODO
   'Written Communication': 'dQw4w9WgXcQ', // TODO
-  'Data & SQL':            'dQw4w9WgXcQ', // TODO
   'System Design':         'dQw4w9WgXcQ', // TODO
 }

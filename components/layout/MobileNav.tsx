@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Menu, X, LayoutDashboard, FileText, Map, Microscope, Target, UserCircle, LogOut, Dumbbell } from 'lucide-react'
+import { Menu, X, LayoutDashboard, FileText, Map, Microscope, Target, UserCircle, LogOut, Dumbbell, Bot } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const NAV_ITEMS = [
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: '/report', label: 'My Report', icon: FileText },
   { href: '/roadmap', label: 'Learning Path', icon: Map },
   { href: '/practice', label: 'Practice', icon: Dumbbell },
+  { href: '/chat', label: 'Navigator AI', icon: Bot },
   { href: '/deep-dive', label: 'Deep Dive', icon: Microscope },
   { href: '/interview-readiness', label: 'Interview Readiness', icon: Target },
   { href: '/profile', label: 'Profile', icon: UserCircle },
