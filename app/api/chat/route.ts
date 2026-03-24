@@ -28,18 +28,11 @@ Do NOT:
 - Add disclaimers about being an AI in every response`
 
 export async function POST(req: NextRequest) {
+  try {
   // Auth check
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new Response('Unauthorized', { status: 401 })
-
-  // Pro check
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('is_pro')
-    .eq('id', user.id)
-    .single()
-  if (!profile?.is_pro) return new Response('Pro required', { status: 403 })
 
   const { message, history, archetype } = await req.json() as {
     message: string
@@ -98,4 +91,9 @@ export async function POST(req: NextRequest) {
       'Transfer-Encoding': 'chunked',
     },
   })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[/api/chat]', msg)
+    return new Response(`Server error: ${msg}`, { status: 500 })
+  }
 }

@@ -63,9 +63,10 @@ export default function ChatClient({ archetype, isPro }: Props) {
       })
 
       if (!res.ok || !res.body) {
+        const errText = await res.text().catch(() => '')
         setMessages((prev) => [
           ...prev.slice(0, -1),
-          { role: 'model', text: 'Something went wrong. Please try again.' },
+          { role: 'model', text: `Error ${res.status}: ${errText || 'Something went wrong. Please try again.'}` },
         ])
         return
       }
