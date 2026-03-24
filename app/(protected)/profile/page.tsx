@@ -64,9 +64,9 @@ export default async function ProfilePage() {
         traits: archetype.traits,
         strengths: archetype.strengths,
       }}
+      userId={user.id}
       evaluationHistory={evaluationHistory}
       dimensionLabels={DIMENSION_LABELS}
-      latestAssessmentId={latest.id}
     />
   )
 }

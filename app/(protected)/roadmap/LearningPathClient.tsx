@@ -6,6 +6,9 @@ import { createClient } from '@/lib/supabase/client'
 import { LearningChapter } from '@/lib/data/learning-path'
 import { Dimension } from '@/lib/data/questions'
 import { TIER_CONFIG, DIMENSION_LABELS } from '@/lib/scoring/engine'
+import BlurGate from '@/components/ui/BlurGate'
+
+const FREE_CHAPTERS = 1
 
 type Mode = 'video' | 'text'
 
@@ -138,6 +141,7 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
               </div>
 
               {/* Steps */}
+              <BlurGate locked={ci >= FREE_CHAPTERS} label="Pro — unlock full learning path">
               <div className="ml-11 flex flex-col gap-2">
                 {chapter.steps.map((step, si) => {
                   const done = isStepDone(step.id)
@@ -292,6 +296,7 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                   </div>
                 )}
               </div>
+              </BlurGate>
             </div>
           )
         })}

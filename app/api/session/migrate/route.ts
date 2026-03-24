@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 // POST /api/session/migrate
 // Called client-side after OAuth callback to migrate anonymous quiz session
@@ -19,8 +20,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    // Fetch the anonymous session
-    const { data: session, error: fetchError } = await supabase
+    // Use admin client to bypass RLS — anonymous sessions have user_id = NULL
+    // so the anon key can never read them after the user authenticates
+    const admin = createAdminClient()
+    const { data: session, error: fetchError } = await admin
       .from('quiz_sessions')
       .select('*')
       .eq('session_token', sessionToken)
@@ -68,8 +71,8 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', user.id)
 
-    // Mark session as migrated
-    await supabase
+    // Mark session as migrated (admin client — same RLS issue on UPDATE)
+    await admin
       .from('quiz_sessions')
       .update({ migrated: true, user_id: user.id })
       .eq('id', session.id)

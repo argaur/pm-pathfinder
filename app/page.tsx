@@ -244,6 +244,146 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Features */}
+      <section className="py-24 px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16 space-y-3">
+            <p className="text-xs font-mono uppercase tracking-widest text-indigo-400">Everything included</p>
+            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
+              Built end-to-end for PM transition
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              {
+                icon: '🧭',
+                title: 'PM Archetype Assessment',
+                desc: '10 scenario-based questions mapping your background × mindset to one of 6 archetypes. No jargon. No generic advice.',
+                accent: 'border-indigo-500/20 bg-indigo-500/5',
+                badge: 'Free',
+                badgeStyle: 'bg-indigo-500/10 text-indigo-400',
+              },
+              {
+                icon: '📊',
+                title: 'Skill Gap Report',
+                desc: '5-dimension radar chart showing exactly where you stand on thinking, execution, technical fluency, user research, and communication.',
+                accent: 'border-teal-500/20 bg-teal-500/5',
+                badge: 'Free',
+                badgeStyle: 'bg-teal-500/10 text-teal-400',
+              },
+              {
+                icon: '🗺️',
+                title: 'Personalised Learning Path',
+                desc: 'Chapter-by-chapter roadmap ordered by your gaps. Watch or read. Mark done. Track progress. Not a one-size-fits-all course.',
+                accent: 'border-amber-500/20 bg-amber-500/5',
+                badge: 'Pro',
+                badgeStyle: 'bg-amber-500/10 text-amber-400',
+              },
+              {
+                icon: '🎯',
+                title: 'Interview Readiness Score',
+                desc: 'A 0–100 composite score benchmarked against APM, PM, and Senior PM roles — with a breakdown of exactly what to fix.',
+                accent: 'border-rose-500/20 bg-rose-500/5',
+                badge: 'Pro',
+                badgeStyle: 'bg-rose-500/10 text-rose-400',
+              },
+            ].map((f, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className={`p-6 rounded-2xl border ${f.accent}`}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <span className="text-2xl">{f.icon}</span>
+                  <span className={`text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full ${f.badgeStyle}`}>
+                    {f.badge}
+                  </span>
+                </div>
+                <h3 className="text-base font-semibold text-[#dae2fd] mb-2">{f.title}</h3>
+                <p className="text-sm text-[#918fa1] leading-relaxed">{f.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-24 bg-[#060e20]/60 px-8" id="pricing">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16 space-y-3">
+            <p className="text-xs font-mono uppercase tracking-widest text-indigo-400">Simple pricing</p>
+            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
+              Start free. Go Pro when you&apos;re ready.
+            </h2>
+            <p className="text-[#918fa1] max-w-md mx-auto">
+              Assessment and report are always free. Unlock the full path when you&apos;re serious about landing the role.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            {/* Free */}
+            <div className="bg-[#131b2e] border border-white/8 rounded-2xl p-8">
+              <p className="text-xs font-mono uppercase tracking-widest text-[#918fa1] mb-3">Free</p>
+              <p className="text-4xl font-bold text-[#dae2fd] mb-1">₹0</p>
+              <p className="text-xs text-[#918fa1] mb-8">Forever free</p>
+              <ul className="flex flex-col gap-3 mb-8">
+                {['PM Archetype Assessment', '5-dimension skill report', 'Chapter 1 of Learning Path', 'Basic Deep Dive (1 dimension)'].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-[#c7c4d8]">
+                    <span className="text-teal-400 flex-shrink-0">✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/quiz">
+                <button className="w-full py-3 rounded-xl border border-white/10 text-sm text-[#c7c4d8] hover:bg-white/5 transition-all">
+                  Get started free
+                </button>
+              </Link>
+            </div>
+
+            {/* Pro */}
+            <div className="relative bg-[#131b2e] border border-indigo-500/30 rounded-2xl p-8 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="px-3 py-1 text-[10px] font-mono uppercase tracking-widest bg-indigo-600 text-white rounded-full">
+                  Most popular
+                </span>
+              </div>
+              <p className="text-xs font-mono uppercase tracking-widest text-indigo-400 mb-3">Pro</p>
+              <div className="mb-1">
+                <span className="text-4xl font-bold text-[#dae2fd]">₹799</span>
+                <span className="text-sm text-[#918fa1]"> / month</span>
+              </div>
+              <p className="text-xs text-[#918fa1] mb-1">or ₹5,999/year <span className="text-teal-400">· save 37%</span></p>
+              <p className="text-xs text-indigo-300 mb-8">₹16,999 lifetime access</p>
+              <ul className="flex flex-col gap-3 mb-8">
+                {[
+                  'Everything in Free',
+                  'Full Learning Path (all chapters)',
+                  'Deep Dive on all 5 dimensions',
+                  'Interview Readiness Score + breakdown',
+                  'Public PM Portfolio page',
+                  'Progress tracking across re-evaluations',
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-[#c7c4d8]">
+                    <span className="text-indigo-400 flex-shrink-0">✓</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/quiz">
+                <button className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all">
+                  Start with Pro
+                  <ArrowRight className="inline ml-2 w-4 h-4" />
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <footer className="mt-auto border-t border-white/5 px-8 py-8 text-center text-sm text-[#918fa1]">
         PM Pathfinder · Built for career switchers, by career switchers.
       </footer>

@@ -3,12 +3,29 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getSessionToken } from '@/lib/utils/session'
+import { createClient } from '@/lib/supabase/client'
 
 export default function MigratePage() {
   const router = useRouter()
 
   useEffect(() => {
     async function migrate() {
+      const supabase = createClient()
+
+      // Check if user already has assessments — returning users skip reveal entirely
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { count } = await supabase
+          .from('assessments')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+
+        if (count && count > 0) {
+          router.replace('/dashboard')
+          return
+        }
+      }
+
       const sessionToken = getSessionToken()
 
       if (sessionToken) {

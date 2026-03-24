@@ -3,13 +3,15 @@
 import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import MobileNav from './MobileNav'
 
 interface TopBarProps {
   displayName: string
   avatarUrl: string | null
+  archetype?: string | null
 }
 
-export default function TopBar({ displayName, avatarUrl }: TopBarProps) {
+export default function TopBar({ displayName, avatarUrl, archetype = null }: TopBarProps) {
   const router = useRouter()
 
   const handleSignOut = async () => {
@@ -20,12 +22,8 @@ export default function TopBar({ displayName, avatarUrl }: TopBarProps) {
   }
 
   return (
-    <header className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-[#0b1326]/80 backdrop-blur-xl flex-shrink-0">
-      <div className="flex items-center gap-2 md:hidden">
-        <span className="text-sm font-bold font-[family-name:var(--font-space-grotesk)] text-[#c3c0ff]">
-          PM Pathfinder
-        </span>
-      </div>
+    <header className="h-14 border-b border-white/5 flex items-center justify-between px-4 bg-[#0b1326]/80 backdrop-blur-xl flex-shrink-0">
+      <MobileNav displayName={displayName} archetype={archetype} />
 
       <div className="ml-auto flex items-center gap-3">
         <span className="text-sm text-[#c7c4d8] hidden sm:block">{displayName}</span>

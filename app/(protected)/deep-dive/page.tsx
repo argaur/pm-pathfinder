@@ -3,11 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { Dimension } from '@/lib/data/questions'
+import BlurGate from '@/components/ui/BlurGate'
+
+const FREE_DIMENSIONS = 1
+const DIMENSION_ORDER: Dimension[] = ['thinking_strategy', 'execution', 'technical_fluency', 'user_research', 'communication']
 
 // Sub-category questions per dimension
 const DEEP_DIVE_QUESTIONS: Record<Dimension, { subCategory: string; question: string; options: string[] }[]> = {
@@ -61,7 +65,7 @@ export default function DeepDivePage() {
     })
   }, [])
 
-  const handleAnswer = (answer: string) => {
+  const handleAnswer = async (answer: string) => {
     if (!selectedDimension) return
     const questions = DEEP_DIVE_QUESTIONS[selectedDimension]
     const qKey = `${selectedDimension}_${currentQ}`
@@ -71,6 +75,16 @@ export default function DeepDivePage() {
     if (currentQ < questions.length - 1) {
       setCurrentQ((p) => p + 1)
     } else {
+      // Save to Supabase
+      try {
+        await fetch('/api/deep-dive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dimension: selectedDimension, answers: updated }),
+        })
+      } catch {
+        // Non-blocking
+      }
       setDone(true)
     }
   }
@@ -148,11 +162,13 @@ export default function DeepDivePage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        {(Object.keys(DEEP_DIVE_QUESTIONS) as Dimension[]).map((dim) => {
+        {DIMENSION_ORDER.map((dim, di) => {
           const tier = tiers?.[dim]
           const config = tier ? TIER_CONFIG[tier as keyof typeof TIER_CONFIG] : TIER_CONFIG.neutral
-          return (
-            <button key={dim} onClick={() => { setSelectedDimension(dim); setCurrentQ(0); setAnswers({}) }}
+          const locked = di >= FREE_DIMENSIONS
+
+          const button = (
+            <button key={dim} onClick={locked ? undefined : () => { setSelectedDimension(dim); setCurrentQ(0); setAnswers({}) }}
               className="w-full text-left flex items-center justify-between px-5 py-4 rounded-2xl border border-white/5 bg-[#171f33] hover:bg-[#1a2236] hover:border-white/10 transition-all group">
               <div>
                 <p className="text-sm font-medium text-[#dae2fd]">{DIMENSION_LABELS[dim]}</p>
@@ -161,6 +177,15 @@ export default function DeepDivePage() {
               <ArrowRight className="w-4 h-4 text-[#918fa1] group-hover:text-indigo-400 transition-colors" />
             </button>
           )
+
+          if (locked) {
+            return (
+              <BlurGate key={dim} locked label="Pro — unlock all dimensions">
+                {button}
+              </BlurGate>
+            )
+          }
+          return button
         })}
       </div>
     </div>

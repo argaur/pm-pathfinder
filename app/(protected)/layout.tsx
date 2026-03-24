@@ -30,6 +30,7 @@ export default async function ProtectedLayout({
         <TopBar
           displayName={profile?.display_name ?? user.email ?? 'User'}
           avatarUrl={profile?.avatar_url ?? null}
+          archetype={profile?.archetype ?? null}
         />
         <main className="flex-1 overflow-y-auto px-6 py-8">{children}</main>
       </div>
