@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { Dimension } from '@/lib/data/questions'
 import BlurGate from '@/components/ui/BlurGate'
+import { getIsPro } from '@/lib/user/getIsPro'
 
 const FREE_DIMENSIONS = 1
 const DIMENSION_ORDER: Dimension[] = ['thinking_strategy', 'execution', 'technical_fluency', 'user_research', 'communication']
@@ -49,19 +50,24 @@ export default function DeepDivePage() {
   const [currentQ, setCurrentQ] = useState(0)
   const [done, setDone] = useState(false)
   const [tiers, setTiers] = useState<Record<Dimension, string> | null>(null)
+  const [isPro, setIsPro] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
-      const { data } = await supabase
-        .from('assessments')
-        .select('tiers')
-        .eq('user_id', user.id)
-        .order('taken_at', { ascending: false })
-        .limit(1)
-        .single()
-      if (data?.tiers) setTiers(data.tiers as Record<Dimension, string>)
+      const [{ data: assessment }, { data: profile }] = await Promise.all([
+        supabase
+          .from('assessments')
+          .select('tiers')
+          .eq('user_id', user.id)
+          .order('taken_at', { ascending: false })
+          .limit(1)
+          .single(),
+        supabase.from('profiles').select('is_pro').eq('id', user.id).single(),
+      ])
+      if (assessment?.tiers) setTiers(assessment.tiers as Record<Dimension, string>)
+      if (profile?.is_pro) setIsPro(true)
     })
   }, [])
 
@@ -165,7 +171,7 @@ export default function DeepDivePage() {
         {DIMENSION_ORDER.map((dim, di) => {
           const tier = tiers?.[dim]
           const config = tier ? TIER_CONFIG[tier as keyof typeof TIER_CONFIG] : TIER_CONFIG.neutral
-          const locked = di >= FREE_DIMENSIONS
+          const locked = !isPro && di >= FREE_DIMENSIONS
 
           const button = (
             <button key={dim} onClick={locked ? undefined : () => { setSelectedDimension(dim); setCurrentQ(0); setAnswers({}) }}

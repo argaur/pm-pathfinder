@@ -40,6 +40,7 @@ interface ProfileProps {
     deltas: Record<Dimension, number | null>
   }[]
   dimensionLabels: Record<Dimension, string>
+  isPro: boolean
 }
 
 interface CaseStudy {
@@ -56,6 +57,7 @@ export default function ProfileClient({
   archetype,
   evaluationHistory,
   dimensionLabels,
+  isPro,
 }: ProfileProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [resumeFile, setResumeFile] = useState<string | null>(null)
@@ -295,7 +297,7 @@ export default function ProfileClient({
           {activeTab === 'portfolio' && (
             <div className="flex flex-col gap-4">
               {/* Public toggle + shareable link */}
-              <BlurGate locked={true} label="Shareable portfolio link — Pro feature">
+              <BlurGate locked={!isPro} label="Shareable portfolio link — Pro feature">
                 <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">

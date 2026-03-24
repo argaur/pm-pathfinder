@@ -17,9 +17,10 @@ interface Props {
   tiers: Record<Dimension, 'growth' | 'neutral' | 'strength'>
   progressMap: Record<string, string>
   userId: string
+  isPro: boolean
 }
 
-export default function LearningPathClient({ chapters, tiers, progressMap: initial, userId }: Props) {
+export default function LearningPathClient({ chapters, tiers, progressMap: initial, userId, isPro }: Props) {
   const [progress, setProgress] = useState(initial)
   const [expandedStep, setExpandedStep] = useState<string | null>(null)
   const [stepModes, setStepModes] = useState<Record<string, Mode>>({})
@@ -141,7 +142,7 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
               </div>
 
               {/* Steps */}
-              <BlurGate locked={ci >= FREE_CHAPTERS} label="Pro — unlock full learning path">
+              <BlurGate locked={!isPro && ci >= FREE_CHAPTERS} label="Pro — unlock full learning path">
               <div className="ml-11 flex flex-col gap-2">
                 {chapter.steps.map((step, si) => {
                   const done = isStepDone(step.id)

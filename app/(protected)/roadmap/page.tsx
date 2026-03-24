@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { LEARNING_CHAPTERS } from '@/lib/data/learning-path'
 import { Dimension } from '@/lib/data/questions'
 import LearningPathClient from './LearningPathClient'
+import { getIsPro } from '@/lib/user/getIsPro'
 
 export default async function LearningPathPage() {
   const supabase = await createClient()
@@ -44,12 +45,15 @@ export default async function LearningPathPage() {
     // Table not yet created — progress starts empty
   }
 
+  const isPro = await getIsPro(user.id)
+
   return (
     <LearningPathClient
       chapters={sortedChapters}
       tiers={tiers}
       progressMap={progressMap}
       userId={user.id}
+      isPro={isPro}
     />
   )
 }

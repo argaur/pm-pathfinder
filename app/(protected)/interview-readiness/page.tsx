@@ -7,6 +7,7 @@ import { LEARNING_CHAPTERS } from '@/lib/data/learning-path'
 import { Dimension } from '@/lib/data/questions'
 import { ArrowRight, Lock, TrendingUp } from 'lucide-react'
 import BlurGate from '@/components/ui/BlurGate'
+import { getIsPro } from '@/lib/user/getIsPro'
 
 const ROLE_THRESHOLDS = [
   { role: 'APM / Associate PM', min: 55, description: 'Entry-level PM roles, often at large tech companies' },
@@ -97,6 +98,8 @@ export default async function InterviewReadinessPage() {
   } catch {
     completedSteps = 0
   }
+
+  const isPro = await getIsPro(user.id)
 
   const { total: score, breakdown } = computeScoreBreakdown(dimensionScores, completedSteps)
   const { label: scoreLabel, color: scoreColor } = getScoreLabel(score)
@@ -216,7 +219,7 @@ export default async function InterviewReadinessPage() {
             Pro feature
           </div>
         </div>
-        <BlurGate locked={true} label="Full score breakdown">
+        <BlurGate locked={!isPro} label="Full score breakdown">
           <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
             <div className="flex flex-col gap-5">
               {breakdown.map((item) => (
@@ -252,7 +255,7 @@ export default async function InterviewReadinessPage() {
             Pro feature
           </div>
         </div>
-        <BlurGate locked={true} label="Personalised gap analysis">
+        <BlurGate locked={!isPro} label="Personalised gap analysis">
           <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
             <div className="flex flex-col gap-4">
               {sortedDims.map(([dim, score], i) => {

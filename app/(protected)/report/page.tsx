@@ -6,6 +6,7 @@ import { Dimension } from '@/lib/data/questions'
 import { Badge } from '@/components/ui/badge'
 import RadarChart from '@/components/report/RadarChart'
 import DimensionCard from '@/components/report/DimensionCard'
+import { getIsPro } from '@/lib/user/getIsPro'
 
 export default async function ReportPage() {
   const supabase = await createClient()
@@ -35,8 +36,8 @@ export default async function ReportPage() {
   }))
 
   const dimensions = Object.keys(dimensionScores) as Dimension[]
-  // First 2 are always free (unlocked), rest are Pro
   const FREE_LIMIT = 2
+  const isPro = await getIsPro(user.id)
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -95,7 +96,7 @@ export default async function ReportPage() {
         {dimensions.map((dim, i) => {
           const score = dimensionScores[dim]
           const tier = tiers?.[dim] ?? 'neutral'
-          const isLocked = i >= FREE_LIMIT
+          const isLocked = !isPro && i >= FREE_LIMIT
           return (
             <DimensionCard
               key={dim}
