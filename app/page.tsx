@@ -61,11 +61,18 @@ export default function LandingPage() {
         <span className="text-xl font-bold tracking-tighter text-[#dae2fd] font-[family-name:var(--font-space-grotesk)]">
           PM Pathfinder
         </span>
-        <Link href="/quiz">
-          <button className="text-sm text-[#c7c4d8] hover:text-[#dae2fd] transition-colors">
-            Take the assessment →
-          </button>
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link href="/auth?next=/dashboard">
+            <button className="text-sm text-[#918fa1] hover:text-[#c7c4d8] transition-colors">
+              Sign in
+            </button>
+          </Link>
+          <Link href="/quiz">
+            <button className="text-sm text-[#c7c4d8] hover:text-[#dae2fd] transition-colors">
+              Take the assessment →
+            </button>
+          </Link>
+        </div>
       </nav>
 
       {/* Hero */}
