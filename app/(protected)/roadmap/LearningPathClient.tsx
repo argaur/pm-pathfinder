@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { CheckCircle, Circle, Play, BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { LearningChapter } from '@/lib/data/learning-path'
+import { TOPIC_VIDEO_MAP } from '@/lib/data/video-map'
 import { Dimension } from '@/lib/data/questions'
 import { TIER_CONFIG, DIMENSION_LABELS } from '@/lib/scoring/engine'
 import BlurGate from '@/components/ui/BlurGate'
@@ -239,7 +240,7 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                           {mode === 'video' ? (
                             <div className="aspect-video bg-[#222a3d] rounded-xl overflow-hidden mb-4">
                               <iframe
-                                src={`https://www.youtube.com/embed/${step.videoId}`}
+                                src={`https://www.youtube.com/embed/${TOPIC_VIDEO_MAP[step.title] ?? step.videoId}`}
                                 title={step.title}
                                 className="w-full h-full"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
