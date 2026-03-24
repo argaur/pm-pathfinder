@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest } from 'next/server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 
+export const maxDuration = 60 // Vercel: extend function timeout to 60s
+
 const genai = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!)
 
 const SYSTEM_PROMPT = `You are Navigator, the AI guide inside PM Pathfinder — a learning platform that helps aspiring and transitioning product managers build job-ready skills.
