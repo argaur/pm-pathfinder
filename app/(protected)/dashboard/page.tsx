@@ -216,16 +216,34 @@ export default async function DashboardPage() {
 
         {/* Stat cards — 2×2 grid */}
         <div className="md:col-span-2 grid grid-cols-2 gap-4">
-          {/* Learning Path */}
-          <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between">
-            <p className="text-[10px] uppercase tracking-widest text-[#918fa1]">Learning Path</p>
-            <div>
-              <p className="text-2xl font-bold font-mono text-teal-400">
-                {completedSteps}
-                <span className="text-sm text-[#918fa1] font-normal"> / {totalSteps}</span>
-              </p>
-              <p className="text-[11px] text-[#918fa1]">chapters completed</p>
-            </div>
+          {/* Learning Path — ring */}
+          <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-4 flex flex-col items-center justify-center gap-2">
+            <p className="text-[10px] uppercase tracking-widest text-[#918fa1] self-start">Learning Path</p>
+            {(() => {
+              const pct = totalSteps > 0 ? completedSteps / totalSteps : 0
+              const r = 28
+              const circ = 2 * Math.PI * r
+              const offset = circ * (1 - pct)
+              return (
+                <div className="relative flex items-center justify-center">
+                  <svg width="72" height="72" className="-rotate-90">
+                    <circle cx="36" cy="36" r={r} fill="none" stroke="#222a3d" strokeWidth="5" />
+                    <circle
+                      cx="36" cy="36" r={r} fill="none"
+                      stroke="#4fdbc8" strokeWidth="5"
+                      strokeLinecap="round"
+                      strokeDasharray={circ}
+                      strokeDashoffset={offset}
+                      style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+                    />
+                  </svg>
+                  <span className="absolute text-sm font-bold font-mono text-teal-400">
+                    {Math.round(pct * 100)}%
+                  </span>
+                </div>
+              )
+            })()}
+            <p className="text-[11px] text-[#918fa1]">{completedSteps} / {totalSteps} steps</p>
           </div>
 
           {/* Days active */}
