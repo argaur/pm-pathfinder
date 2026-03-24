@@ -2,13 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, FileText, PlayCircle, BookOpen, Microscope, RefreshCw } from 'lucide-react'
+import { LayoutDashboard, FileText, Map, Microscope, RefreshCw } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/report', label: 'My Report', icon: FileText },
-  { href: '/roadmap/video', label: 'Video Roadmap', icon: PlayCircle },
-  { href: '/roadmap/text', label: 'Text Roadmap', icon: BookOpen },
+  { href: '/roadmap', label: 'Learning Path', icon: Map },
   { href: '/deep-dive', label: 'Deep Dive', icon: Microscope },
   { href: '/re-evaluate', label: 'Re-evaluate', icon: RefreshCw },
 ]
