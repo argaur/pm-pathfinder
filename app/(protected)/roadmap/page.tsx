@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { LEARNING_CHAPTERS } from '@/lib/data/learning-path'
+import { ARCHETYPE_CHAPTERS } from '@/lib/data/archetype-content'
 import { Dimension } from '@/lib/data/questions'
 import LearningPathClient from './LearningPathClient'
 import { getIsPro } from '@/lib/user/getIsPro'
@@ -22,9 +23,12 @@ export default async function LearningPathPage() {
 
   const tiers = (assessment.tiers ?? {}) as Record<Dimension, 'growth' | 'neutral' | 'strength'>
 
+  // Pick archetype-specific chapters; fall back to generic if archetype not found
+  const baseChapters = ARCHETYPE_CHAPTERS[assessment.archetype ?? ''] ?? LEARNING_CHAPTERS
+
   // Sort chapters: growth first (biggest gap), neutral second, strength last
   const tierOrder = { growth: 0, neutral: 1, strength: 2 }
-  const sortedChapters = [...LEARNING_CHAPTERS].sort((a, b) => {
+  const sortedChapters = [...baseChapters].sort((a, b) => {
     const ta = tierOrder[tiers[a.dimension] ?? 'neutral']
     const tb = tierOrder[tiers[b.dimension] ?? 'neutral']
     return ta - tb
