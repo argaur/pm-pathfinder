@@ -49,7 +49,7 @@ async function* streamGemini(
   message: string
 ): AsyncGenerator<string> {
   const res = await fetch(
-    `${GOOGLE_API_BASE}/models/gemini-2.0-flash:streamGenerateContent?key=${apiKey}&alt=sse`,
+    `${GOOGLE_API_BASE}/models/gemini-2.0-flash-lite:streamGenerateContent?key=${apiKey}&alt=sse`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
