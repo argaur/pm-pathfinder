@@ -5,11 +5,6 @@ import { createClient as createServerClient } from '@/lib/supabase/server'
 
 const genai = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!)
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
 const SYSTEM_PROMPT = `You are Navigator, the AI guide inside PM Pathfinder — a learning platform that helps aspiring and transitioning product managers build job-ready skills.
 
 Your role:
@@ -29,6 +24,11 @@ Do NOT:
 
 export async function POST(req: NextRequest) {
   try {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
   // Auth check
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
