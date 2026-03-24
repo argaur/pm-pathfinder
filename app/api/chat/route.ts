@@ -21,15 +21,84 @@ Do NOT:
 - Refuse to answer general PM questions
 - Add disclaimers about being an AI in every response`
 
+// ── Google AI REST helpers (no SDK — avoids Vercel runtime incompatibility) ──
+
+const GOOGLE_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
+
+async function embedText(text: string, apiKey: string): Promise<number[]> {
+  const res = await fetch(
+    `${GOOGLE_API_BASE}/models/gemini-embedding-001:embedContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'models/gemini-embedding-001',
+        content: { parts: [{ text }] },
+      }),
+    }
+  )
+  if (!res.ok) throw new Error(`Embed failed: ${res.status} ${await res.text()}`)
+  const data = await res.json()
+  return data.embedding.values
+}
+
+async function* streamGemini(
+  apiKey: string,
+  systemInstruction: string,
+  history: { role: string; parts: { text: string }[] }[],
+  message: string
+): AsyncGenerator<string> {
+  const res = await fetch(
+    `${GOOGLE_API_BASE}/models/gemini-2.0-flash:streamGenerateContent?key=${apiKey}&alt=sse`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemInstruction }] },
+        contents: [
+          ...history,
+          { role: 'user', parts: [{ text: message }] },
+        ],
+        generationConfig: { temperature: 0.7 },
+      }),
+    }
+  )
+
+  if (!res.ok || !res.body) throw new Error(`Gemini failed: ${res.status}`)
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue
+      const json = line.slice(6).trim()
+      if (!json || json === '[DONE]') continue
+      try {
+        const parsed = JSON.parse(json)
+        const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text
+        if (text) yield text
+      } catch { /* skip malformed */ }
+    }
+  }
+}
+
+// ── Route handler ─────────────────────────────────────────────────────────────
+
 export async function POST(req: NextRequest) {
   try {
-    // Dynamic import — avoids module-level crash if package has env issues
-    const { GoogleGenerativeAI } = await import('@google/generative-ai')
-
-    if (!process.env.GOOGLE_AI_API_KEY) return new Response('Missing GOOGLE_AI_API_KEY', { status: 500 })
+    const apiKey = process.env.GOOGLE_AI_API_KEY
+    if (!apiKey) return new Response('Missing GOOGLE_AI_API_KEY', { status: 500 })
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return new Response('Missing SUPABASE_SERVICE_ROLE_KEY', { status: 500 })
 
-    const genai = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY)
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -45,13 +114,10 @@ export async function POST(req: NextRequest) {
       history: { role: 'user' | 'model'; parts: { text: string }[] }[]
       archetype: string | null
     }
-
     if (!message?.trim()) return new Response('Empty message', { status: 400 })
 
-    // ── Retrieve relevant chunks ─────────────────────────────────────────────
-    const embeddingModel = genai.getGenerativeModel({ model: 'gemini-embedding-001' })
-    const embeddingResult = await embeddingModel.embedContent(message)
-    const queryEmbedding = embeddingResult.embedding.values
+    // ── Retrieve relevant chunks ───────────────────────────────────────────
+    const queryEmbedding = await embedText(message, apiKey)
 
     const { data: chunks } = await supabaseAdmin.rpc('match_chunks', {
       query_embedding: queryEmbedding,
@@ -60,31 +126,25 @@ export async function POST(req: NextRequest) {
     })
 
     const contextBlock = chunks && chunks.length > 0
-      ? `\n\n---\nRelevant context from PM Pathfinder learning content:\n\n${
+      ? `\n\n---\nRelevant context:\n\n${
           chunks.map((c: { content: string; source: string }, i: number) =>
-            `[${i + 1}] (source: ${c.source})\n${c.content}`
+            `[${i + 1}] (${c.source})\n${c.content}`
           ).join('\n\n')
         }\n---`
       : ''
 
-    // ── Stream Gemini response ───────────────────────────────────────────────
-    const model = genai.getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      systemInstruction: SYSTEM_PROMPT + contextBlock,
-    })
+    const systemInstruction = SYSTEM_PROMPT + contextBlock
 
-    const chat = model.startChat({ history })
-
+    // ── Stream response ────────────────────────────────────────────────────
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const result = await chat.sendMessageStream(message)
-          for await (const chunk of result.stream) {
-            const text = chunk.text()
-            if (text) controller.enqueue(new TextEncoder().encode(text))
+          for await (const chunk of streamGemini(apiKey, systemInstruction, history, message)) {
+            controller.enqueue(new TextEncoder().encode(chunk))
           }
         } catch (e) {
-          controller.error(e)
+          const msg = e instanceof Error ? e.message : String(e)
+          controller.enqueue(new TextEncoder().encode(`\n[Error: ${msg}]`))
         } finally {
           controller.close()
         }
@@ -92,10 +152,7 @@ export async function POST(req: NextRequest) {
     })
 
     return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Transfer-Encoding': 'chunked',
-      },
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     })
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e)
