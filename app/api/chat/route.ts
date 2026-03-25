@@ -84,7 +84,8 @@ async function* streamGemini(
   )
 
   if (res.status === 429) {
-    console.error('[generate] 429 rate limit — all retries exhausted')
+    const body = await res.text()
+    console.error('[generate] 429 body:', body)
     throw new Error('Rate limit reached — please wait a moment and try again')
   }
   if (!res.ok || !res.body) {
