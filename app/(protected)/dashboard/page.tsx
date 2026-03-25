@@ -21,7 +21,6 @@ import MultiRadarChart, {
   RadarSeriesPoint,
   RadarSeries,
 } from '@/components/dashboard/MultiRadarChart'
-import BlurGate from '@/components/ui/BlurGate'
 
 // Archetype accent colours (for gradient cards)
 const ARCHETYPE_GRADIENTS: Record<string, string> = {
@@ -46,8 +45,10 @@ function computeReadinessScore(
 ): number {
   const totalSteps = LEARNING_CHAPTERS.reduce((acc, c) => acc + c.steps.length, 0)
   const avg = Object.values(dimensionScores).reduce((a, b) => a + b, 0) / 5
-  const dimensionScore = (avg / 10) * 40
-  const pathScore = (Math.min(completedSteps, totalSteps) / totalSteps) * 25
+  const dimensionScore = (avg / 10) * 60   // assessment quality: max 60
+  const pathScore = totalSteps > 0
+    ? (Math.min(completedSteps, totalSteps) / totalSteps) * 40  // learning progress: max 40
+    : 0
   return Math.round(dimensionScore + pathScore)
 }
 
@@ -246,14 +247,14 @@ export default async function DashboardPage() {
             <p className="text-[11px] text-[#918fa1]">{completedSteps} / {totalSteps} steps</p>
           </div>
 
-          {/* Days active */}
+          {/* Focus Area */}
           <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-4 flex flex-col justify-between">
-            <p className="text-[10px] uppercase tracking-widest text-[#918fa1]">Days Active</p>
+            <p className="text-[10px] uppercase tracking-widest text-[#918fa1]">Focus Area</p>
             <div>
-              <p className="text-2xl font-bold font-mono text-indigo-400">
-                {daysSince(allAssessments[0].taken_at)}
+              <p className="text-base font-bold text-indigo-400 leading-snug">
+                {DIMENSION_LABELS[weakestDim].split(' & ')[0]}
               </p>
-              <p className="text-[11px] text-[#918fa1]">since you joined</p>
+              <p className="text-[11px] text-[#918fa1] mt-0.5">start here</p>
             </div>
           </div>
 
@@ -371,24 +372,26 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Activity feed ── */}
-      <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
-        <p className="text-[10px] uppercase tracking-widest text-[#918fa1] font-medium mb-4">
-          Activity
-        </p>
-        <div className="flex flex-wrap gap-x-8 gap-y-3">
-          {activityItems.slice(0, 5).map((item, i) => {
-            const Icon = item.icon
-            return (
-              <div key={i} className="flex items-center gap-2">
-                <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${item.color}`} />
-                <span className="text-xs text-[#c7c4d8]">{item.label}</span>
-                <span className="text-[11px] text-[#918fa1]">· {item.sub}</span>
-              </div>
-            )
-          })}
+      {/* ── Activity feed (only when there's meaningful history) ── */}
+      {allAssessments.length > 1 && (
+        <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
+          <p className="text-[10px] uppercase tracking-widest text-[#918fa1] font-medium mb-4">
+            Activity
+          </p>
+          <div className="flex flex-wrap gap-x-8 gap-y-3">
+            {activityItems.slice(0, 5).map((item, i) => {
+              const Icon = item.icon
+              return (
+                <div key={i} className="flex items-center gap-2">
+                  <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${item.color}`} />
+                  <span className="text-xs text-[#c7c4d8]">{item.label}</span>
+                  <span className="text-[11px] text-[#918fa1]">· {item.sub}</span>
+                </div>
+              )
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── Quick links ── */}
       <div>
@@ -413,15 +416,19 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Re-evaluate nudge (inline, not a separate nav item) ── */}
-      {daysSinceEval >= 7 && (
+      {/* ── Re-evaluate nudge — always show for first eval, then after 7 days ── */}
+      {(allAssessments.length === 1 || daysSinceEval >= 7) && (
         <div className="bg-[#171f33] border border-teal-500/20 rounded-2xl p-5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Calendar className="w-4 h-4 text-teal-400 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-[#dae2fd]">Time for a re-evaluation?</p>
+              <p className="text-sm font-medium text-[#dae2fd]">
+                {allAssessments.length === 1 ? 'Track your growth over time' : 'Time for a re-evaluation?'}
+              </p>
               <p className="text-xs text-[#918fa1]">
-                It&apos;s been {daysSinceEval} days since your last assessment.
+                {allAssessments.length === 1
+                  ? 'Retake the diagnostic after working through your path to see how your scores shift.'
+                  : `It's been ${daysSinceEval} days since your last assessment.`}
               </p>
             </div>
           </div>
