@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
@@ -76,6 +76,7 @@ export default function DeepDivePage() {
   const [tiers, setTiers] = useState<Record<Dimension, string> | null>(null)
   const [isPro, setIsPro] = useState(false)
   const [completedDimensions, setCompletedDimensions] = useState<Set<Dimension>>(new Set())
+  const [expandedDimension, setExpandedDimension] = useState<Dimension | null>(null)
 
   const fetchCompleted = async () => {
     const supabase = createClient()
@@ -262,26 +263,76 @@ export default function DeepDivePage() {
           const locked = !isPro && di >= FREE_DIMENSIONS
 
           const isCompleted = completedDimensions.has(dim)
+          const isExpanded = expandedDimension === dim
 
           const button = (
-            <button key={dim} onClick={locked ? undefined : () => { setSelectedDimension(dim); setCurrentQ(0); setAnswers({}) }}
-              className={`w-full text-left flex items-center justify-between px-5 py-4 rounded-2xl border transition-all group ${
-                isCompleted
-                  ? 'border-teal-500/25 bg-teal-500/5 hover:bg-teal-500/10'
-                  : 'border-white/5 bg-[#171f33] hover:bg-[#1a2236] hover:border-white/10'
-              }`}>
-              <div>
-                <p className="text-sm font-medium text-[#dae2fd]">{DIMENSION_LABELS[dim]}</p>
-                {isCompleted
-                  ? <p className="text-xs mt-0.5 text-teal-400">Completed · tap to redo</p>
-                  : tier && <p className={`text-xs mt-0.5 ${config.color}`}>{config.label}</p>
-                }
+            <div key={dim} className={`rounded-2xl border transition-all ${
+              isCompleted ? 'border-teal-500/25 bg-teal-500/5' : 'border-white/5 bg-[#171f33]'
+            }`}>
+              {/* Row */}
+              <div className="flex items-center gap-2 px-5 py-4">
+                {/* Main action — start quiz (or expand if completed) */}
+                <button
+                  onClick={locked ? undefined : () => {
+                    if (isCompleted) {
+                      setExpandedDimension(isExpanded ? null : dim)
+                    } else {
+                      setSelectedDimension(dim); setCurrentQ(0); setAnswers({})
+                    }
+                  }}
+                  className="flex-1 text-left group"
+                >
+                  <p className="text-sm font-medium text-[#dae2fd]">{DIMENSION_LABELS[dim]}</p>
+                  {isCompleted
+                    ? <p className="text-xs mt-0.5 text-teal-400">Completed</p>
+                    : tier && <p className={`text-xs mt-0.5 ${config.color}`}>{config.label}</p>
+                  }
+                </button>
+
+                {isCompleted ? (
+                  <div className="flex items-center gap-2">
+                    {/* Redo button */}
+                    <button
+                      onClick={() => { setSelectedDimension(dim); setCurrentQ(0); setAnswers({}) }}
+                      className="text-[11px] font-mono text-[#918fa1] hover:text-[#c7c4d8] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 transition-all"
+                    >
+                      Redo
+                    </button>
+                    {/* Expand toggle */}
+                    <button
+                      onClick={() => setExpandedDimension(isExpanded ? null : dim)}
+                      className="text-teal-400 hover:text-teal-300 transition-colors p-1"
+                    >
+                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                ) : (
+                  <ArrowRight className="w-4 h-4 text-[#918fa1] group-hover:text-indigo-400 transition-colors" />
+                )}
               </div>
-              {isCompleted
-                ? <svg className="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                : <ArrowRight className="w-4 h-4 text-[#918fa1] group-hover:text-indigo-400 transition-colors" />
-              }
-            </button>
+
+              {/* Expanded insights */}
+              <AnimatePresence>
+                {isCompleted && isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-5 pb-4 flex flex-col gap-2 border-t border-white/5 pt-3">
+                      {DEEP_DIVE_QUESTIONS[dim].map((q) => (
+                        <div key={q.subCategory} className="bg-[#0f1929] rounded-xl px-4 py-3">
+                          <p className="text-[10px] uppercase tracking-widest text-indigo-400 font-mono mb-1">{q.subCategory}</p>
+                          <p className="text-xs text-[#c7c4d8] leading-relaxed">{SUBCATEGORY_INSIGHTS[q.subCategory]}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )
 
           if (locked) {
