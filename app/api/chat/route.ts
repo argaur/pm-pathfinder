@@ -52,7 +52,11 @@ async function embedText(text: string, apiKey: string): Promise<number[]> {
       }),
     }
   )
-  if (!res.ok) throw new Error(`Embed failed: ${res.status} ${await res.text()}`)
+  if (!res.ok) {
+    const body = await res.text()
+    console.error('[embed] status:', res.status, body)
+    throw new Error(`Embed failed: ${res.status} ${body}`)
+  }
   const data = await res.json()
   return data.embedding.values
 }
@@ -79,8 +83,14 @@ async function* streamGemini(
     }
   )
 
-  if (res.status === 429) throw new Error('Rate limit reached — please wait a moment and try again')
-  if (!res.ok || !res.body) throw new Error(`Gemini failed: ${res.status}`)
+  if (res.status === 429) {
+    console.error('[generate] 429 rate limit — all retries exhausted')
+    throw new Error('Rate limit reached — please wait a moment and try again')
+  }
+  if (!res.ok || !res.body) {
+    console.error('[generate] status:', res.status)
+    throw new Error(`Gemini failed: ${res.status}`)
+  }
 
   const reader = res.body.getReader()
   const decoder = new TextDecoder()
