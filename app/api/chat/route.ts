@@ -25,8 +25,23 @@ Do NOT:
 
 const GOOGLE_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 3
+): Promise<Response> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url, options)
+    if (res.status !== 429 || attempt === maxRetries) return res
+    // Exponential backoff: 1s, 2s, 4s
+    await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)))
+  }
+  // Unreachable, but TypeScript needs this
+  return fetch(url, options)
+}
+
 async function embedText(text: string, apiKey: string): Promise<number[]> {
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `${GOOGLE_API_BASE}/models/gemini-embedding-001:embedContent?key=${apiKey}`,
     {
       method: 'POST',
@@ -48,7 +63,7 @@ async function* streamGemini(
   history: { role: string; parts: { text: string }[] }[],
   message: string
 ): AsyncGenerator<string> {
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `${GOOGLE_API_BASE}/models/gemini-2.0-flash-lite:streamGenerateContent?key=${apiKey}&alt=sse`,
     {
       method: 'POST',
@@ -64,6 +79,7 @@ async function* streamGemini(
     }
   )
 
+  if (res.status === 429) throw new Error('Rate limit reached — please wait a moment and try again')
   if (!res.ok || !res.body) throw new Error(`Gemini failed: ${res.status}`)
 
   const reader = res.body.getReader()
