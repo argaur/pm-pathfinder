@@ -63,8 +63,9 @@ export default function ResultsPage() {
     .slice(0, 2)
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <div className="w-full max-w-lg">
+    <main className="min-h-screen flex flex-col relative overflow-hidden">
+      <div className="flex-1 flex flex-col justify-center px-6 pt-10 pb-28">
+      <div className="w-full max-w-lg mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -150,10 +151,16 @@ export default function ResultsPage() {
             </div>
           )}
 
-          {/* CTA */}
+        </motion.div>
+      </div>
+      </div>
+
+      {/* Fixed footer CTA */}
+      <div className="fixed bottom-0 inset-x-0 bg-gradient-to-t from-[#0b1326] via-[#0b1326]/95 to-transparent px-6 pt-6 pb-8">
+        <div className="max-w-lg mx-auto">
           <Button
             onClick={() => router.push('/auth')}
-            className="w-full h-12 bg-[#ffb95f] hover:bg-amber-400 text-slate-950 font-semibold rounded-xl mb-3"
+            className="w-full h-14 bg-[#ffb95f] hover:bg-amber-400 text-slate-950 font-semibold text-base rounded-2xl mb-3"
           >
             Unlock your full report — free
             <ArrowRight className="ml-2 w-4 h-4" />
@@ -161,7 +168,7 @@ export default function ResultsPage() {
           <p className="text-center text-xs text-[#918fa1]">
             Google sign-in · Your results are saved · Takes 10 seconds
           </p>
-        </motion.div>
+        </div>
       </div>
     </main>
   )

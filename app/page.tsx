@@ -4,23 +4,40 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 
+const BARRIERS = [
+  { id: 'Proof Gap',            desc: 'Cannot credibly demonstrate PM capability without a PM title.' },
+  { id: 'Access Gap',           desc: 'PM hiring runs on referrals. Cold applications get 1.5–2.7% response.' },
+  { id: 'Theory-Practice Gap',  desc: 'Content consumed but not converted into applicable skill.' },
+  { id: 'Feedback Vacuum',      desc: 'No structured feedback outside of actual interviews.' },
+  { id: 'Jargon Barrier',       desc: 'PM education built by PMs for PMs — alienates career switchers.' },
+]
+
+const ARCHETYPES = [
+  { name: 'The Builder',    bg: 'Technical',      mindset: 'Execution',  color: 'text-indigo-400',  border: 'border-indigo-500/20', bg2: 'bg-indigo-500/5',  from: 'SWE, DevOps' },
+  { name: 'The Architect',  bg: 'Technical',      mindset: 'Strategy',   color: 'text-teal-400',    border: 'border-teal-500/20',   bg2: 'bg-teal-500/5',    from: 'Tech Lead, Solutions Architect' },
+  { name: 'The Storyteller',bg: 'Human-Centered', mindset: 'Strategy',   color: 'text-violet-400',  border: 'border-violet-500/20', bg2: 'bg-violet-500/5',  from: 'Designer, UX Researcher' },
+  { name: 'The Advocate',   bg: 'Human-Centered', mindset: 'Execution',  color: 'text-rose-400',    border: 'border-rose-500/20',   bg2: 'bg-rose-500/5',    from: 'CX, Support Lead' },
+  { name: 'The Operator',   bg: 'Business',       mindset: 'Execution',  color: 'text-amber-400',   border: 'border-amber-500/20',  bg2: 'bg-amber-500/5',   from: 'Ops, BA, Consultant' },
+  { name: 'The Strategist', bg: 'Business',       mindset: 'Strategy',   color: 'text-emerald-400', border: 'border-emerald-500/20',bg2: 'bg-emerald-500/5', from: 'Strategy, Finance, Growth' },
+]
+
 const PAIN_POINTS = [
   {
-    icon: '😤',
-    quote: "I've been preparing for months but still don't feel ready to apply.",
-    persona: 'The Over-Prepper',
+    quote: "I just have a resume. I do not have a portfolio to showcase.",
+    name: 'Ankit',
+    context: '3 years as PM · couldn\'t break into general PM roles',
     accent: { bg: 'bg-indigo-500/10', text: 'text-indigo-400', line: 'bg-indigo-500/40' },
   },
   {
-    icon: '🧭',
-    quote: "I have the skills but I don't know which type of PM role I actually fit into.",
-    persona: 'The Generalist',
+    quote: "I used to not see where do I stand. How can I measure myself?",
+    name: 'Rishi',
+    context: '8 years in BA / PM-adjacent roles',
     accent: { bg: 'bg-teal-500/10', text: 'text-teal-400', line: 'bg-teal-500/40' },
   },
   {
-    icon: '📭',
-    quote: "I'm applying to dozens of roles but getting zero feedback. My background doesn't translate.",
-    persona: 'The Transitioner',
+    quote: "That structured guidance which is customized to where do I stand, not the generic one.",
+    name: 'Kriti',
+    context: '14 years experience · 4.5 as PM',
     accent: { bg: 'bg-amber-500/10', text: 'text-amber-400', line: 'bg-amber-500/40' },
   },
 ]
@@ -28,22 +45,22 @@ const PAIN_POINTS = [
 const STEPS = [
   {
     num: '01',
-    title: 'Take the Assessment',
-    desc: '10 scenario-based questions. No PM jargon required. Takes 8 minutes.',
+    title: 'Understand where you actually stand',
+    desc: '10 scenario-based questions mapped across 5 PM dimensions. No jargon required. Takes 8 minutes.',
     color: 'bg-indigo-600',
     glow: 'shadow-[0_0_24px_rgba(79,70,229,0.5)]',
   },
   {
     num: '02',
-    title: 'Get Your PM Archetype',
-    desc: 'One of 6 archetypes based on your background and mindset. Built on primary research.',
+    title: 'Get your PM Archetype',
+    desc: 'One of 6 archetypes based on your background and mindset. Know exactly what kind of PM you\'re built to be — and what gap to close first.',
     color: 'bg-teal-500',
     glow: 'shadow-[0_0_24px_rgba(79,219,200,0.5)]',
   },
   {
     num: '03',
-    title: 'Follow Your Path',
-    desc: 'A roadmap of concepts, frameworks and exercises targeting your specific skill gaps.',
+    title: 'Follow a path built for you',
+    desc: 'A chapter-by-chapter roadmap targeting your exact skill gaps — not a generic course. Concepts, frameworks, and practice exercises in the order you need them.',
     color: 'bg-[#ffb95f]',
     glow: 'shadow-[0_0_24px_rgba(255,185,95,0.5)]',
   },
@@ -90,14 +107,16 @@ export default function LandingPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-400" />
               </span>
-              Built for career switchers
+              Built on 9 user interviews
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold font-[family-name:var(--font-space-grotesk)] leading-[1.05] tracking-tighter text-[#dae2fd]">
-              Discover Your{' '}
+              You&apos;re Closer to PM{' '}
+              <br className="hidden sm:block" />
+              Than You Think.{' '}
               <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#c3c0ff] to-[#4fdbc8]">
-                PM Archetype
+                Find Out What&apos;s Missing.
               </span>
             </h1>
 
@@ -177,7 +196,7 @@ export default function LandingPage() {
               The Career Gap is Real
             </h2>
             <p className="text-[#c7c4d8] max-w-2xl mx-auto leading-relaxed">
-              Standard training leaves candidates lost in the in-between. We help you bridge the gap with data-driven clarity.
+              From 9 user interviews across engineering, design, and consulting backgrounds — three patterns kept surfacing.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -190,17 +209,17 @@ export default function LandingPage() {
                 transition={{ delay: i * 0.1 }}
                 className="group p-8 rounded-2xl bg-[#131b2e] border border-white/5 hover:bg-[#171f33] hover:border-white/10 transition-all duration-500"
               >
-                <div className={`mb-6 p-3 rounded-xl w-fit ${item.accent.bg}`}>
-                  <span className="text-2xl">{item.icon}</span>
-                </div>
                 <p className="text-lg font-medium text-[#dae2fd] italic leading-relaxed mb-6">
                   &ldquo;{item.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className={`h-px w-10 ${item.accent.line}`} />
-                  <span className={`text-xs font-mono uppercase tracking-tighter ${item.accent.text}`}>
-                    {item.persona}
-                  </span>
+                  <div>
+                    <p className={`text-xs font-mono font-semibold uppercase tracking-tighter ${item.accent.text}`}>
+                      {item.name}
+                    </p>
+                    <p className="text-xs text-[#918fa1] mt-0.5">{item.context}</p>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -208,12 +227,90 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Research Foundation */}
+      <section className="py-24 bg-[#060e20]/60 px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14 space-y-3">
+            <p className="text-xs font-mono uppercase tracking-widest text-teal-400">Primary research</p>
+            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
+              5 structural barriers to PM transition
+            </h2>
+            <p className="text-[#c7c4d8] max-w-xl mx-auto text-sm leading-relaxed">
+              Validated across 9 interviews with professionals transitioning from engineering, consulting, design, and operations.
+            </p>
+          </div>
+
+          {/* Barriers grid — 3 + 2 centred */}
+          <div className="flex flex-col gap-3 mb-14">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {BARRIERS.slice(0, 3).map((b, i) => (
+                <motion.div
+                  key={b.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.07 }}
+                  className="bg-[#131b2e] border border-white/5 rounded-2xl px-5 py-5"
+                >
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <span className="text-xs font-mono text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <p className="text-sm font-semibold text-[#dae2fd]">{b.id}</p>
+                  </div>
+                  <p className="text-sm text-[#918fa1] leading-relaxed">{b.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:w-2/3 sm:mx-auto">
+              {BARRIERS.slice(3).map((b, i) => (
+                <motion.div
+                  key={b.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: (i + 3) * 0.07 }}
+                  className="bg-[#131b2e] border border-white/5 rounded-2xl px-5 py-5"
+                >
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <span className="text-xs font-mono text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full">
+                      {String(i + 4).padStart(2, '0')}
+                    </span>
+                    <p className="text-sm font-semibold text-[#dae2fd]">{b.id}</p>
+                  </div>
+                  <p className="text-sm text-[#918fa1] leading-relaxed">{b.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* User quote */}
+          <div className="max-w-2xl mx-auto bg-[#131b2e] border border-teal-500/15 rounded-2xl px-8 py-7">
+            <p className="text-lg text-[#dae2fd] leading-relaxed italic mb-5">
+              &ldquo;A tool which kind of tailors the entire program according to me only. It sort of analyses me and then presents its solution.&rdquo;
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="h-px flex-1 bg-teal-500/20" />
+              <span className="text-xs font-mono text-[#918fa1] uppercase tracking-widest">
+                Gaurav · 7 years in product · research participant
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="py-24 bg-[#060e20]/60">
         <div className="max-w-5xl mx-auto px-8">
-          <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] text-center mb-20 tracking-tight">
-            Your Navigation Path
-          </h2>
+          <div className="text-center mb-20 space-y-3">
+            <p className="text-xs font-mono uppercase tracking-widest text-indigo-400">The journey</p>
+            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
+              From career switcher to hired PM
+            </h2>
+            <p className="text-[#c7c4d8] max-w-lg mx-auto text-sm leading-relaxed">
+              Three steps. No generic advice. A path that starts from where you are — not where everyone else is.
+            </p>
+          </div>
           <div className="relative">
             <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-indigo-500 via-teal-500 to-transparent -translate-x-1/2 hidden md:block" />
             <div className="space-y-20">
@@ -245,6 +342,66 @@ export default function LandingPage() {
               <button className="px-10 py-5 bg-[#ffb95f] hover:bg-amber-400 text-slate-950 font-bold text-lg rounded-full transition-all active:scale-95 shadow-[0_0_32px_rgba(255,185,95,0.3)]">
                 Start the Assessment
                 <ArrowRight className="inline ml-2 w-5 h-5" />
+              </button>
+            </Link>
+
+            {/* Destination */}
+            <div className="mt-12 max-w-xl mx-auto bg-gradient-to-br from-teal-500/10 to-indigo-500/10 border border-teal-500/20 rounded-2xl px-8 py-6 text-left">
+              <p className="text-xs font-mono uppercase tracking-widest text-teal-400 mb-3">The destination</p>
+              <p className="text-base font-semibold text-[#dae2fd] leading-relaxed mb-2">
+                You walk into your PM interview knowing your archetype, your strengths, and exactly how you closed the gap.
+              </p>
+              <p className="text-sm text-[#918fa1] leading-relaxed">
+                Not just prepared — positioned. You can speak to your background as an asset, not a liability.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Archetype Preview */}
+      <section className="py-24 px-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14 space-y-3">
+            <p className="text-xs font-mono uppercase tracking-widest text-indigo-400">The framework</p>
+            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
+              6 PM archetypes. Which one are you?
+            </h2>
+            <p className="text-[#c7c4d8] max-w-lg mx-auto text-sm leading-relaxed">
+              Mapped across two axes: your professional background and your natural mindset — execution-first or strategy-first.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+            {ARCHETYPES.map((a, i) => (
+              <motion.div
+                key={a.name}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.06 }}
+                className={`p-5 rounded-2xl border ${a.border} ${a.bg2}`}
+              >
+                <h3 className={`text-base font-bold font-[family-name:var(--font-space-grotesk)] ${a.color} mb-2`}>
+                  {a.name}
+                </h3>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-[#918fa1]">
+                    {a.bg}
+                  </span>
+                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-[#918fa1]">
+                    {a.mindset}
+                  </span>
+                </div>
+                <p className="text-xs text-[#918fa1]">Comes from: {a.from}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link href="/quiz">
+              <button className="px-8 py-4 border border-indigo-500/30 hover:bg-indigo-500/10 text-indigo-300 text-sm font-semibold rounded-xl transition-all">
+                Find out what's holding you back →
               </button>
             </Link>
           </div>
@@ -391,8 +548,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="mt-auto border-t border-white/5 px-8 py-8 text-center text-sm text-[#918fa1]">
-        PM Pathfinder · Built for career switchers, by career switchers.
+      <footer className="mt-auto border-t border-white/5 px-8 py-8">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[#918fa1]">
+          <span className="font-[family-name:var(--font-space-grotesk)] font-semibold text-[#dae2fd]">PM Pathfinder</span>
+          <span>Built on primary research with 9 professionals navigating the PM transition.</span>
+          <span className="font-mono text-xs">Rethink AI MPM Cohort 7</span>
+        </div>
       </footer>
     </main>
   )

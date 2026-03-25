@@ -111,13 +111,13 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+    <main className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Atmospheric orbs */}
       <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -z-10" />
       <div className="fixed top-0 left-0 w-[400px] h-[400px] bg-teal-500/[0.07] rounded-full blur-[100px] pointer-events-none -z-10" />
 
       {/* Progress dots */}
-      <div className="flex gap-2 mb-12">
+      <div className="flex gap-2 justify-center pt-10 pb-6 flex-shrink-0">
         {STEPS.map((_, i) => (
           <div
             key={i}
@@ -128,43 +128,52 @@ export default function OnboardingPage() {
         ))}
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -24 }}
-          transition={{ duration: 0.25 }}
-          className="w-full max-w-lg"
-        >
-          <div className="mb-8">
-            <p className="text-xs uppercase tracking-widest text-teal-400 font-mono mb-3">
-              Step {currentStep + 1} of {STEPS.length}
-            </p>
-            <h2 className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight mb-2">
-              {step.question}
-            </h2>
-            {step.subtext && (
-              <p className="text-sm text-[#918fa1] leading-relaxed">{step.subtext}</p>
-            )}
-          </div>
+      {/* Centred content — pb-28 gives clearance above fixed CTA */}
+      <div className="flex-1 flex flex-col justify-center px-6 pb-28">
+        <div className="w-full max-w-lg mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentStep}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -24 }}
+              transition={{ duration: 0.25 }}
+            >
+              <div className="mb-8">
+                <p className="text-xs uppercase tracking-widest text-teal-400 font-mono mb-3">
+                  Step {currentStep + 1} of {STEPS.length}
+                </p>
+                <h2 className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight mb-2">
+                  {step.question}
+                </h2>
+                {step.subtext && (
+                  <p className="text-sm text-[#918fa1] leading-relaxed">{step.subtext}</p>
+                )}
+              </div>
 
-          <div className="flex flex-col gap-2.5 mb-8">
-            {step.options.map((option) => (
-              <button
-                key={option}
-                onClick={() => handleSelect(option)}
-                className={`w-full text-left px-5 py-4 rounded-2xl text-sm transition-all duration-150 ${
-                  selected === option
-                    ? 'border-2 border-[#4fdbc8] bg-[#222a3d] text-[#dae2fd] shadow-[0_0_20px_rgba(79,219,200,0.1)]'
-                    : 'border border-white/5 bg-[#171f33] text-[#c7c4d8] hover:bg-[#1a2236] hover:border-white/10'
-                }`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
+              <div className="flex flex-col gap-2.5">
+                {step.options.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => handleSelect(option)}
+                    className={`w-full text-left px-5 py-4 rounded-2xl text-sm transition-all duration-150 ${
+                      selected === option
+                        ? 'border-2 border-[#4fdbc8] bg-[#222a3d] text-[#dae2fd] shadow-[0_0_20px_rgba(79,219,200,0.1)]'
+                        : 'border border-white/5 bg-[#171f33] text-[#c7c4d8] hover:bg-[#1a2236] hover:border-white/10'
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
 
+      {/* Fixed footer CTA */}
+      <div className="fixed bottom-0 inset-x-0 bg-gradient-to-t from-[#0b1326] via-[#0b1326]/95 to-transparent px-6 pt-6 pb-8">
+        <div className="max-w-lg mx-auto">
           <Button
             onClick={handleNext}
             disabled={!selected || loading}
@@ -173,8 +182,8 @@ export default function OnboardingPage() {
             {loading ? 'Saving...' : currentStep < STEPS.length - 1 ? 'Continue' : 'Show my insights'}
             {!loading && <ArrowRight className="ml-2 w-4 h-4" />}
           </Button>
-        </motion.div>
-      </AnimatePresence>
+        </div>
+      </div>
     </main>
   )
 }

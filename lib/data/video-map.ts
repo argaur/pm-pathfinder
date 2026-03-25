@@ -21,11 +21,11 @@ export const TOPIC_VIDEO_MAP: Record<string, string> = {
   'Data & SQL':            '-TNeIdOc1F8', // "Metrics mock interview — Instagram engagement drop"
   'Competitive Analysis':  'nrM6AwYOrBc', // "Uber strategy PM mock interview"
 
-  // ── TODO: fill manually ──────────────────────────────────────────────────
-  'Product Storytelling':  'dQw4w9WgXcQ', // TODO
-  'Stakeholder Influence': 'dQw4w9WgXcQ', // TODO
-  'Go-to-Market':          'dQw4w9WgXcQ', // TODO
-  'Stakeholder Management':'dQw4w9WgXcQ', // TODO
-  'Written Communication': 'dQw4w9WgXcQ', // TODO
-  'System Design':         'dQw4w9WgXcQ', // TODO
+  // ── Filled with @TheSwagWalaPM ──────────────────────────────────────────
+  'Product Storytelling':  'U8a-oJf0cWc', // "How Top 1% PMs build experiences"
+  'Stakeholder Influence': 'tSxiS_NX68M', // "This is how great PMs read product metrics"
+  'Go-to-Market':          '1epNn5ZB8Oo', // "Static Roadmaps Are Dead. AI Runs Product in 2026"
+  'Stakeholder Management':'GVExvt4A2rs', // "Now is the time for AI Native Product Managers"
+  'Written Communication': 'mB3ud5u_9WM', // "Great Products have Nuance | They understand Users!"
+  'System Design':         '7rKQn1XKv94', // "The Paradox in Modern PM | Product Analytics"
 }

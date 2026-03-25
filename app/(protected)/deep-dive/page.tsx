@@ -11,6 +11,30 @@ import { Dimension } from '@/lib/data/questions'
 import BlurGate from '@/components/ui/BlurGate'
 import { getIsPro } from '@/lib/user/getIsPro'
 
+// Static coaching insight shown per sub-category on completion card
+const SUBCATEGORY_INSIGHTS: Record<string, string> = {
+  // thinking_strategy
+  Prioritisation:       'Strong prioritisation is where PM credibility is built. The best PMs pair data signals with stakeholder context — neither alone is enough.',
+  'Problem Framing':    'Before jumping to solutions, great PMs define the right problem. Ambiguous briefs are an opportunity to earn trust by bringing clarity.',
+  'Trade-off Decisions':'Trade-off calls are where PM judgment shows. Define a minimum quality bar, ship, measure, and iterate — that\'s the pattern that compounds.',
+  // execution
+  'Sprint Planning':    'Aligning on sprint goal before individual stories keeps the team focused on outcomes, not outputs. Goal-first planning reduces mid-sprint chaos.',
+  'Stakeholder Alignment': 'How you respond to mid-sprint changes defines whether stakeholders trust your process — or learn to bypass it.',
+  'Delivery Tracking':  'Proactive visibility lets you catch slippage early. Waiting for the review to surface surprises means it\'s already too late.',
+  // technical_fluency
+  'Architecture Awareness': 'Asking about rollback and data volume is exactly the risk awareness engineers respect. It signals you see delivery risk, not just the feature.',
+  'API Literacy':        'Checking SLA and rate limits before committing to a third-party integration is how PMs prevent 2am incidents from becoming product failures.',
+  'Tech Debt Awareness': 'Negotiating a % of each sprint for debt (vs a separate backlog) is the most durable model — it keeps engineering trust intact over time.',
+  // user_research
+  'Research Methods':   'Choosing the right method for the question is a core PM skill. Interviews validate the why; A/B tests validate what scales — both serve different needs.',
+  'Insight Synthesis':  'Themes across sessions beat memorable quotes. Affinity mapping forces you to find patterns instead of cherry-picking confirming evidence.',
+  'Metrics + Qual Balance': 'Qual explains what quant can\'t. When they conflict, it\'s almost always a context gap — run more research before making a directional bet.',
+  // communication
+  'Upward Communication':   'Starting with business outcome anchors leadership to what they care about. Everything else becomes supporting evidence, not a pitch.',
+  'Cross-functional Influence': 'Framing tech work as risk reduction with business impact is the translation layer engineers can\'t always provide — and where PM adds real value.',
+  'Conflict Resolution': 'Finding the common goal beneath conflicting asks resolves 80% of stakeholder conflicts without escalating or building the wrong thing.',
+}
+
 const FREE_DIMENSIONS = 1
 const DIMENSION_ORDER: Dimension[] = ['thinking_strategy', 'execution', 'technical_fluency', 'user_research', 'communication']
 
@@ -96,27 +120,54 @@ export default function DeepDivePage() {
   }
 
   if (done && selectedDimension) {
+    const completedQuestions = DEEP_DIVE_QUESTIONS[selectedDimension]
     return (
       <div className="max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="bg-[#171f33] rounded-2xl p-8 text-center">
-            <div className="text-4xl mb-4">✓</div>
-            <h2 className="text-xl font-semibold text-[#dae2fd] mb-2">Deep dive complete</h2>
-            <p className="text-sm text-[#c7c4d8] mb-6">
-              Your {DIMENSION_LABELS[selectedDimension]} sub-category breakdown has been saved.
-              This will refine your roadmap recommendations.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Button onClick={() => { setDone(false); setSelectedDimension(null); setCurrentQ(0); setAnswers({}) }}
-                variant="outline" className="border-white/10 text-[#c7c4d8]">
-                Dive into another dimension
-              </Button>
-              <Button onClick={() => router.push('/roadmap')}
-                className="bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-semibold rounded-xl">
-                See my roadmap
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-[#4fdbc8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
+            <div>
+              <p className="text-xs uppercase tracking-widest text-[#4fdbc8] font-mono">Analysis complete</p>
+              <h2 className="text-xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd]">
+                {DIMENSION_LABELS[selectedDimension]} — sub-category breakdown
+              </h2>
+            </div>
+          </div>
+
+          {/* Per sub-category insight cards */}
+          <div className="flex flex-col gap-3 mb-6">
+            {completedQuestions.map((q) => {
+              const insight = SUBCATEGORY_INSIGHTS[q.subCategory]
+              return (
+                <motion.div
+                  key={q.subCategory}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-[#171f33] rounded-2xl px-5 py-4 border border-white/5"
+                >
+                  <p className="text-xs uppercase tracking-widest text-indigo-400 font-mono mb-1">{q.subCategory}</p>
+                  <p className="text-sm text-[#c7c4d8] leading-relaxed">{insight}</p>
+                </motion.div>
+              )
+            })}
+          </div>
+
+          {/* CTAs */}
+          <div className="flex gap-3">
+            <Button onClick={() => { setDone(false); setSelectedDimension(null); setCurrentQ(0); setAnswers({}) }}
+              variant="outline" className="border-white/10 text-[#c7c4d8] rounded-xl flex-1">
+              Dive into another dimension
+            </Button>
+            <Button onClick={() => router.push('/roadmap')}
+              className="bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-semibold rounded-xl flex-1">
+              See my roadmap
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
           </div>
         </motion.div>
       </div>
