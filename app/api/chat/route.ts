@@ -68,7 +68,7 @@ async function* streamGemini(
   message: string
 ): AsyncGenerator<string> {
   const res = await fetchWithRetry(
-    `${GOOGLE_API_BASE}/models/gemini-2.5-flash-exp:streamGenerateContent?key=${apiKey}&alt=sse`,
+    `${GOOGLE_API_BASE}/models/gemini-3.1-flash-lite-preview:streamGenerateContent?key=${apiKey}&alt=sse`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
