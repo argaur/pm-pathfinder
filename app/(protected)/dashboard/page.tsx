@@ -17,6 +17,7 @@ import {
   BookOpen,
   Activity,
 } from 'lucide-react'
+import { computeReadinessScore } from '@/lib/scoring/readiness'
 import MultiRadarChart, {
   RadarSeriesPoint,
   RadarSeries,
@@ -39,18 +40,6 @@ const QUICK_LINKS = [
   { href: '/interview-readiness', icon: Target, label: 'Interview Readiness', desc: 'Your score + what to fix', color: 'text-amber-400' },
 ]
 
-function computeReadinessScore(
-  dimensionScores: Record<Dimension, number>,
-  completedSteps: number,
-): number {
-  const totalSteps = LEARNING_CHAPTERS.reduce((acc, c) => acc + c.steps.length, 0)
-  const avg = Object.values(dimensionScores).reduce((a, b) => a + b, 0) / 5
-  const dimensionScore = (avg / 10) * 60   // assessment quality: max 60
-  const pathScore = totalSteps > 0
-    ? (Math.min(completedSteps, totalSteps) / totalSteps) * 40  // learning progress: max 40
-    : 0
-  return Math.round(dimensionScore + pathScore)
-}
 
 function getWeakestDimension(scores: Record<Dimension, number>): Dimension {
   return (Object.entries(scores) as [Dimension, number][]).reduce((a, b) =>
@@ -87,21 +76,31 @@ export default async function DashboardPage() {
   const dimensionScores = latest.dimension_scores as Record<Dimension, number>
   const tiers = latest.tiers as Record<Dimension, 'growth' | 'neutral' | 'strength'>
 
-  // Learning path progress
+  // Learning path + deep dive progress
   let completedSteps = 0
+  let completedDeepDives = 0
   try {
-    const { count } = await supabase
-      .from('learning_path_progress')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('status', 'complete')
-    completedSteps = count ?? 0
+    const [{ count: pathCount }, { data: deepDiveRows }] = await Promise.all([
+      supabase
+        .from('learning_path_progress')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'complete'),
+      supabase
+        .from('deep_dive_results')
+        .select('dimension')
+        .eq('user_id', user.id),
+    ])
+    completedSteps = pathCount ?? 0
+    completedDeepDives = deepDiveRows
+      ? new Set(deepDiveRows.map((r) => r.dimension)).size
+      : 0
   } catch {
     completedSteps = 0
   }
 
   const totalSteps = LEARNING_CHAPTERS.reduce((acc, c) => acc + c.steps.length, 0)
-  const readinessScore = computeReadinessScore(dimensionScores, completedSteps)
+  const { total: readinessScore } = computeReadinessScore({ dimensionScores, completedSteps, completedDeepDives })
   const weakestDim = getWeakestDimension(dimensionScores)
   const daysSinceEval = daysSince(latest.taken_at)
   const gradientClass = ARCHETYPE_GRADIENTS[latest.archetype] ?? 'from-indigo-900/60 to-[#171f33]'
