@@ -3,13 +3,13 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { DIMENSION_DETAILS } from '@/lib/data/dimension-details'
-import { LEARNING_CHAPTERS } from '@/lib/data/learning-path'
 import { Dimension } from '@/lib/data/questions'
 import { ArrowRight, Lock, TrendingUp } from 'lucide-react'
 import BlurGate from '@/components/ui/BlurGate'
 import { getIsPro } from '@/lib/user/getIsPro'
 import { computeReadinessScore } from '@/lib/scoring/readiness'
-import RoleBenchmarks, { ROLE_THRESHOLDS } from '@/components/interview/RoleBenchmarks'
+import { ROLE_THRESHOLDS } from '@/lib/data/role-thresholds'
+import RoleBenchmarks from '@/components/interview/RoleBenchmarks'
 
 function getScoreLabel(score: number): { label: string; color: string } {
   if (score < 30) return { label: 'Just starting out', color: 'text-rose-400' }
