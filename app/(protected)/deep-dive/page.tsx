@@ -75,6 +75,20 @@ export default function DeepDivePage() {
   const [done, setDone] = useState(false)
   const [tiers, setTiers] = useState<Record<Dimension, string> | null>(null)
   const [isPro, setIsPro] = useState(false)
+  const [completedDimensions, setCompletedDimensions] = useState<Set<Dimension>>(new Set())
+
+  const fetchCompleted = async () => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase
+      .from('deep_dive_results')
+      .select('dimension')
+      .eq('user_id', user.id)
+    if (data) {
+      setCompletedDimensions(new Set(data.map((r) => r.dimension as Dimension)))
+    }
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -93,6 +107,7 @@ export default function DeepDivePage() {
       if (assessment?.tiers) setTiers(assessment.tiers as Record<Dimension, string>)
       if (profile?.is_pro) setIsPro(true)
     })
+    fetchCompleted()
   }, [])
 
   const handleAnswer = async (answer: string) => {
@@ -112,6 +127,7 @@ export default function DeepDivePage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ dimension: selectedDimension, answers: updated }),
         })
+        await fetchCompleted() // refresh completed state
       } catch {
         // Non-blocking
       }
@@ -121,6 +137,13 @@ export default function DeepDivePage() {
 
   if (done && selectedDimension) {
     const completedQuestions = DEEP_DIVE_QUESTIONS[selectedDimension]
+    const nextDim = DIMENSION_ORDER.find(
+      (d) => d !== selectedDimension && !completedDimensions.has(d) && (isPro || DIMENSION_ORDER.indexOf(d) < FREE_DIMENSIONS)
+    )
+    const allDone = DIMENSION_ORDER
+      .filter((_, i) => isPro || i < FREE_DIMENSIONS)
+      .every((d) => completedDimensions.has(d))
+
     return (
       <div className="max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
@@ -159,13 +182,27 @@ export default function DeepDivePage() {
 
           {/* CTAs */}
           <div className="flex gap-3">
-            <Button onClick={() => { setDone(false); setSelectedDimension(null); setCurrentQ(0); setAnswers({}) }}
-              variant="outline" className="border-white/10 text-[#c7c4d8] rounded-xl flex-1">
-              Dive into another dimension
-            </Button>
+            {nextDim ? (
+              <Button
+                onClick={() => { setDone(false); setSelectedDimension(nextDim); setCurrentQ(0); setAnswers({}) }}
+                variant="outline"
+                className="border-white/10 text-[#c7c4d8] rounded-xl flex-1"
+              >
+                Next: {DIMENSION_LABELS[nextDim].split(' & ')[0]}
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={() => { setDone(false); setSelectedDimension(null); setCurrentQ(0); setAnswers({}) }}
+                variant="outline"
+                className="border-white/10 text-[#c7c4d8] rounded-xl flex-1"
+              >
+                {allDone ? 'Redo a dimension' : 'Dive into another'}
+              </Button>
+            )}
             <Button onClick={() => router.push('/roadmap')}
               className="bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-semibold rounded-xl flex-1">
-              See my roadmap
+              Go to Learning Path
               <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </div>
@@ -224,14 +261,26 @@ export default function DeepDivePage() {
           const config = tier ? TIER_CONFIG[tier as keyof typeof TIER_CONFIG] : TIER_CONFIG.neutral
           const locked = !isPro && di >= FREE_DIMENSIONS
 
+          const isCompleted = completedDimensions.has(dim)
+
           const button = (
             <button key={dim} onClick={locked ? undefined : () => { setSelectedDimension(dim); setCurrentQ(0); setAnswers({}) }}
-              className="w-full text-left flex items-center justify-between px-5 py-4 rounded-2xl border border-white/5 bg-[#171f33] hover:bg-[#1a2236] hover:border-white/10 transition-all group">
+              className={`w-full text-left flex items-center justify-between px-5 py-4 rounded-2xl border transition-all group ${
+                isCompleted
+                  ? 'border-teal-500/25 bg-teal-500/5 hover:bg-teal-500/10'
+                  : 'border-white/5 bg-[#171f33] hover:bg-[#1a2236] hover:border-white/10'
+              }`}>
               <div>
                 <p className="text-sm font-medium text-[#dae2fd]">{DIMENSION_LABELS[dim]}</p>
-                {tier && <p className={`text-xs mt-0.5 ${config.color}`}>{config.label}</p>}
+                {isCompleted
+                  ? <p className="text-xs mt-0.5 text-teal-400">Completed · tap to redo</p>
+                  : tier && <p className={`text-xs mt-0.5 ${config.color}`}>{config.label}</p>
+                }
               </div>
-              <ArrowRight className="w-4 h-4 text-[#918fa1] group-hover:text-indigo-400 transition-colors" />
+              {isCompleted
+                ? <svg className="w-4 h-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                : <ArrowRight className="w-4 h-4 text-[#918fa1] group-hover:text-indigo-400 transition-colors" />
+              }
             </button>
           )
 
