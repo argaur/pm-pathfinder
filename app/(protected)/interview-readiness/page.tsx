@@ -8,12 +8,8 @@ import { Dimension } from '@/lib/data/questions'
 import { ArrowRight, Lock, TrendingUp } from 'lucide-react'
 import BlurGate from '@/components/ui/BlurGate'
 import { getIsPro } from '@/lib/user/getIsPro'
-
-const ROLE_THRESHOLDS = [
-  { role: 'APM / Associate PM', min: 55, description: 'Entry-level PM roles, often at large tech companies' },
-  { role: 'Product Manager (IC)', min: 70, description: 'Core PM roles — 2–5 years experience expected' },
-  { role: 'Senior PM', min: 82, description: 'Senior IC or Lead roles — strong track record required' },
-]
+import { computeReadinessScore } from '@/lib/scoring/readiness'
+import RoleBenchmarks, { ROLE_THRESHOLDS } from '@/components/interview/RoleBenchmarks'
 
 function getScoreLabel(score: number): { label: string; color: string } {
   if (score < 30) return { label: 'Just starting out', color: 'text-rose-400' }
@@ -21,50 +17,6 @@ function getScoreLabel(score: number): { label: string; color: string } {
   if (score < 65) return { label: 'Getting there', color: 'text-yellow-400' }
   if (score < 75) return { label: 'Interview ready', color: 'text-teal-400' }
   return { label: 'Strongly positioned', color: 'text-emerald-400' }
-}
-
-function computeScoreBreakdown(
-  dimensionScores: Record<Dimension, number>,
-  completedSteps: number,
-): {
-  total: number
-  breakdown: { label: string; score: number; max: number; description: string }[]
-} {
-  const totalSteps = LEARNING_CHAPTERS.reduce((acc, c) => acc + c.steps.length, 0)
-  const avg = Object.values(dimensionScores).reduce((a, b) => a + b, 0) / 5
-  const dimensionScore = Math.round((avg / 10) * 40)
-  const pathScore = Math.round((Math.min(completedSteps, totalSteps) / totalSteps) * 25)
-  const total = Math.min(dimensionScore + pathScore, 100)
-
-  return {
-    total,
-    breakdown: [
-      {
-        label: 'Skill Assessment',
-        score: dimensionScore,
-        max: 40,
-        description: 'Based on your 5-dimension diagnostic scores',
-      },
-      {
-        label: 'Learning Progress',
-        score: pathScore,
-        max: 25,
-        description: `${completedSteps} of ${totalSteps} Learning Path steps completed`,
-      },
-      {
-        label: 'Deep Dive Analysis',
-        score: 0,
-        max: 20,
-        description: 'Complete Deep Dive sessions to add up to 20 points',
-      },
-      {
-        label: 'Portfolio Strength',
-        score: 0,
-        max: 15,
-        description: 'Add case studies to your portfolio to add up to 15 points',
-      },
-    ],
-  }
 }
 
 export default async function InterviewReadinessPage() {
@@ -88,20 +40,30 @@ export default async function InterviewReadinessPage() {
   const tiers = assessment.tiers as Record<Dimension, 'growth' | 'neutral' | 'strength'>
 
   let completedSteps = 0
+  let completedDeepDives = 0
   try {
-    const { count } = await supabase
-      .from('learning_path_progress')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('status', 'complete')
-    completedSteps = count ?? 0
+    const [{ count: pathCount }, { data: deepDiveRows }] = await Promise.all([
+      supabase
+        .from('learning_path_progress')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'complete'),
+      supabase
+        .from('deep_dive_results')
+        .select('dimension')
+        .eq('user_id', user.id),
+    ])
+    completedSteps = pathCount ?? 0
+    completedDeepDives = deepDiveRows
+      ? new Set(deepDiveRows.map((r) => r.dimension)).size
+      : 0
   } catch {
     completedSteps = 0
   }
 
   const isPro = await getIsPro(user.id)
 
-  const { total: score, breakdown } = computeScoreBreakdown(dimensionScores, completedSteps)
+  const { total: score, breakdown } = computeReadinessScore({ dimensionScores, completedSteps, completedDeepDives })
   const { label: scoreLabel, color: scoreColor } = getScoreLabel(score)
 
   // Top 3 gaps (dimensions with lowest scores)
@@ -179,33 +141,7 @@ export default async function InterviewReadinessPage() {
         <p className="text-[10px] uppercase tracking-widest text-[#918fa1] font-medium mb-4">
           Role Benchmarks
         </p>
-        <div className="flex flex-col gap-4">
-          {ROLE_THRESHOLDS.map((r) => {
-            const reached = score >= r.min
-            return (
-              <div key={r.role}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${reached ? 'bg-emerald-400' : 'bg-[#3d4a60]'}`} />
-                    <span className={`text-sm font-medium ${reached ? 'text-[#dae2fd]' : 'text-[#918fa1]'}`}>
-                      {r.role}
-                    </span>
-                  </div>
-                  <span className={`text-xs font-mono ${reached ? 'text-emerald-400' : 'text-[#918fa1]'}`}>
-                    {reached ? '✓ Reached' : `Need ${r.min}`}
-                  </span>
-                </div>
-                <div className="h-2 bg-[#222a3d] rounded-full overflow-hidden ml-4">
-                  <div
-                    className={`h-full rounded-full transition-all ${reached ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-indigo-600 to-indigo-500'}`}
-                    style={{ width: `${Math.min((score / r.min) * 100, 100)}%` }}
-                  />
-                </div>
-                <p className="text-[11px] text-[#918fa1] ml-4 mt-1">{r.description}</p>
-              </div>
-            )
-          })}
-        </div>
+        <RoleBenchmarks score={score} dimensionScores={dimensionScores} tiers={tiers} />
       </div>
 
       {/* Score breakdown — Pro locked */}
