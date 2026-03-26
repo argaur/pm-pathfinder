@@ -154,7 +154,11 @@ export default function DiagnosticPage() {
           {currentIndex + 1} / {TOTAL_QUESTIONS}
         </span>
         <button
-          onClick={() => router.push('/')}
+          onClick={() => {
+            if (window.confirm('Exit the quiz? Your progress will be lost.')) {
+              router.push('/')
+            }
+          }}
           className="text-[#918fa1] hover:text-[#c7c4d8] transition-colors"
         >
           <X className="w-4 h-4" />

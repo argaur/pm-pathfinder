@@ -28,20 +28,30 @@ export default function MigratePage() {
 
       const sessionToken = getSessionToken()
 
-      if (sessionToken) {
-        try {
-          const res = await fetch('/api/session/migrate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionToken }),
-          })
-          const data = await res.json()
-          console.log('[migrate] status:', res.status, 'body:', data)
-        } catch (err) {
-          console.error('[migrate] fetch error:', err)
+      if (!sessionToken) {
+        console.warn('[migrate] no session token in localStorage — sending to quiz')
+        router.replace('/quiz')
+        return
+      }
+
+      try {
+        const res = await fetch('/api/session/migrate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionToken }),
+        })
+        const data = await res.json()
+        console.log('[migrate] status:', res.status, 'body:', data)
+
+        if (!res.ok) {
+          console.warn('[migrate] migration failed — sending to quiz to retake')
+          router.replace('/quiz')
+          return
         }
-      } else {
-        console.warn('[migrate] no session token in localStorage')
+      } catch (err) {
+        console.error('[migrate] fetch error:', err)
+        router.replace('/quiz')
+        return
       }
 
       router.replace('/reveal')
