@@ -188,6 +188,33 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Cohort submission note — not part of the live product ── */}
+      <div className="border-t border-dashed border-amber-500/20 bg-amber-500/[0.03] px-8 py-5">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 text-[10px] font-mono uppercase tracking-widest text-amber-500/70 border border-amber-500/30 rounded px-1.5 py-0.5 flex-shrink-0">
+              Submission only
+            </span>
+            <p className="text-xs text-amber-200/40 leading-relaxed max-w-md">
+              The link below is part of the <span className="text-amber-200/60">Rethink AI MPM Cohort 7</span> submission and is not a live product feature. It documents the user journey designed for this case study.
+            </p>
+          </div>
+          <a
+            href="https://claude.ai/public/artifacts/21d109c4-6559-4ab5-a07d-b4715fa1702a"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-amber-500/20 bg-amber-500/5 text-amber-400/70 hover:text-amber-300 hover:border-amber-500/40 transition-colors text-xs font-mono"
+          >
+            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            User Journey Map
+          </a>
+        </div>
+      </div>
+
       {/* Pain Points */}
       <section className="py-24 px-8">
         <div className="max-w-7xl mx-auto">
@@ -547,33 +574,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ── Cohort submission note — not part of the live product ── */}
-      <div className="border-t border-dashed border-amber-500/20 bg-amber-500/[0.03] px-8 py-5">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 text-[10px] font-mono uppercase tracking-widest text-amber-500/70 border border-amber-500/30 rounded px-1.5 py-0.5 flex-shrink-0">
-              Submission only
-            </span>
-            <p className="text-xs text-amber-200/40 leading-relaxed max-w-md">
-              The link below is part of the <span className="text-amber-200/60">Rethink AI MPM Cohort 7</span> submission and is not a live product feature. It documents the user journey designed for this case study.
-            </p>
-          </div>
-          <a
-            href="https://claude.ai/public/artifacts/21d109c4-6559-4ab5-a07d-b4715fa1702a"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-amber-500/20 bg-amber-500/5 text-amber-400/70 hover:text-amber-300 hover:border-amber-500/40 transition-colors text-xs font-mono"
-          >
-            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-            User Journey Map
-          </a>
-        </div>
-      </div>
 
       <footer className="mt-auto border-t border-white/5 px-8 py-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[#918fa1]">
