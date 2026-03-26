@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import { DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { Dimension } from '@/lib/data/questions'
 import BlurGate from '@/components/ui/BlurGate'
 import { getIsPro } from '@/lib/user/getIsPro'
+import { subCategoryToSlug } from '@/lib/data/topics'
 
 // Static coaching insight shown per sub-category on completion card
 const SUBCATEGORY_INSIGHTS: Record<string, string> = {
@@ -174,7 +176,15 @@ export default function DeepDivePage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-[#171f33] rounded-2xl px-5 py-4 border border-white/5"
                 >
-                  <p className="text-xs uppercase tracking-widest text-indigo-400 font-mono mb-1">{q.subCategory}</p>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs uppercase tracking-widest text-indigo-400 font-mono">{q.subCategory}</p>
+                    <Link
+                      href={`/topics/${subCategoryToSlug(q.subCategory)}`}
+                      className="text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+                    >
+                      Go deeper <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
                   <p className="text-sm text-[#c7c4d8] leading-relaxed">{insight}</p>
                 </motion.div>
               )
@@ -323,10 +333,17 @@ export default function DeepDivePage() {
                   >
                     <div className="px-5 pb-4 flex flex-col gap-2 border-t border-white/5 pt-3">
                       {DEEP_DIVE_QUESTIONS[dim].map((q) => (
-                        <div key={q.subCategory} className="bg-[#0f1929] rounded-xl px-4 py-3">
-                          <p className="text-[10px] uppercase tracking-widest text-indigo-400 font-mono mb-1">{q.subCategory}</p>
+                        <Link
+                          key={q.subCategory}
+                          href={`/topics/${subCategoryToSlug(q.subCategory)}`}
+                          className="block bg-[#0f1929] rounded-xl px-4 py-3 hover:bg-[#131e35] hover:border-indigo-500/20 border border-transparent transition-all group"
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-[10px] uppercase tracking-widest text-indigo-400 font-mono">{q.subCategory}</p>
+                            <ArrowRight className="w-3 h-3 text-[#918fa1] group-hover:text-indigo-400 transition-colors flex-shrink-0" />
+                          </div>
                           <p className="text-xs text-[#c7c4d8] leading-relaxed">{SUBCATEGORY_INSIGHTS[q.subCategory]}</p>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   </motion.div>
