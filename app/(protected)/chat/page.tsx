@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getIsPro } from '@/lib/user/getIsPro'
+import { getCachedUser } from '@/lib/supabase/cached'
 import ChatClient from './ChatClient'
 
 export default async function ChatPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCachedUser()
   if (!user) redirect('/auth')
+
+  const supabase = await createClient()
 
   const { data: assessment } = await supabase
     .from('assessments')
@@ -16,12 +17,9 @@ export default async function ChatPage() {
     .limit(1)
     .single()
 
-  const isPro = await getIsPro(user.id)
-
   return (
     <ChatClient
       archetype={assessment?.archetype ?? null}
-      isPro={isPro}
     />
   )
 }

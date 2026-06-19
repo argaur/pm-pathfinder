@@ -1,19 +1,18 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCachedUser } from '@/lib/supabase/cached'
 import { ARCHETYPES } from '@/lib/data/archetypes'
 import { DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { Dimension } from '@/lib/data/questions'
 import { Badge } from '@/components/ui/badge'
 import RadarChart from '@/components/report/RadarChart'
 import DimensionCard from '@/components/report/DimensionCard'
-import { getIsPro } from '@/lib/user/getIsPro'
 
 export default async function ReportPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getCachedUser()
   if (!user) redirect('/auth')
+
+  const supabase = await createClient()
 
   const { data: assessment } = await supabase
     .from('assessments')
@@ -36,8 +35,6 @@ export default async function ReportPage() {
   }))
 
   const dimensions = Object.keys(dimensionScores) as Dimension[]
-  const FREE_LIMIT = 2
-  const isPro = await getIsPro(user.id)
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -93,10 +90,9 @@ export default async function ReportPage() {
         </p>
       </div>
       <div className="flex flex-col gap-3 mb-6">
-        {dimensions.map((dim, i) => {
+        {dimensions.map((dim) => {
           const score = dimensionScores[dim]
           const tier = tiers?.[dim] ?? 'neutral'
-          const isLocked = !isPro && i >= FREE_LIMIT
           return (
             <DimensionCard
               key={dim}
@@ -104,7 +100,6 @@ export default async function ReportPage() {
               label={DIMENSION_LABELS[dim]}
               score={score}
               tier={tier}
-              locked={isLocked}
             />
           )
         })}

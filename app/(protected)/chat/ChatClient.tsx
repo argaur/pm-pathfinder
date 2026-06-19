@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Sparkles } from 'lucide-react'
-import BlurGate from '@/components/ui/BlurGate'
 
 interface Message {
   role: 'user' | 'model'
@@ -14,7 +13,6 @@ interface GeminiMessage { role: 'user' | 'model'; parts: GeminiPart[] }
 
 interface Props {
   archetype: string | null
-  isPro: boolean
 }
 
 const STARTERS = [
@@ -24,7 +22,7 @@ const STARTERS = [
   'What makes a strong PM metrics answer?',
 ]
 
-export default function ChatClient({ archetype, isPro }: Props) {
+export default function ChatClient({ archetype }: Props) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
@@ -122,8 +120,7 @@ export default function ChatClient({ archetype, isPro }: Props) {
         </div>
       </div>
 
-      <BlurGate locked={!isPro} label="Navigator is a Pro feature">
-        <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex flex-col flex-1 min-h-0">
           {/* Message area */}
           <div className="flex-1 overflow-y-auto space-y-4 pr-1 pb-2">
             {messages.length === 0 ? (
@@ -213,7 +210,6 @@ export default function ChatClient({ archetype, isPro }: Props) {
             </p>
           </div>
         </div>
-      </BlurGate>
     </div>
   )
 }

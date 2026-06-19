@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getCachedUser, getCachedProfile } from '@/lib/supabase/cached'
 import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
 
@@ -8,20 +8,13 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getCachedUser()
 
   if (!user) {
     redirect('/auth')
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('display_name, archetype, avatar_url')
-    .eq('id', user.id)
-    .single()
+  const profile = await getCachedProfile(user.id)
 
   return (
     <div className="flex h-screen bg-[#0b1326] overflow-hidden">

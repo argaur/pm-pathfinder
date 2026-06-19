@@ -7,9 +7,6 @@ import { LearningChapter } from '@/lib/data/learning-path'
 import { TOPIC_VIDEO_MAP } from '@/lib/data/video-map'
 import { Dimension } from '@/lib/data/questions'
 import { TIER_CONFIG, DIMENSION_LABELS } from '@/lib/scoring/engine'
-import BlurGate from '@/components/ui/BlurGate'
-
-const FREE_CHAPTERS = 1
 
 type Mode = 'video' | 'text'
 
@@ -18,10 +15,9 @@ interface Props {
   tiers: Record<Dimension, 'growth' | 'neutral' | 'strength'>
   progressMap: Record<string, string>
   userId: string
-  isPro: boolean
 }
 
-export default function LearningPathClient({ chapters, tiers, progressMap: initial, userId, isPro }: Props) {
+export default function LearningPathClient({ chapters, tiers, progressMap: initial, userId }: Props) {
   const [progress, setProgress] = useState(initial)
   const [expandedStep, setExpandedStep] = useState<string | null>(null)
   const [stepModes, setStepModes] = useState<Record<string, Mode>>({})
@@ -143,7 +139,6 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
               </div>
 
               {/* Steps */}
-              <BlurGate locked={!isPro && ci >= FREE_CHAPTERS} label="Pro — unlock full learning path">
               <div className="ml-11 flex flex-col gap-2">
                 {chapter.steps.map((step, si) => {
                   const done = isStepDone(step.id)
@@ -298,7 +293,6 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                   </div>
                 )}
               </div>
-              </BlurGate>
             </div>
           )
         })}

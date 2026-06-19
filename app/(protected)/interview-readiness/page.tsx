@@ -1,12 +1,11 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getCachedUser } from '@/lib/supabase/cached'
 import { DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { DIMENSION_DETAILS } from '@/lib/data/dimension-details'
 import { Dimension } from '@/lib/data/questions'
-import { ArrowRight, Lock, TrendingUp } from 'lucide-react'
-import BlurGate from '@/components/ui/BlurGate'
-import { getIsPro } from '@/lib/user/getIsPro'
+import { ArrowRight, TrendingUp } from 'lucide-react'
 import { computeReadinessScore } from '@/lib/scoring/readiness'
 import { ROLE_THRESHOLDS } from '@/lib/data/role-thresholds'
 import RoleBenchmarks from '@/components/interview/RoleBenchmarks'
@@ -20,11 +19,10 @@ function getScoreLabel(score: number): { label: string; color: string } {
 }
 
 export default async function InterviewReadinessPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getCachedUser()
   if (!user) redirect('/auth')
+
+  const supabase = await createClient()
 
   const { data: assessment } = await supabase
     .from('assessments')
@@ -60,8 +58,6 @@ export default async function InterviewReadinessPage() {
   } catch {
     completedSteps = 0
   }
-
-  const isPro = await getIsPro(user.id)
 
   const { total: score, breakdown } = computeReadinessScore({ dimensionScores, completedSteps, completedDeepDives })
   const { label: scoreLabel, color: scoreColor } = getScoreLabel(score)
@@ -144,92 +140,80 @@ export default async function InterviewReadinessPage() {
         <RoleBenchmarks score={score} dimensionScores={dimensionScores} tiers={tiers} />
       </div>
 
-      {/* Score breakdown — Pro locked */}
+      {/* Score breakdown */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <p className="text-[10px] uppercase tracking-widest text-[#918fa1] font-medium">
             Score Breakdown
           </p>
-          <div className="flex items-center gap-1.5 text-[11px] text-indigo-400">
-            <Lock className="w-3 h-3" />
-            Pro feature
+        </div>
+        <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
+          <div className="flex flex-col gap-5">
+            {breakdown.map((item) => (
+              <div key={item.label}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm text-[#dae2fd]">{item.label}</span>
+                  <span className="text-xs font-mono text-[#918fa1]">
+                    {item.score} / {item.max}
+                  </span>
+                </div>
+                <div className="h-1.5 bg-[#222a3d] rounded-full overflow-hidden mb-1">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-teal-500"
+                    style={{ width: `${(item.score / item.max) * 100}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-[#918fa1]">{item.description}</p>
+              </div>
+            ))}
           </div>
         </div>
-        <BlurGate locked={!isPro} label="Full score breakdown">
-          <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
-            <div className="flex flex-col gap-5">
-              {breakdown.map((item) => (
-                <div key={item.label}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm text-[#dae2fd]">{item.label}</span>
-                    <span className="text-xs font-mono text-[#918fa1]">
-                      {item.score} / {item.max}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-[#222a3d] rounded-full overflow-hidden mb-1">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-teal-500"
-                      style={{ width: `${(item.score / item.max) * 100}%` }}
-                    />
-                  </div>
-                  <p className="text-[11px] text-[#918fa1]">{item.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </BlurGate>
       </div>
 
-      {/* What's holding you back — Pro locked */}
+      {/* What's holding you back */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
           <p className="text-[10px] uppercase tracking-widest text-[#918fa1] font-medium">
             What&apos;s Holding You Back
           </p>
-          <div className="flex items-center gap-1.5 text-[11px] text-indigo-400">
-            <Lock className="w-3 h-3" />
-            Pro feature
+        </div>
+        <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
+          <div className="flex flex-col gap-4">
+            {sortedDims.map(([dim, score], i) => {
+              const tier = tiers[dim]
+              const config = TIER_CONFIG[tier]
+              const detail = DIMENSION_DETAILS[dim]
+              return (
+                <div key={dim} className="flex gap-4">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#222a3d] flex items-center justify-center">
+                    <span className="text-[11px] font-mono text-[#918fa1]">{i + 1}</span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-[#dae2fd]">
+                        {DIMENSION_LABELS[dim]}
+                      </span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full border border-white/10 ${config.bg} ${config.color}`}>
+                        {config.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#918fa1] mb-2">{detail.nextStepAction}</p>
+                    <Link
+                      href="/roadmap"
+                      className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                    >
+                      Go to Learning Path
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                  <span className={`text-sm font-mono flex-shrink-0 ${config.color}`}>
+                    {score.toFixed(1)}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         </div>
-        <BlurGate locked={!isPro} label="Personalised gap analysis">
-          <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
-            <div className="flex flex-col gap-4">
-              {sortedDims.map(([dim, score], i) => {
-                const tier = tiers[dim]
-                const config = TIER_CONFIG[tier]
-                const detail = DIMENSION_DETAILS[dim]
-                return (
-                  <div key={dim} className="flex gap-4">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#222a3d] flex items-center justify-center">
-                      <span className="text-[11px] font-mono text-[#918fa1]">{i + 1}</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium text-[#dae2fd]">
-                          {DIMENSION_LABELS[dim]}
-                        </span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full border border-white/10 ${config.bg} ${config.color}`}>
-                          {config.label}
-                        </span>
-                      </div>
-                      <p className="text-xs text-[#918fa1] mb-2">{detail.nextStepAction}</p>
-                      <Link
-                        href="/roadmap"
-                        className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
-                      >
-                        Go to Learning Path
-                        <ArrowRight className="w-3 h-3" />
-                      </Link>
-                    </div>
-                    <span className={`text-sm font-mono flex-shrink-0 ${config.color}`}>
-                      {score.toFixed(1)}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </BlurGate>
       </div>
 
       {/* Improve your score CTA */}

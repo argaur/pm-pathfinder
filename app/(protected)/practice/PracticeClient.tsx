@@ -5,17 +5,15 @@ import { CheckCircle, ChevronRight, Lightbulb, RotateCcw, Dumbbell } from 'lucid
 import { LearningChapter, LearningStep } from '@/lib/data/learning-path'
 import { Dimension } from '@/lib/data/questions'
 import { TIER_CONFIG, DIMENSION_LABELS } from '@/lib/scoring/engine'
-import BlurGate from '@/components/ui/BlurGate'
 
 interface Props {
   chapters: LearningChapter[]
   tiers: Record<Dimension, 'growth' | 'neutral' | 'strength'>
-  isPro: boolean
 }
 
 type StepState = 'idle' | 'writing' | 'revealed'
 
-export default function PracticeClient({ chapters, tiers, isPro }: Props) {
+export default function PracticeClient({ chapters, tiers }: Props) {
   const [selectedChapter, setSelectedChapter] = useState(chapters[0]?.id ?? '')
   const [selectedStep, setSelectedStep] = useState<LearningStep | null>(
     chapters[0]?.steps[0] ?? null
@@ -65,8 +63,7 @@ export default function PracticeClient({ chapters, tiers, isPro }: Props) {
         </div>
       </div>
 
-      <BlurGate locked={!isPro} label="Practice is a Pro feature">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {/* Left panel — chapter + step picker */}
           <div className="md:col-span-1 flex flex-col gap-3">
             {/* Chapter tabs */}
@@ -281,7 +278,6 @@ export default function PracticeClient({ chapters, tiers, isPro }: Props) {
             )}
           </div>
         </div>
-      </BlurGate>
     </div>
   )
 }

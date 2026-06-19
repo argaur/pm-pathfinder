@@ -1,15 +1,16 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCachedUser } from '@/lib/supabase/cached'
 import { ARCHETYPE_CHAPTERS } from '@/lib/data/archetype-content'
 import { LEARNING_CHAPTERS } from '@/lib/data/learning-path'
-import { getIsPro } from '@/lib/user/getIsPro'
 import { Dimension } from '@/lib/data/questions'
 import PracticeClient from './PracticeClient'
 
 export default async function PracticePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getCachedUser()
   if (!user) redirect('/auth')
+
+  const supabase = await createClient()
 
   const { data: assessment } = await supabase
     .from('assessments')
@@ -32,13 +33,10 @@ export default async function PracticePage() {
     return ta - tb
   })
 
-  const isPro = await getIsPro(user.id)
-
   return (
     <PracticeClient
       chapters={sortedChapters}
       tiers={tiers}
-      isPro={isPro}
     />
   )
 }

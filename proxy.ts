@@ -4,6 +4,16 @@ import { createServerClient } from '@supabase/ssr'
 const PROTECTED_PATHS = ['/dashboard', '/report', '/roadmap', '/deep-dive', '/re-evaluate', '/profile', '/interview-readiness']
 
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p))
+
+  // Public routes (landing page, quiz, auth, etc.) never need the session
+  // refreshed here — skip the Supabase Auth round-trip entirely so they
+  // serve at full (often static) speed.
+  if (!isProtected) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -29,10 +39,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const pathname = request.nextUrl.pathname
-  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p))
-
-  if (isProtected && !user) {
+  if (!user) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/auth'
     redirectUrl.searchParams.set('next', pathname)

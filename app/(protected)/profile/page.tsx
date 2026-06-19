@@ -1,20 +1,18 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getCachedUser, getCachedProfile } from '@/lib/supabase/cached'
 import { ARCHETYPES } from '@/lib/data/archetypes'
 import { DIMENSION_LABELS } from '@/lib/scoring/engine'
 import { Dimension } from '@/lib/data/questions'
 import ProfileClient from './ProfileClient'
-import { getIsPro } from '@/lib/user/getIsPro'
 
 export default async function ProfilePage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getCachedUser()
   if (!user) redirect('/auth')
 
-  const [{ data: profile }, { data: assessments }] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
+  const supabase = await createClient()
+  const [profile, { data: assessments }] = await Promise.all([
+    getCachedProfile(user.id),
     supabase
       .from('assessments')
       .select('*')
@@ -47,8 +45,6 @@ export default async function ProfilePage() {
     }
   })
 
-  const isPro = await getIsPro(user.id)
-
   return (
     <ProfileClient
       profile={{
@@ -68,7 +64,6 @@ export default async function ProfilePage() {
         strengths: archetype.strengths,
       }}
       userId={user.id}
-      isPro={isPro}
       evaluationHistory={evaluationHistory}
       dimensionLabels={DIMENSION_LABELS}
     />

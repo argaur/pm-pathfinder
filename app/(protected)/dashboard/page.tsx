@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getCachedUser, getCachedProfile } from '@/lib/supabase/cached'
 import { ARCHETYPES } from '@/lib/data/archetypes'
 import { DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { DIMENSION_DETAILS } from '@/lib/data/dimension-details'
@@ -54,14 +55,12 @@ function daysSince(dateStr: string): number {
 const RADAR_COLORS = ['#374151', '#4f46e5', '#06b6d4', '#10b981']
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await getCachedUser()
   if (!user) redirect('/auth')
 
-  const [{ data: profile }, { data: allAssessments }] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
+  const supabase = await createClient()
+  const [profile, { data: allAssessments }] = await Promise.all([
+    getCachedProfile(user.id),
     supabase
       .from('assessments')
       .select('*')

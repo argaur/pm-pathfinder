@@ -9,7 +9,6 @@ import {
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Dimension } from '@/lib/data/questions'
-import BlurGate from '@/components/ui/BlurGate'
 
 type Tab = 'overview' | 'portfolio' | 'evaluations'
 
@@ -40,7 +39,6 @@ interface ProfileProps {
     deltas: Record<Dimension, number | null>
   }[]
   dimensionLabels: Record<Dimension, string>
-  isPro: boolean
 }
 
 interface CaseStudy {
@@ -57,7 +55,6 @@ export default function ProfileClient({
   archetype,
   evaluationHistory,
   dimensionLabels,
-  isPro,
 }: ProfileProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [resumeFile, setResumeFile] = useState<string | null>(null)
@@ -297,39 +294,37 @@ export default function ProfileClient({
           {activeTab === 'portfolio' && (
             <div className="flex flex-col gap-4">
               {/* Public toggle + shareable link */}
-              <BlurGate locked={!isPro} label="Shareable portfolio link — Pro feature">
-                <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      {isPublic
-                        ? <Globe className="w-4 h-4 text-teal-400" />
-                        : <Lock className="w-4 h-4 text-[#918fa1]" />}
-                      <span className="text-sm font-medium text-[#dae2fd]">
-                        {isPublic ? 'Portfolio is public' : 'Portfolio is private'}
-                      </span>
+              <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    {isPublic
+                      ? <Globe className="w-4 h-4 text-teal-400" />
+                      : <Lock className="w-4 h-4 text-[#918fa1]" />}
+                    <span className="text-sm font-medium text-[#dae2fd]">
+                      {isPublic ? 'Portfolio is public' : 'Portfolio is private'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setIsPublic((p) => !p)}
+                    className={`w-10 h-5.5 rounded-full transition-all relative ${isPublic ? 'bg-teal-500' : 'bg-[#3d4a60]'}`}
+                  >
+                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${isPublic ? 'left-5.5' : 'left-0.5'}`} />
+                  </button>
+                </div>
+                {isPublic && (
+                  <div className="flex items-center gap-3 bg-[#0f1729] rounded-xl p-3">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <LinkIcon className="w-3.5 h-3.5 text-teal-400 flex-shrink-0" />
+                      <p className="text-xs font-mono text-[#dae2fd] truncate">{publicUrl}</p>
                     </div>
-                    <button
-                      onClick={() => setIsPublic((p) => !p)}
-                      className={`w-10 h-5.5 rounded-full transition-all relative ${isPublic ? 'bg-teal-500' : 'bg-[#3d4a60]'}`}
-                    >
-                      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${isPublic ? 'left-5.5' : 'left-0.5'}`} />
+                    <button onClick={copyLink}
+                      className="flex items-center gap-1.5 text-xs text-teal-400 hover:text-teal-300 transition-colors flex-shrink-0">
+                      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copied ? 'Copied' : 'Copy'}
                     </button>
                   </div>
-                  {isPublic && (
-                    <div className="flex items-center gap-3 bg-[#0f1729] rounded-xl p-3">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <LinkIcon className="w-3.5 h-3.5 text-teal-400 flex-shrink-0" />
-                        <p className="text-xs font-mono text-[#dae2fd] truncate">{publicUrl}</p>
-                      </div>
-                      <button onClick={copyLink}
-                        className="flex items-center gap-1.5 text-xs text-teal-400 hover:text-teal-300 transition-colors flex-shrink-0">
-                        {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                        {copied ? 'Copied' : 'Copy'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </BlurGate>
+                )}
+              </div>
 
               {/* PM Story */}
               <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
