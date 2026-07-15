@@ -30,6 +30,7 @@ export default function InsightsPage() {
     }
 
     const axis = classifyBackground(onboarding.background, onboarding.industry)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from session storage (external system) read above, not derived from props/state
     setBackgroundLabel(AXIS_LABELS[axis])
     setInsights(getInsightsForBackground(axis))
 

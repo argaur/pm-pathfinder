@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { Lock, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getOrCreateSessionToken, getOnboardingAnswers, getDiagnosticAnswers } from '@/lib/utils/session'
+import { getOnboardingAnswers, getDiagnosticAnswers } from '@/lib/utils/session'
 import { classifyBackground } from '@/lib/classifiers/background'
 import { runFullScoring, DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { ARCHETYPES } from '@/lib/data/archetypes'
@@ -23,21 +23,14 @@ export default function ResultsPage() {
       const onboarding = getOnboardingAnswers()
       const diagnostic = getDiagnosticAnswers()
 
-      console.log('[results] onboarding:', onboarding)
-      console.log('[results] diagnostic keys:', diagnostic ? Object.keys(diagnostic).length : null)
-
       if (!onboarding || !diagnostic) {
-        console.warn('[results] missing data — redirecting to /quiz')
         router.replace('/quiz')
         return
       }
 
       const backgroundAxis = classifyBackground(onboarding.background, onboarding.industry)
-      console.log('[results] backgroundAxis:', backgroundAxis)
-
       const scored = runFullScoring(diagnostic, backgroundAxis)
-      console.log('[results] scored:', scored)
-
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from session storage (external system) read above, not derived from props/state
       setResult(scored)
     } catch (err) {
       console.error('[results] scoring error:', err)

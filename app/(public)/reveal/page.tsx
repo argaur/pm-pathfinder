@@ -98,21 +98,6 @@ export default function RevealPage() {
     router.push('/dashboard')
   }
 
-  // Polygon points scaled by dimension score (0-10 → 0-62 radius from center 100,100)
-  const getScaledPoints = () => {
-    if (!scores) return PENTAGON
-    const dims: Dimension[] = ['thinking_strategy', 'execution', 'technical_fluency', 'user_research', 'communication']
-    const angles = [-90, -90 + 72, -90 + 144, -90 + 216, -90 + 288]
-    return angles
-      .map((angle, i) => {
-        const score = scores[dims[i]] ?? 5
-        const r = (score / 10) * 62
-        const rad = (angle * Math.PI) / 180
-        return `${(100 + r * Math.cos(rad)).toFixed(1)},${(100 + r * Math.sin(rad)).toFixed(1)}`
-      })
-      .join(' ')
-  }
-
   const dashOffset = PENTAGON_OUTLINE_LENGTH * (1 - drawProgress)
 
   return (

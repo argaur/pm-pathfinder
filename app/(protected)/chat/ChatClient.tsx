@@ -130,7 +130,7 @@ export default function ChatClient({ archetype }: Props) {
                 </div>
                 <div className="text-center">
                   <p className="text-sm text-[#c7c4d8] font-medium mb-1">
-                    Hi, I'm Navigator
+                    Hi, I&apos;m Navigator
                   </p>
                   <p className="text-xs text-[#918fa1]">
                     Ask me anything about product management
@@ -206,7 +206,7 @@ export default function ChatClient({ archetype }: Props) {
               </button>
             </div>
             <p className="text-[10px] text-[#3d4a60] mt-1.5 text-center">
-              Grounded in your archetype content + The Builder's Bible
+              Grounded in your archetype content + The Builder&apos;s Bible
             </p>
           </div>
         </div>

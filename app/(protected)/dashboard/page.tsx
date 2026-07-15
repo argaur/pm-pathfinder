@@ -13,7 +13,6 @@ import {
   Microscope,
   Target,
   ArrowRight,
-  TrendingUp,
   Calendar,
   BookOpen,
   Activity,

@@ -6,7 +6,6 @@
 import {
   DIAGNOSTIC_QUESTIONS,
   Dimension,
-  DiagnosticQuestion,
   QuestionOption,
 } from '@/lib/data/questions'
 import {

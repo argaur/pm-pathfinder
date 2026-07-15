@@ -93,6 +93,7 @@ export default function ProfileClient({
 
     // Resume from localStorage (file stays local — no cloud upload yet)
     const resume = localStorage.getItem('pm_resume_name')
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from localStorage, an external system, is the documented exception to this rule
     if (resume) setResumeFile(resume)
   }, [])
 

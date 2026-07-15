@@ -11,7 +11,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
-import path from 'path'
 import pdfParse from 'pdf-parse'
 import { ARCHETYPE_CHAPTERS } from '../lib/data/archetype-content'
 

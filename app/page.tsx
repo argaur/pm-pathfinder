@@ -401,7 +401,7 @@ export default function LandingPage() {
           <div className="text-center">
             <Link href="/quiz">
               <button className="px-8 py-4 border border-indigo-500/30 hover:bg-indigo-500/10 text-indigo-300 text-sm font-semibold rounded-xl transition-all">
-                Find out what's holding you back →
+                Find out what&apos;s holding you back →
               </button>
             </Link>
           </div>
