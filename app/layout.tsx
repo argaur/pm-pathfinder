@@ -37,6 +37,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#0b1326] text-[#dae2fd] font-sans">
         {children}
+        <script src="/analytics.js" defer />
       </body>
     </html>
   );
