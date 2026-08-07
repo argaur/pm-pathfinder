@@ -97,40 +97,6 @@ No payment integration yet — Razorpay is next.
 
 ---
 
-## AI Session Protocol — Read This First
-
-> Instructions for Claude. Follow these steps at the start of every session.
-
-### Step 1: Orient (before touching any code)
-- Read this file fully
-- Run `git log --oneline -10` to see recent history
-- Check "Status" section below → tell Gaurav: current state, what was last done, what's next
-
-### Step 2: Explore → Gemini (not Claude tokens)
-- Large file reads, understanding a module, reading logs → Gemini terminal tab
-- Gemini has 1M context and is free — don't burn Claude tokens on reads
-- Paste Gemini's summary into the Claude session as context
-
-### Step 3: Plan → Claude Plan Mode
-- Any task with 3+ steps → enter Plan Mode before writing code
-- Challenge the ask: right problem? right scope? right time?
-- Only build what was asked. Scope Hold.
-
-### Step 4: Build → Split by task type
-
-| Task | Tool |
-|---|---|
-| Boilerplate, tests, repetitive components, bulk codegen | Codex background mode |
-| Auth flow, Supabase RLS, data models, edge cases | Claude |
-| Inline completions, simple edits | Copilot |
-
-Codex background: `codex exec --prompt "<task>" --full-auto --model gpt-4o-mini > .codex-review.md 2>&1 &`
-
-### Step 5: End of Session (do not skip)
-1. Update "Status" section below (current task, blocker, date)
-2. Run `/compact` in Claude
-3. Update Obsidian project page
-
 ---
 
 ## Status
@@ -141,8 +107,9 @@ Codex background: `codex exec --prompt "<task>" --full-auto --model gpt-4o-mini 
 
 ## Model notes
 **This section expires. Review it at every model launch and every Claude Code version bump.**
-Current as of 2026-08-05: Opus 5 / Sonnet 5 / Fable 5, Claude Code 2.1.222. Checked by
-`Claude Optimisation/scripts/claude-md-eval.sh`, which found nothing stale in this file.
+Current as of 2026-08-05: Opus 5 / Sonnet 5 / Fable 5, Claude Code 2.1.222.
+Re-checked 2026-08-07 by `Claude Optimisation/scripts/claude-md-eval.sh`, after five contract-drift
+rules were added to it. Clean on that run.
 - Delegation is not automatic. Claude Code 2.1.219 and later suppress subagents on Opus 5 unless
   the user asks for one, so name the agent when you want it.
 - Do not add verification, anti-laziness or hedging instructions. These models self-verify, are
