@@ -2,7 +2,22 @@
 
 Archetype-based PM career navigation platform. Submitted for Rethink AI MPM Cohort 7 (2026-03-26). Now treating as a real product.
 
-**Live:** https://pm-pathfinder-pi.vercel.app | **Repo:** https://github.com/argaur/pm-pathfinder
+Project facts only. Global CLAUDE.md handles judgment. **Cap: 8,500 bytes.** Reviewed 2026-08-07.
+
+**Repo:** https://github.com/argaur/pm-pathfinder
+
+**Live URL: verify it, do not read it from here.** This file used to print
+`pm-pathfinder-pi.vercel.app` on this line, and its own Critical Constraints section says not to
+trust that link without checking, because it has gone stale before. A URL that must be re-verified
+before use is not a fact, so it is no longer recorded. Get the bound domain from the Vercel REST
+API `get_project` `domains` field.
+
+## Framework state
+- **Framework:** Blueprint. **No rubric has ever been run here.** Recorded 2026-08-07.
+- **Current phase:** Phase 4, in-flight. The product is live, has auth, a paywall mechanism and 7
+  Supabase tables, so it is plainly not a lean-depth project.
+- **Run `/rubric` on the codebase as-is** and write the score into this block. Until then the depth
+  is unset, which is why this block says phase and not depth.
 
 ## Commands
 
@@ -95,15 +110,13 @@ No payment integration yet — Razorpay is next.
 - Resume upload + AI parsing — backlog
 - Real content for topic pages (video IDs, framework copy) — content task, not dev
 
----
+## Source of truth
+Memory: `pm-pathfinder/memory/`, git-tracked in this repo. `project.md` holds current state, and
+`decisions.md` and `past-mistakes.md` hold the reasoning.
 
----
-
-## Status
-- **State:** active
-- **Current task:** Submitted to Razorpay's "AI Builders" hiring channel (2026-07-15) — cohort strip removed, README/LICENSE/lint cleaned up for public-repo readiness. Next real work: Razorpay payment integration (Pro-gating is disabled platform-wide until this ships — see Paywall section).
-- **Blocker:** none
-- **Last updated:** 2026-07-15
+**Status does not live in this file.** A `## Status` block sat here until 2026-08-07, duplicating
+`memory/project.md` almost word for word and three weeks behind it. Two copies of a status is one
+copy plus a thing that lies. Read `memory/project.md`.
 
 ## Model notes
 **This section expires. Review it at every model launch and every Claude Code version bump.**
