@@ -27,7 +27,7 @@ npm run build        # verify no type errors before pushing
 npm run lint
 ```
 
-**Env required locally:** copy `.env.local` — needs `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+**Env required locally:** copy `.env.local` — needs `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET` (any random string; Vercel sets it automatically on real cron invocations in production).
 
 ## Architecture
 
@@ -56,7 +56,7 @@ lib/
   data/topics.ts            # 15 topic entries, slugToTopic(), subCategoryToSlug()
   scoring/readiness.ts      # computeReadinessScore() — shared by dashboard + interview-readiness
   user/getIsPro.ts          # Single DB query for Pro status — called per server page
-  supabase/admin.ts         # Service role client — bypasses RLS. ONLY for /api/session/migrate
+  supabase/admin.ts         # Service role client — bypasses RLS. For /api/session/migrate and /api/cron/keep-alive only
 ```
 
 ## Auth Flow
@@ -87,7 +87,9 @@ No session:   /auth → /migrate → no sessionToken OR API error → /quiz dire
 
 **Supabase RLS** — `CREATE POLICY IF NOT EXISTS` is invalid PostgreSQL. Always: `DROP POLICY IF EXISTS` + `CREATE POLICY`.
 
-**Service role key** — `lib/supabase/admin.ts` bypasses RLS. Only used in `/api/session/migrate`. Never import it in client components or any other route.
+**Service role key** — `lib/supabase/admin.ts` bypasses RLS. Used in `/api/session/migrate` and `/api/cron/keep-alive`. Never import it in client components.
+
+**Supabase free-tier auto-pause** — the project pauses after ~7 days of inactivity, which breaks Google sign-in with a raw "site can't be reached" the instant a user clicks "Continue with Google" (the request never reaches Google — Supabase's own subdomain stops resolving). Fixed 2026-09-12 with a daily Vercel Cron (`vercel.json` → `/api/cron/keep-alive`) that pings the DB. If this recurs, check the Vercel cron's execution history before assuming it's the redirect-allow-list issue again — this is a different failure mode with the same-looking symptom.
 
 **Vercel deployment verification** — use Vercel REST API, not GitHub Deployments API. GitHub API returns preview URLs, not production. Don't trust the "Live:" link at the top of this file either without checking — verify the actual bound domain via `get_project`'s `domains` field; this file has gone stale before.
 
@@ -100,13 +102,14 @@ No session:   /auth → /migrate → no sessionToken OR API error → /quiz dire
 ## Paywall
 
 `is_pro boolean` on `profiles`. Flip manually: `UPDATE profiles SET is_pro = true WHERE id = 'uuid';`
-No payment integration yet — Razorpay is next.
+No payment integration, and none is planned — see Out of Scope below.
 
-**Pro-gating is currently disabled everywhere** (2026-06-19) — this is a cohort case-study product right now, not a paid product, so every feature (report, roadmap, profile portfolio link, interview-readiness breakdown, chat, practice, deep-dive) is unlocked for all users. `getIsPro`, `BlurGate`, and `PricingModal` still exist and work — they're just not called from any page. Re-enable gating by re-adding `isPro`/`getIsPro()` checks once Razorpay ships.
+**Pro-gating is disabled everywhere, permanently** (2026-06-19, reconfirmed 2026-09-12) — this is a portfolio/case-study product, not a paid one, so every feature (report, roadmap, profile portfolio link, interview-readiness breakdown, chat, practice, deep-dive) is unlocked for all users. `getIsPro`, `BlurGate`, and `PricingModal` still exist and work — they're just not called from any page, and left in place as harmless unused infra rather than deleted. There is no plan to ever re-enable gating.
 
-## Out of Scope (do not build unless explicitly asked)
+## Out of Scope (never build, not just "not yet")
 
-- Payment integration (Razorpay) — scheduled, not started
+- Payment integration (Razorpay) — permanently out of scope. This is a portfolio/proof-of-work
+  project, not a real product with real customers. Never propose or start it.
 - Resume upload + AI parsing — backlog
 - Real content for topic pages (video IDs, framework copy) — content task, not dev
 
