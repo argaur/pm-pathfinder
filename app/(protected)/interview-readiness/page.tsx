@@ -77,13 +77,13 @@ export default async function InterviewReadinessPage() {
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-1">
           Interview Readiness
         </p>
-        <h1 className="text-2xl font-bold text-[#dae2fd] font-[family-name:var(--font-space-grotesk)]">
+        <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-space-grotesk)]">
           Your PM Readiness Score
         </h1>
       </div>
 
       {/* Big score card */}
-      <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-8 mb-6 text-center">
+      <div className="bg-surface-1 border border-border rounded-2xl p-8 mb-6 text-center">
         <div className="inline-flex flex-col items-center">
           {/* Circular ring */}
           <div className="relative w-36 h-36 mb-4">
@@ -113,14 +113,14 @@ export default async function InterviewReadinessPage() {
               </defs>
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-4xl font-bold font-mono text-[#dae2fd]">{score}</span>
-              <span className="text-xs text-[#918fa1]">out of 100</span>
+              <span className="text-4xl font-bold font-mono text-foreground">{score}</span>
+              <span className="text-xs text-muted-foreground">out of 100</span>
             </div>
           </div>
 
           <p className={`text-lg font-semibold mb-1 ${scoreColor}`}>{scoreLabel}</p>
           {nextRole ? (
-            <p className="text-sm text-[#918fa1]">
+            <p className="text-sm text-muted-foreground">
               {pointsToNext} points away from{' '}
               <span className="text-[#c7c4d8]">{nextRole.role}</span> readiness
             </p>
@@ -133,8 +133,8 @@ export default async function InterviewReadinessPage() {
       </div>
 
       {/* Role benchmarks */}
-      <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6 mb-6">
-        <p className="text-[10px] uppercase tracking-widest text-[#918fa1] font-medium mb-4">
+      <div className="bg-surface-1 border border-border rounded-2xl p-6 mb-6">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium mb-4">
           Role Benchmarks
         </p>
         <RoleBenchmarks score={score} dimensionScores={dimensionScores} tiers={tiers} />
@@ -143,27 +143,27 @@ export default async function InterviewReadinessPage() {
       {/* Score breakdown */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[10px] uppercase tracking-widest text-[#918fa1] font-medium">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
             Score Breakdown
           </p>
         </div>
-        <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
+        <div className="bg-surface-1 border border-border rounded-2xl p-6">
           <div className="flex flex-col gap-5">
             {breakdown.map((item) => (
               <div key={item.label}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm text-[#dae2fd]">{item.label}</span>
-                  <span className="text-xs font-mono text-[#918fa1]">
+                  <span className="text-sm text-foreground">{item.label}</span>
+                  <span className="text-xs font-mono text-muted-foreground">
                     {item.score} / {item.max}
                   </span>
                 </div>
-                <div className="h-1.5 bg-[#222a3d] rounded-full overflow-hidden mb-1">
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-1">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-teal-500"
                     style={{ width: `${(item.score / item.max) * 100}%` }}
                   />
                 </div>
-                <p className="text-[11px] text-[#918fa1]">{item.description}</p>
+                <p className="text-[11px] text-muted-foreground">{item.description}</p>
               </div>
             ))}
           </div>
@@ -173,11 +173,11 @@ export default async function InterviewReadinessPage() {
       {/* What's holding you back */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[10px] uppercase tracking-widest text-[#918fa1] font-medium">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
             What&apos;s Holding You Back
           </p>
         </div>
-        <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
+        <div className="bg-surface-1 border border-border rounded-2xl p-6">
           <div className="flex flex-col gap-4">
             {sortedDims.map(([dim, score], i) => {
               const tier = tiers[dim]
@@ -185,19 +185,19 @@ export default async function InterviewReadinessPage() {
               const detail = DIMENSION_DETAILS[dim]
               return (
                 <div key={dim} className="flex gap-4">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#222a3d] flex items-center justify-center">
-                    <span className="text-[11px] font-mono text-[#918fa1]">{i + 1}</span>
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-muted flex items-center justify-center">
+                    <span className="text-[11px] font-mono text-muted-foreground">{i + 1}</span>
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-[#dae2fd]">
+                      <span className="text-sm font-medium text-foreground">
                         {DIMENSION_LABELS[dim]}
                       </span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full border border-white/10 ${config.bg} ${config.color}`}>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full border border-border ${config.bg} ${config.color}`}>
                         {config.label}
                       </span>
                     </div>
-                    <p className="text-xs text-[#918fa1] mb-2">{detail.nextStepAction}</p>
+                    <p className="text-xs text-muted-foreground mb-2">{detail.nextStepAction}</p>
                     <Link
                       href="/roadmap"
                       className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
@@ -217,10 +217,10 @@ export default async function InterviewReadinessPage() {
       </div>
 
       {/* Improve your score CTA */}
-      <div className="bg-[#171f33] border border-indigo-500/20 rounded-2xl p-6">
+      <div className="bg-surface-1 border border-indigo-500/20 rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-4">
           <TrendingUp className="w-4 h-4 text-indigo-400" />
-          <p className="text-sm font-medium text-[#dae2fd]">How to improve your score</p>
+          <p className="text-sm font-medium text-foreground">How to improve your score</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
@@ -232,9 +232,9 @@ export default async function InterviewReadinessPage() {
             <Link
               key={href}
               href={href}
-              className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#0f1729] border border-white/[0.06] hover:border-indigo-500/30 transition-all group"
+              className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#0f1729] border border-border hover:border-indigo-500/30 transition-all group"
             >
-              <span className="text-xs text-[#c7c4d8] group-hover:text-[#dae2fd] transition-colors">
+              <span className="text-xs text-[#c7c4d8] group-hover:text-foreground transition-colors">
                 {label}
               </span>
               <span className="text-[11px] font-mono text-indigo-400 flex-shrink-0 ml-2">

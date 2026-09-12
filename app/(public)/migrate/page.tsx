@@ -61,10 +61,10 @@ export default function MigratePage() {
   }, [router])
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#0b1326]">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-8 h-8 border-2 border-[#4fdbc8] border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-[#918fa1]">Setting up your profile…</p>
+    <main className="min-h-screen flex items-center justify-center bg-surface-0">
+      <div role="status" className="flex flex-col items-center gap-4">
+        <div aria-hidden="true" className="w-8 h-8 border-2 border-secondary border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-muted-foreground">Setting up your profile…</p>
       </div>
     </main>
   )

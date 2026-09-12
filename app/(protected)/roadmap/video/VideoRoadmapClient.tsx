@@ -51,14 +51,14 @@ export default function VideoRoadmapClient({ archetype, getRoadmapContent, progr
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-1">Video Roadmap</p>
-        <h1 className="text-2xl font-bold text-[#dae2fd] mb-1">{archetype.name} Path</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-1">{archetype.name} Path</h1>
         <p className="text-sm text-[#c7c4d8]">
           {completedCount} of {weeks.length} weeks completed
         </p>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 bg-[#222a3d] rounded-full overflow-hidden mb-6">
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-6">
         <div
           className="h-full bg-gradient-to-r from-indigo-500 to-teal-500 rounded-full transition-all duration-500"
           style={{ width: `${(completedCount / weeks.length) * 100}%` }}
@@ -73,8 +73,8 @@ export default function VideoRoadmapClient({ archetype, getRoadmapContent, progr
             onClick={() => setTimeline(m)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               timeline === m
-                ? 'bg-[#4f46e5] text-[#dae2fd]'
-                : 'bg-[#171f33] text-[#c7c4d8] hover:bg-[#222a3d]'
+                ? 'bg-brand-indigo text-foreground'
+                : 'bg-surface-1 text-[#c7c4d8] hover:bg-muted'
             }`}
           >
             {m} month{m > 1 ? 's' : ''}
@@ -93,28 +93,30 @@ export default function VideoRoadmapClient({ archetype, getRoadmapContent, progr
             <div
               key={week.week}
               className={`rounded-xl overflow-hidden transition-all ${
-                isDone ? 'bg-[#0d2b1a]' : 'bg-[#171f33]'
+                isDone ? 'bg-[#0d2b1a]' : 'bg-surface-1'
               }`}
             >
               <div className="flex items-center gap-4 p-4">
                 <button
                   onClick={() => toggleDone(week.week)}
+                  aria-label={isDone ? `Mark week ${week.week} as not done` : `Mark week ${week.week} as done`}
+                  aria-pressed={isDone}
                   className="flex-shrink-0"
                 >
                   {isDone ? (
-                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                    <CheckCircle aria-hidden="true" className="w-5 h-5 text-emerald-500" />
                   ) : (
-                    <Circle className="w-5 h-5 text-[#918fa1] hover:text-[#c7c4d8] transition-colors" />
+                    <Circle aria-hidden="true" className="w-5 h-5 text-muted-foreground hover:text-[#c7c4d8] transition-colors" />
                   )}
                 </button>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xs font-mono text-[#918fa1]">Week {week.week}</span>
-                    <span className="text-xs text-[#918fa1]">·</span>
+                    <span className="text-xs font-mono text-muted-foreground">Week {week.week}</span>
+                    <span className="text-xs text-muted-foreground">·</span>
                     <span className="text-xs text-indigo-500">{week.dimension}</span>
                   </div>
-                  <p className={`text-sm font-medium ${isDone ? 'text-[#918fa1] line-through' : 'text-[#dae2fd]'}`}>
+                  <p className={`text-sm font-medium ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                     {week.title}
                   </p>
                 </div>
@@ -131,7 +133,7 @@ export default function VideoRoadmapClient({ archetype, getRoadmapContent, progr
               {/* Inline video embed */}
               {isActive && (
                 <div className="px-4 pb-4">
-                  <div className="aspect-video bg-[#222a3d] rounded-lg overflow-hidden">
+                  <div className="aspect-video bg-muted rounded-lg overflow-hidden">
                     <iframe
                       src={`https://www.youtube.com/embed/${week.videoId}`}
                       title={week.title}

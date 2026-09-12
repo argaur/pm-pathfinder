@@ -73,11 +73,11 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
       {/* Page header */}
       <div className="mb-8">
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-mono mb-1">Learning Path</p>
-        <h1 className="text-2xl font-bold text-[#dae2fd] mb-1">Your PM Growth Roadmap</h1>
-        <p className="text-sm text-[#918fa1]">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Your PM Growth Roadmap</h1>
+        <p className="text-sm text-muted-foreground">
           {doneCount} of {totalSteps} steps complete · Ordered by your assessment gaps
         </p>
-        <div className="h-1 bg-[#222a3d] rounded-full mt-4 overflow-hidden">
+        <div className="h-1 bg-muted rounded-full mt-4 overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-indigo-500 to-teal-400 rounded-full transition-all duration-700"
             style={{ width: `${(doneCount / totalSteps) * 100}%` }}
@@ -102,7 +102,7 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                   >
                     {ci + 1}
                   </div>
-                  <div className="w-px bg-[#222a3d] mt-2" style={{ height: 20 }} />
+                  <div className="w-px bg-muted mt-2" style={{ height: 20 }} />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -111,30 +111,30 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                     >
                       {tierCfg.label}
                     </span>
-                    <span className="text-xs text-[#918fa1]">{DIMENSION_LABELS[chapter.dimension]}</span>
+                    <span className="text-xs text-muted-foreground">{DIMENSION_LABELS[chapter.dimension]}</span>
                   </div>
-                  <h2 className="text-lg font-bold text-[#dae2fd] leading-tight">{chapter.title}</h2>
-                  <p className="text-xs text-[#918fa1] mt-0.5">{chapter.subtitle}</p>
+                  <h2 className="text-lg font-bold text-foreground leading-tight">{chapter.title}</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">{chapter.subtitle}</p>
                 </div>
               </div>
 
               {/* Before → After cards */}
               <div className="ml-11 mb-5 grid grid-cols-2 gap-3">
-                <div className="bg-[#171f33] rounded-xl p-4 relative overflow-hidden">
+                <div className="bg-surface-1 rounded-xl p-4 relative overflow-hidden">
                   <span className="absolute top-1 right-3 text-[38px] font-black text-white/[0.04] leading-none select-none pointer-events-none">
                     BEFORE
                   </span>
                   <p className="text-[10px] uppercase tracking-widest text-rose-400/60 font-mono mb-1.5">Before</p>
                   <p className="text-sm font-semibold text-[#c7c4d8]">{chapter.beforeState}</p>
-                  <p className="text-xs text-[#918fa1] mt-1.5 leading-relaxed">{chapter.beforeDesc}</p>
+                  <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{chapter.beforeDesc}</p>
                 </div>
-                <div className="bg-[#171f33] rounded-xl p-4 relative overflow-hidden border border-teal-500/10">
+                <div className="bg-surface-1 rounded-xl p-4 relative overflow-hidden border border-teal-500/10">
                   <span className="absolute top-1 right-3 text-[38px] font-black text-white/[0.04] leading-none select-none pointer-events-none">
                     AFTER
                   </span>
                   <p className="text-[10px] uppercase tracking-widest text-teal-400/60 font-mono mb-1.5">After</p>
                   <p className="text-sm font-semibold text-[#c7c4d8]">{chapter.afterState}</p>
-                  <p className="text-xs text-[#918fa1] mt-1.5 leading-relaxed">{chapter.afterDesc}</p>
+                  <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{chapter.afterDesc}</p>
                 </div>
               </div>
 
@@ -153,8 +153,8 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                         done
                           ? 'bg-[#0d1e2e] border-teal-900/20'
                           : isActive
-                          ? 'bg-[#171f33] border-[#4fdbc8]/25 shadow-[0_0_20px_rgba(79,219,200,0.05)]'
-                          : 'bg-[#171f33] border-white/[0.05]'
+                          ? 'bg-surface-1 border-secondary/25 shadow-[0_0_20px_rgba(79,219,200,0.05)]'
+                          : 'bg-surface-1 border-white/[0.05]'
                       }`}
                     >
                       {/* Step header */}
@@ -166,15 +166,15 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                           {done ? (
                             <CheckCircle className="w-5 h-5 text-teal-400" />
                           ) : isActive ? (
-                            <span className="w-5 h-5 rounded-full border-2 border-[#4fdbc8] bg-[#4fdbc8]/10 animate-pulse block" />
+                            <span className="w-5 h-5 rounded-full border-2 border-secondary bg-secondary/10 animate-pulse block" />
                           ) : (
-                            <Circle className="w-5 h-5 text-[#918fa1]" />
+                            <Circle className="w-5 h-5 text-muted-foreground" />
                           )}
                         </span>
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-xs font-mono text-[#918fa1]">
+                            <span className="text-xs font-mono text-muted-foreground">
                               {ci + 1}.{si + 1}
                             </span>
                             {done && (
@@ -183,7 +183,7 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                           </div>
                           <p
                             className={`text-sm font-medium ${
-                              done ? 'text-[#918fa1] line-through decoration-[#918fa1]/40' : 'text-[#dae2fd]'
+                              done ? 'text-muted-foreground line-through decoration-muted-foreground/40' : 'text-foreground'
                             }`}
                           >
                             {step.title}
@@ -191,9 +191,9 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                         </div>
 
                         {isExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-[#918fa1] flex-shrink-0" />
+                          <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-[#918fa1] flex-shrink-0" />
+                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         )}
                       </button>
 
@@ -201,7 +201,7 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                       {isExpanded && (
                         <div className="px-4 pb-5 border-t border-white/[0.04]">
                           {/* Why in path */}
-                          <p className="text-xs text-[#4fdbc8]/75 italic mt-4 mb-4 leading-relaxed">
+                          <p className="text-xs text-secondary/75 italic mt-4 mb-4 leading-relaxed">
                             {step.whyInPath}
                           </p>
 
@@ -211,8 +211,8 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                               onClick={() => setStepModes((p) => ({ ...p, [step.id]: 'video' }))}
                               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 mode === 'video'
-                                  ? 'bg-indigo-500/20 text-[#c3c0ff] border border-indigo-500/30'
-                                  : 'bg-[#222a3d] text-[#918fa1] border border-transparent hover:text-[#c7c4d8]'
+                                  ? 'bg-indigo-500/20 text-primary border border-indigo-500/30'
+                                  : 'bg-muted text-muted-foreground border border-transparent hover:text-[#c7c4d8]'
                               }`}
                             >
                               <Play className="w-3 h-3" />
@@ -222,8 +222,8 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                               onClick={() => setStepModes((p) => ({ ...p, [step.id]: 'text' }))}
                               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                                 mode === 'text'
-                                  ? 'bg-teal-500/20 text-[#4fdbc8] border border-teal-500/30'
-                                  : 'bg-[#222a3d] text-[#918fa1] border border-transparent hover:text-[#c7c4d8]'
+                                  ? 'bg-teal-500/20 text-secondary border border-teal-500/30'
+                                  : 'bg-muted text-muted-foreground border border-transparent hover:text-[#c7c4d8]'
                               }`}
                             >
                               <BookOpen className="w-3 h-3" />
@@ -233,7 +233,7 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
 
                           {/* Content area */}
                           {mode === 'video' ? (
-                            <div className="aspect-video bg-[#222a3d] rounded-xl overflow-hidden mb-4">
+                            <div className="aspect-video bg-muted rounded-xl overflow-hidden mb-4">
                               <iframe
                                 src={`https://www.youtube.com/embed/${TOPIC_VIDEO_MAP[step.title] ?? step.videoId}`}
                                 title={step.title}
@@ -244,13 +244,13 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                             </div>
                           ) : (
                             <div className="flex flex-col gap-3 mb-4">
-                              <div className="bg-[#222a3d] rounded-xl p-4">
+                              <div className="bg-muted rounded-xl p-4">
                                 <p className="text-[10px] uppercase tracking-widest text-indigo-400 font-mono mb-2">
                                   Concept
                                 </p>
                                 <p className="text-sm text-[#c7c4d8] leading-relaxed">{step.concept}</p>
                               </div>
-                              <div className="bg-[#222a3d] rounded-xl p-4">
+                              <div className="bg-muted rounded-xl p-4">
                                 <p className="text-[10px] uppercase tracking-widest text-teal-400 font-mono mb-2">
                                   Framework
                                 </p>
@@ -270,7 +270,7 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
                             <button
                               onClick={() => markDone(step.id)}
                               disabled={saving === step.id}
-                              className="w-full h-11 bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-bold text-sm rounded-xl transition-all active:scale-[0.98] disabled:opacity-60"
+                              className="w-full h-11 bg-secondary hover:bg-teal-400 text-slate-950 font-bold text-sm rounded-xl transition-all active:scale-[0.98] disabled:opacity-60"
                             >
                               {saving === step.id
                                 ? 'Saving…'
@@ -303,8 +303,8 @@ export default function LearningPathClient({ chapters, tiers, progressMap: initi
         <div className="mt-12 text-center">
           <div className="inline-flex flex-col items-center gap-3 px-8 py-6 rounded-2xl bg-teal-500/10 border border-teal-500/20">
             <CheckCircle className="w-8 h-8 text-teal-400" />
-            <p className="text-base font-bold text-[#dae2fd]">Path complete</p>
-            <p className="text-sm text-[#918fa1]">You&apos;ve finished every step. Time for a Deep Dive.</p>
+            <p className="text-base font-bold text-foreground">Path complete</p>
+            <p className="text-sm text-muted-foreground">You&apos;ve finished every step. Time for a Deep Dive.</p>
           </div>
         </div>
       )}

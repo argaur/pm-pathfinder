@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { Dimension } from '@/lib/data/questions'
 import { subCategoryToSlug } from '@/lib/data/topics'
+import { REDUCED_MOTION } from '@/lib/motion'
 
 // Static coaching insight shown per sub-category on completion card
 const SUBCATEGORY_INSIGHTS: Record<string, string> = {
@@ -113,18 +114,19 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
     const allDone = DIMENSION_ORDER.every((d) => completedDimensions.has(d))
 
     return (
+      <MotionConfig reducedMotion={REDUCED_MOTION}>
       <div className="max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
           {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center">
-              <svg className="w-4 h-4 text-[#4fdbc8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <svg aria-hidden="true" className="w-4 h-4 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-widest text-[#4fdbc8] font-mono">Analysis complete</p>
-              <h2 className="text-xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd]">
+              <p className="text-xs uppercase tracking-widest text-secondary font-mono">Analysis complete</p>
+              <h2 className="text-xl font-bold font-[family-name:var(--font-space-grotesk)] text-foreground">
                 {DIMENSION_LABELS[selectedDimension]} — sub-category breakdown
               </h2>
             </div>
@@ -139,7 +141,7 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
                   key={q.subCategory}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#171f33] rounded-2xl px-5 py-4 border border-white/5"
+                  className="bg-surface-1 rounded-2xl px-5 py-4 border border-white/5"
                 >
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-xs uppercase tracking-widest text-indigo-400 font-mono">{q.subCategory}</p>
@@ -162,7 +164,7 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
               <Button
                 onClick={() => { setDone(false); setSelectedDimension(nextDim); setCurrentQ(0); setAnswers({}) }}
                 variant="outline"
-                className="border-white/10 text-[#c7c4d8] rounded-xl flex-1"
+                className="border-border text-[#c7c4d8] rounded-xl flex-1"
               >
                 Next: {DIMENSION_LABELS[nextDim].split(' & ')[0]}
                 <ArrowRight className="ml-2 w-4 h-4" />
@@ -171,19 +173,20 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
               <Button
                 onClick={() => { setDone(false); setSelectedDimension(null); setCurrentQ(0); setAnswers({}) }}
                 variant="outline"
-                className="border-white/10 text-[#c7c4d8] rounded-xl flex-1"
+                className="border-border text-[#c7c4d8] rounded-xl flex-1"
               >
                 {allDone ? 'Redo a dimension' : 'Dive into another'}
               </Button>
             )}
             <Button onClick={() => router.push('/roadmap')}
-              className="bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-semibold rounded-xl flex-1">
+              className="bg-secondary hover:bg-teal-400 text-slate-950 font-semibold rounded-xl flex-1">
               Go to Learning Path
               <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </div>
         </motion.div>
       </div>
+      </MotionConfig>
     )
   }
 
@@ -193,24 +196,25 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
     const progress = Math.round(((currentQ) / questions.length) * 100)
 
     return (
+      <MotionConfig reducedMotion={REDUCED_MOTION}>
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
-          <div className="flex-1 h-1.5 bg-[#222a3d] rounded-full overflow-hidden">
+          <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-indigo-500 to-teal-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-xs font-mono text-[#918fa1]">{currentQ + 1}/{questions.length}</span>
+          <span className="text-xs font-mono text-muted-foreground">{currentQ + 1}/{questions.length}</span>
         </div>
 
         <AnimatePresence mode="wait">
           <motion.div key={currentQ} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }}>
             <p className="text-xs uppercase tracking-widest text-teal-400 font-mono mb-4">{q.subCategory}</p>
-            <h2 className="text-xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight mb-7 leading-snug">
+            <h2 className="text-xl font-bold font-[family-name:var(--font-space-grotesk)] text-foreground tracking-tight mb-7 leading-snug">
               {q.question}
             </h2>
             <div className="flex flex-col gap-2.5">
               {q.options.map((opt, i) => (
                 <button key={i} onClick={() => handleAnswer(opt)}
-                  className="w-full text-left px-5 py-4 rounded-2xl border border-white/5 bg-[#171f33] text-[#c7c4d8] hover:bg-[#1a2236] hover:border-white/10 text-sm transition-all">
+                  className="w-full text-left px-5 py-4 rounded-2xl border border-white/5 bg-surface-1 text-[#c7c4d8] hover:bg-[#1a2236] hover:border-border text-sm transition-all">
                   {opt}
                 </button>
               ))}
@@ -218,14 +222,16 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
           </motion.div>
         </AnimatePresence>
       </div>
+      </MotionConfig>
     )
   }
 
   return (
+    <MotionConfig reducedMotion={REDUCED_MOTION}>
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-1">Deep Dive</p>
-        <h1 className="text-2xl font-bold text-[#dae2fd] mb-2">Go deeper on a dimension</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Go deeper on a dimension</h1>
         <p className="text-sm text-[#c7c4d8]">
           Pick a dimension to break down your sub-category strengths and gaps with 3 targeted questions.
         </p>
@@ -241,7 +247,7 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
 
           return (
             <div key={dim} className={`rounded-2xl border transition-all ${
-              isCompleted ? 'border-teal-500/25 bg-teal-500/5' : 'border-white/5 bg-[#171f33]'
+              isCompleted ? 'border-teal-500/25 bg-teal-500/5' : 'border-white/5 bg-surface-1'
             }`}>
               {/* Row */}
               <div className="flex items-center gap-2 px-5 py-4">
@@ -256,7 +262,7 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
                   }}
                   className="flex-1 text-left group"
                 >
-                  <p className="text-sm font-medium text-[#dae2fd]">{DIMENSION_LABELS[dim]}</p>
+                  <p className="text-sm font-medium text-foreground">{DIMENSION_LABELS[dim]}</p>
                   {isCompleted
                     ? <p className="text-xs mt-0.5 text-teal-400">Completed</p>
                     : tier && <p className={`text-xs mt-0.5 ${config.color}`}>{config.label}</p>
@@ -268,20 +274,22 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
                     {/* Redo button */}
                     <button
                       onClick={() => { setSelectedDimension(dim); setCurrentQ(0); setAnswers({}) }}
-                      className="text-[11px] font-mono text-[#918fa1] hover:text-[#c7c4d8] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 transition-all"
+                      className="text-[11px] font-mono text-muted-foreground hover:text-[#c7c4d8] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 transition-all"
                     >
                       Redo
                     </button>
                     {/* Expand toggle */}
                     <button
                       onClick={() => setExpandedDimension(isExpanded ? null : dim)}
+                      aria-label={isExpanded ? `Collapse ${DIMENSION_LABELS[dim]} insights` : `Expand ${DIMENSION_LABELS[dim]} insights`}
+                      aria-expanded={isExpanded}
                       className="text-teal-400 hover:text-teal-300 transition-colors p-1"
                     >
-                      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                      <ChevronDown aria-hidden="true" className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                     </button>
                   </div>
                 ) : (
-                  <ArrowRight className="w-4 h-4 text-[#918fa1] group-hover:text-indigo-400 transition-colors" />
+                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-indigo-400 transition-colors" />
                 )}
               </div>
 
@@ -304,7 +312,7 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
                         >
                           <div className="flex items-center justify-between mb-1">
                             <p className="text-[10px] uppercase tracking-widest text-indigo-400 font-mono">{q.subCategory}</p>
-                            <ArrowRight className="w-3 h-3 text-[#918fa1] group-hover:text-indigo-400 transition-colors flex-shrink-0" />
+                            <ArrowRight className="w-3 h-3 text-muted-foreground group-hover:text-indigo-400 transition-colors flex-shrink-0" />
                           </div>
                           <p className="text-xs text-[#c7c4d8] leading-relaxed">{SUBCATEGORY_INSIGHTS[q.subCategory]}</p>
                         </Link>
@@ -318,5 +326,6 @@ export default function DeepDiveClient({ initialTiers, initialCompleted }: DeepD
         })}
       </div>
     </div>
+    </MotionConfig>
   )
 }

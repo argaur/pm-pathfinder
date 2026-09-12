@@ -28,7 +28,7 @@ export default async function ReportPage() {
         <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-1">
           Diagnostic Report
         </p>
-        <h1 className="text-2xl font-bold text-[#dae2fd] font-[family-name:var(--font-space-grotesk)]">
+        <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-space-grotesk)]">
           Your Complete Profile
         </h1>
       </div>

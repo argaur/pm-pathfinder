@@ -47,13 +47,13 @@ function AuthForm() {
         className="w-full max-w-sm"
       >
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-[#dae2fd] mb-2">Unlock your full report</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Unlock your full report</h1>
           <p className="text-sm text-[#c7c4d8]">
             Sign in to see your complete archetype profile, skill gap map, and personalised roadmap.
           </p>
         </div>
 
-        <div className="bg-[#171f33] rounded-2xl p-6">
+        <div className="bg-surface-1 rounded-2xl p-6">
           {error && (
             <div className="bg-[#2d1515] border border-rose-800/50 text-rose-400 text-sm rounded-lg p-3 mb-4">
               {error}
@@ -87,7 +87,7 @@ function AuthForm() {
             {loading ? 'Redirecting...' : 'Continue with Google'}
           </button>
 
-          <p className="text-center text-xs text-[#918fa1] mt-4">
+          <p className="text-center text-xs text-muted-foreground mt-4">
             Your quiz results are automatically saved to your account.
           </p>
         </div>
@@ -98,7 +98,7 @@ function AuthForm() {
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0b1326]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-surface-0" />}>
       <AuthForm />
     </Suspense>
   )
