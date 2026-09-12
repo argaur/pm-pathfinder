@@ -1,558 +1,469 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
+import Hero from '@/components/marketing/Hero'
+import { DURATIONS, EASINGS, fadeUpVariants, staggerDelay } from '@/lib/motion'
+
+/**
+ * Product landing page — the second consumer of components/marketing/Hero.
+ *
+ * The page leads with what the product does and the evidence behind it, in that
+ * order: a claim, then the research the claim came from, then the mechanism,
+ * then an honest note that the whole thing is free.
+ *
+ * Colour rules (measured, do not "fix"):
+ *   - brand-indigo is 2.94:1 as text on dark and fails AA. Fill only — button
+ *     background, ring, wash. Never text.
+ *   - the amber CTA always carries text-slate-950 (11.87:1). Never light text
+ *     on amber.
+ *
+ * All colour, spacing and motion values come from app/globals.css tokens and
+ * lib/motion.ts. No raw hex, no inline timing numbers.
+ */
 
 const BARRIERS = [
-  { id: 'Proof Gap',            desc: 'Cannot credibly demonstrate PM capability without a PM title.' },
-  { id: 'Access Gap',           desc: 'PM hiring runs on referrals. Cold applications get 1.5–2.7% response.' },
-  { id: 'Theory-Practice Gap',  desc: 'Content consumed but not converted into applicable skill.' },
-  { id: 'Feedback Vacuum',      desc: 'No structured feedback outside of actual interviews.' },
-  { id: 'Jargon Barrier',       desc: 'PM education built by PMs for PMs — alienates career switchers.' },
-]
-
-const ARCHETYPES = [
-  { name: 'The Builder',    bg: 'Technical',      mindset: 'Execution',  color: 'text-indigo-400',  border: 'border-indigo-500/20', bg2: 'bg-indigo-500/5',  from: 'SWE, DevOps' },
-  { name: 'The Architect',  bg: 'Technical',      mindset: 'Strategy',   color: 'text-teal-400',    border: 'border-teal-500/20',   bg2: 'bg-teal-500/5',    from: 'Tech Lead, Solutions Architect' },
-  { name: 'The Storyteller',bg: 'Human-Centered', mindset: 'Strategy',   color: 'text-violet-400',  border: 'border-violet-500/20', bg2: 'bg-violet-500/5',  from: 'Designer, UX Researcher' },
-  { name: 'The Advocate',   bg: 'Human-Centered', mindset: 'Execution',  color: 'text-rose-400',    border: 'border-rose-500/20',   bg2: 'bg-rose-500/5',    from: 'CX, Support Lead' },
-  { name: 'The Operator',   bg: 'Business',       mindset: 'Execution',  color: 'text-amber-400',   border: 'border-amber-500/20',  bg2: 'bg-amber-500/5',   from: 'Ops, BA, Consultant' },
-  { name: 'The Strategist', bg: 'Business',       mindset: 'Strategy',   color: 'text-emerald-400', border: 'border-emerald-500/20',bg2: 'bg-emerald-500/5', from: 'Strategy, Finance, Growth' },
+  { id: 'Proof gap', desc: 'Cannot credibly demonstrate PM capability without a PM title.' },
+  { id: 'Access gap', desc: 'PM hiring runs on referrals. Cold applications get a 1.5 to 2.7% response.' },
+  { id: 'Theory-practice gap', desc: 'Content gets consumed but never converted into applicable skill.' },
+  { id: 'Feedback vacuum', desc: 'No structured feedback outside of actual interviews.' },
+  { id: 'Jargon barrier', desc: 'PM education is built by PMs for PMs, which shuts out career switchers.' },
 ]
 
 const PAIN_POINTS = [
   {
-    quote: "I just have a resume. I do not have a portfolio to showcase.",
+    quote: 'I just have a resume. I do not have a portfolio to showcase.',
     name: 'Ankit',
-    context: '3 years as PM · couldn\'t break into general PM roles',
-    accent: { bg: 'bg-indigo-500/10', text: 'text-indigo-400', line: 'bg-indigo-500/40' },
+    context: '3 years as PM, could not break into general PM roles',
   },
   {
-    quote: "I used to not see where do I stand. How can I measure myself?",
+    quote: 'I used to not see where do I stand. How can I measure myself?',
     name: 'Rishi',
-    context: '8 years in BA / PM-adjacent roles',
-    accent: { bg: 'bg-teal-500/10', text: 'text-teal-400', line: 'bg-teal-500/40' },
+    context: '8 years in BA and PM-adjacent roles',
   },
   {
-    quote: "That structured guidance which is customized to where do I stand, not the generic one.",
+    quote: 'That structured guidance which is customized to where do I stand, not the generic one.',
     name: 'Kriti',
-    context: '14 years experience · 4.5 as PM',
-    accent: { bg: 'bg-amber-500/10', text: 'text-amber-400', line: 'bg-amber-500/40' },
+    context: '14 years experience, 4.5 as PM',
   },
 ]
 
 const STEPS = [
   {
     num: '01',
-    title: 'Understand where you actually stand',
-    desc: '10 scenario-based questions mapped across 5 PM dimensions. No jargon required. Takes 8 minutes.',
-    color: 'bg-indigo-600',
-    glow: 'shadow-[0_0_24px_rgba(79,70,229,0.5)]',
+    title: 'Find out where you actually stand',
+    desc: '10 scenario questions mapped across 5 PM dimensions. No jargon required. It takes about 8 minutes.',
   },
   {
     num: '02',
-    title: 'Get your PM Archetype',
-    desc: 'One of 6 archetypes based on your background and mindset. Know exactly what kind of PM you\'re built to be — and what gap to close first.',
-    color: 'bg-teal-500',
-    glow: 'shadow-[0_0_24px_rgba(79,219,200,0.5)]',
+    title: 'Get your PM archetype',
+    desc: 'One of 6 archetypes, from your background and your mindset. You learn what kind of PM you are built to be, and which gap to close first.',
   },
   {
     num: '03',
     title: 'Follow a path built for you',
-    desc: 'A chapter-by-chapter roadmap targeting your exact skill gaps — not a generic course. Concepts, frameworks, and practice exercises in the order you need them.',
-    color: 'bg-[#ffb95f]',
-    glow: 'shadow-[0_0_24px_rgba(255,185,95,0.5)]',
+    desc: 'A chapter-by-chapter roadmap aimed at your gaps, not a generic course. Concepts, frameworks and practice in the order you need them.',
   },
 ]
 
+const ARCHETYPES = [
+  { name: 'The Builder', background: 'Technical', mindset: 'Execution', from: 'SWE, DevOps' },
+  { name: 'The Architect', background: 'Technical', mindset: 'Strategy', from: 'Tech lead, solutions architect' },
+  { name: 'The Storyteller', background: 'Human-centered', mindset: 'Strategy', from: 'Designer, UX researcher' },
+  { name: 'The Advocate', background: 'Human-centered', mindset: 'Execution', from: 'CX, support lead' },
+  { name: 'The Operator', background: 'Business', mindset: 'Execution', from: 'Ops, BA, consultant' },
+  { name: 'The Strategist', background: 'Business', mindset: 'Strategy', from: 'Strategy, finance, growth' },
+]
+
+const FEATURES = [
+  {
+    title: 'PM archetype assessment',
+    desc: '10 scenario questions mapping your background against your mindset to one of 6 archetypes.',
+  },
+  {
+    title: 'Skill gap report',
+    desc: 'A 5-dimension breakdown of where you stand on thinking, execution, technical fluency, user research and communication.',
+  },
+  {
+    title: 'Personalised learning path',
+    desc: 'A roadmap ordered by your gaps. Watch or read, mark done, track progress.',
+  },
+  {
+    title: 'Interview readiness score',
+    desc: 'A 0 to 100 score benchmarked against APM, PM and Senior PM roles, with a breakdown of what to fix.',
+  },
+  {
+    title: 'Deep dive per dimension',
+    desc: 'Sub-category scoring inside any dimension, so a low score tells you which part of it is low.',
+  },
+  {
+    title: 'Public PM portfolio',
+    desc: 'A shareable case-study page backed by your assessed skills, at a link you can send to a recruiter.',
+  },
+]
+
+const SAMPLE_SCORES = [
+  { label: 'TECHNICAL DEPTH', value: 82, bar: 'bg-primary' },
+  { label: 'PRODUCT STRATEGY', value: 64, bar: 'bg-secondary' },
+  { label: 'USER EMPATHY', value: 91, bar: 'bg-brand-amber' },
+]
+
+function SectionHeading({
+  eyebrow,
+  title,
+  lede,
+}: {
+  eyebrow: string
+  title: string
+  lede?: string
+}) {
+  return (
+    <motion.div
+      variants={fadeUpVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.4 }}
+      transition={{ duration: DURATIONS.long, ease: EASINGS.easeOutExpo }}
+      className="mb-12 flex flex-col gap-3"
+    >
+      <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+        {eyebrow}
+      </p>
+      <h2 className="text-balance font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        {title}
+      </h2>
+      {lede && (
+        <p className="max-w-2xl text-pretty text-sm leading-relaxed text-card-foreground/80">
+          {lede}
+        </p>
+      )}
+    </motion.div>
+  )
+}
+
+function Reveal({
+  index = 0,
+  children,
+  className,
+}: {
+  index?: number
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <motion.div
+      variants={fadeUpVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{
+        duration: DURATIONS.long,
+        delay: staggerDelay(index),
+        ease: EASINGS.easeOutExpo,
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 export default function LandingPage() {
   return (
-    <main className="flex flex-col min-h-screen overflow-x-hidden">
-      {/* Atmosphere */}
-      <div className="fixed -top-40 -right-40 w-[700px] h-[700px] bg-indigo-600/10 rounded-full blur-[130px] pointer-events-none -z-10" />
-      <div className="fixed bottom-0 -left-40 w-[500px] h-[500px] bg-teal-500/[0.06] rounded-full blur-[120px] pointer-events-none -z-10" />
-
+    <main className="min-h-screen bg-surface-0">
       {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 bg-[#0b1326]/80 backdrop-blur-xl border-b border-white/5 px-8 h-16 flex items-center justify-between">
-        <span className="text-xl font-bold tracking-tighter text-[#dae2fd] font-[family-name:var(--font-space-grotesk)]">
-          PM Pathfinder
-        </span>
-        <div className="flex items-center gap-6">
-          <Link href="/auth?next=/dashboard">
-            <button className="text-sm text-[#918fa1] hover:text-[#c7c4d8] transition-colors">
-              Sign in
-            </button>
+      <nav className="flex h-14 items-center justify-between border-b border-border px-6">
+        <span className="font-heading text-sm font-bold text-primary">PM Pathfinder</span>
+        <div className="flex items-center gap-5">
+          <Link
+            href="/auth?next=/dashboard"
+            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Sign in
           </Link>
-          <Link href="/quiz">
-            <button className="text-sm text-[#c7c4d8] hover:text-[#dae2fd] transition-colors">
-              Take the assessment →
-            </button>
+          <Link
+            href="/quiz"
+            className="text-xs text-foreground/80 transition-colors hover:text-foreground"
+          >
+            Take the assessment →
           </Link>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative pt-36 pb-28 px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Left */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="space-y-8"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[#c3c0ff] text-xs font-mono tracking-widest uppercase">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-400" />
-              </span>
-              Built on 9 user interviews
-            </div>
-
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold font-[family-name:var(--font-space-grotesk)] leading-[1.05] tracking-tighter text-[#dae2fd]">
-              You&apos;re Closer to PM{' '}
-              <br className="hidden sm:block" />
-              Than You Think.{' '}
-              <br className="hidden sm:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#c3c0ff] to-[#4fdbc8]">
-                Find Out What&apos;s Missing.
-              </span>
-            </h1>
-
-            <p className="text-xl text-[#c7c4d8] font-light max-w-lg leading-relaxed">
-              Take a 10-minute assessment. Get your personalised career roadmap built from{' '}
-              <span className="text-[#dae2fd] font-medium">your background</span>, not a generic template.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <Link href="/quiz">
-                <button className="px-10 py-5 bg-[#ffb95f] hover:bg-amber-400 text-slate-950 font-bold text-lg rounded-full transition-all active:scale-95 shadow-[0_0_32px_rgba(255,185,95,0.3)]">
-                  Assess Where You Are
-                </button>
-              </Link>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium text-[#dae2fd]">Free. No credit card required.</span>
-                <span className="text-xs text-[#918fa1] font-mono">2,847 assessments completed</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Right — preview card */}
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative hidden lg:block"
-          >
-            <div className="absolute -inset-6 bg-gradient-to-br from-indigo-600/20 to-teal-500/20 rounded-3xl blur-3xl" />
-            <div className="relative bg-[#131b2e] border border-white/8 rounded-2xl p-8">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h3 className="font-[family-name:var(--font-space-grotesk)] font-bold text-xl text-[#dae2fd]">
-                    Current Trajectory
-                  </h3>
-                  <p className="text-xs text-[#918fa1] uppercase tracking-widest font-mono mt-1">
-                    Navigator Analytics
-                  </p>
+      <Hero
+        eyebrow="PM career diagnostic"
+        title="You are closer to PM than you think. Find out what is missing."
+        lede="Take a 10-minute assessment. Get a career roadmap built from your background, not from a generic template."
+        meta={['9 user interviews', '6 archetypes', '10 questions', 'about 8 minutes']}
+        badges={['Free', 'No card', 'Everything unlocked']}
+        actions={[
+          { label: 'Assess where you are', href: '/quiz', variant: 'amber' },
+          { label: 'Sign in', href: '/auth?next=/dashboard', variant: 'ghost' },
+        ]}
+      >
+        {/* Illustrative sample of the report, labelled as such. */}
+        <figure className="rounded-2xl border border-border bg-surface-1 p-card-sm">
+          <figcaption className="mb-5 flex items-baseline justify-between gap-4">
+            <span className="font-heading text-sm font-semibold text-foreground">
+              What the report looks like
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Sample, not real data
+            </span>
+          </figcaption>
+          <div className="flex flex-col gap-3">
+            {SAMPLE_SCORES.map((item) => (
+              <div key={item.label} className="flex flex-col gap-2 rounded-xl bg-surface-2 p-3">
+                <div className="flex justify-between font-mono text-[11px]">
+                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className="text-foreground">{item.value}%</span>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/15 flex items-center justify-center text-xl">
-                  📊
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-0">
+                  <div
+                    className={`h-full rounded-full ${item.bar}`}
+                    style={{ width: `${item.value}%` }}
+                  />
                 </div>
               </div>
-              <div className="space-y-4">
-                {[
-                  { label: 'TECHNICAL DEPTH', value: 82, bar: 'bg-[#c3c0ff]', val: 'text-[#c3c0ff]' },
-                  { label: 'PRODUCT STRATEGY', value: 64, bar: 'bg-[#4fdbc8]', val: 'text-[#4fdbc8]' },
-                  { label: 'USER EMPATHY', value: 91, bar: 'bg-[#ffb95f]', val: 'text-[#ffb95f]' },
-                ].map((item) => (
-                  <div key={item.label} className="bg-[#171f33] p-4 rounded-xl space-y-2.5">
-                    <div className="flex justify-between text-xs font-mono">
-                      <span className="text-[#918fa1]">{item.label}</span>
-                      <span className={item.val}>{item.value}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-[#222a3d] rounded-full overflow-hidden">
-                      <div className={`h-full ${item.bar} rounded-full`} style={{ width: `${item.value}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
-                <span className="text-xs text-[#918fa1] font-mono">ARCHETYPE MATCH</span>
-                <span className="text-sm font-bold text-[#dae2fd] font-[family-name:var(--font-space-grotesk)]">
-                  The Strategist
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Pain Points */}
-      <section className="py-24 px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
-              The Career Gap is Real
-            </h2>
-            <p className="text-[#c7c4d8] max-w-2xl mx-auto leading-relaxed">
-              From 9 user interviews across engineering, design, and consulting backgrounds — three patterns kept surfacing.
-            </p>
+            ))}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Archetype match
+            </span>
+            <span className="font-heading text-sm font-semibold text-foreground">
+              The Strategist
+            </span>
+          </div>
+        </figure>
+      </Hero>
+
+      <div className="mx-auto max-w-4xl px-6">
+        {/* Research — what people actually said */}
+        <section className="py-16 sm:py-section">
+          <SectionHeading
+            eyebrow="Primary research"
+            title="The career gap is real"
+            lede="Nine interviews with people moving into PM from engineering, design, consulting and operations. Three patterns kept surfacing."
+          />
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {PAIN_POINTS.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group p-8 rounded-2xl bg-[#131b2e] border border-white/5 hover:bg-[#171f33] hover:border-white/10 transition-all duration-500"
-              >
-                <p className="text-lg font-medium text-[#dae2fd] italic leading-relaxed mb-6">
-                  &ldquo;{item.quote}&rdquo;
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className={`h-px w-10 ${item.accent.line}`} />
-                  <div>
-                    <p className={`text-xs font-mono font-semibold uppercase tracking-tighter ${item.accent.text}`}>
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-[#918fa1] mt-0.5">{item.context}</p>
-                  </div>
-                </div>
-              </motion.div>
+              <Reveal key={item.name} index={i}>
+                <figure className="h-full rounded-2xl border border-border bg-surface-1 p-card-sm">
+                  <blockquote className="text-pretty text-sm leading-relaxed text-card-foreground/85">
+                    &ldquo;{item.quote}&rdquo;
+                  </blockquote>
+                  <figcaption className="mt-5 flex items-start gap-3">
+                    <span aria-hidden className="mt-2 h-px w-6 shrink-0 bg-brand-amber" />
+                    <span>
+                      <span className="block font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-foreground">
+                        {item.name}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        {item.context}
+                      </span>
+                    </span>
+                  </figcaption>
+                </figure>
+              </Reveal>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Research Foundation */}
-      <section className="py-24 bg-[#060e20]/60 px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14 space-y-3">
-            <p className="text-xs font-mono uppercase tracking-widest text-teal-400">Primary research</p>
-            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
-              5 structural barriers to PM transition
-            </h2>
-            <p className="text-[#c7c4d8] max-w-xl mx-auto text-sm leading-relaxed">
-              Validated across 9 interviews with professionals transitioning from engineering, consulting, design, and operations.
-            </p>
-          </div>
+        {/* Research — the barriers */}
+        <section className="border-t border-border py-16 sm:py-section">
+          <SectionHeading
+            eyebrow="What the interviews found"
+            title="Five structural barriers to a PM transition"
+            lede="Each one is a thing the product has to answer. The assessment and the roadmap are built directly against this list."
+          />
 
-          {/* Barriers grid — 3 + 2 centred */}
-          <div className="flex flex-col gap-3 mb-14">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {BARRIERS.slice(0, 3).map((b, i) => (
-                <motion.div
-                  key={b.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.07 }}
-                  className="bg-[#131b2e] border border-white/5 rounded-2xl px-5 py-5"
-                >
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <span className="text-xs font-mono text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full">
-                      {String(i + 1).padStart(2, '0')}
+          <ol className="flex flex-col gap-3">
+            {BARRIERS.map((b, i) => (
+              <Reveal key={b.id} index={i}>
+                <li className="flex items-start gap-4 rounded-2xl border border-border bg-surface-1 p-card-sm">
+                  <span
+                    aria-hidden
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-indigo/20 font-mono text-xs font-semibold text-foreground"
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-semibold text-foreground">{b.id}</span>
+                    <span className="mt-1 block text-pretty text-sm leading-relaxed text-card-foreground/80">
+                      {b.desc}
                     </span>
-                    <p className="text-sm font-semibold text-[#dae2fd]">{b.id}</p>
-                  </div>
-                  <p className="text-sm text-[#918fa1] leading-relaxed">{b.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:w-2/3 sm:mx-auto">
-              {BARRIERS.slice(3).map((b, i) => (
-                <motion.div
-                  key={b.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: (i + 3) * 0.07 }}
-                  className="bg-[#131b2e] border border-white/5 rounded-2xl px-5 py-5"
-                >
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <span className="text-xs font-mono text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-full">
-                      {String(i + 4).padStart(2, '0')}
-                    </span>
-                    <p className="text-sm font-semibold text-[#dae2fd]">{b.id}</p>
-                  </div>
-                  <p className="text-sm text-[#918fa1] leading-relaxed">{b.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+                  </span>
+                </li>
+              </Reveal>
+            ))}
+          </ol>
 
-          {/* User quote */}
-          <div className="max-w-2xl mx-auto bg-[#131b2e] border border-teal-500/15 rounded-2xl px-8 py-7">
-            <p className="text-lg text-[#dae2fd] leading-relaxed italic mb-5">
-              &ldquo;A tool which kind of tailors the entire program according to me only. It sort of analyses me and then presents its solution.&rdquo;
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="h-px flex-1 bg-teal-500/20" />
-              <span className="text-xs font-mono text-[#918fa1] uppercase tracking-widest">
-                Gaurav · 7 years in product · research participant
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+          <Reveal className="mt-8">
+            <figure className="rounded-2xl border border-border bg-surface-1 p-card-sm">
+              <blockquote className="text-pretty text-base leading-relaxed text-card-foreground/85">
+                &ldquo;A tool which kind of tailors the entire program according to me only. It
+                sort of analyses me and then presents its solution.&rdquo;
+              </blockquote>
+              <figcaption className="mt-4 font-mono text-xs text-muted-foreground">
+                Research participant · 7 years in product
+              </figcaption>
+            </figure>
+          </Reveal>
+        </section>
 
-      {/* How It Works */}
-      <section className="py-24 bg-[#060e20]/60">
-        <div className="max-w-5xl mx-auto px-8">
-          <div className="text-center mb-20 space-y-3">
-            <p className="text-xs font-mono uppercase tracking-widest text-indigo-400">The journey</p>
-            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
-              From career switcher to hired PM
-            </h2>
-            <p className="text-[#c7c4d8] max-w-lg mx-auto text-sm leading-relaxed">
-              Three steps. No generic advice. A path that starts from where you are — not where everyone else is.
-            </p>
-          </div>
-          <div className="relative">
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-indigo-500 via-teal-500 to-transparent -translate-x-1/2 hidden md:block" />
-            <div className="space-y-20">
-              {STEPS.map((step, i) => (
-                <div
-                  key={i}
-                  className={`relative flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-8 md:gap-0`}
-                >
-                  <div className={`md:w-1/2 ${i % 2 === 0 ? 'md:pr-24 md:text-right' : 'md:pl-24'}`}>
-                    <h3 className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] mb-3">
-                      {step.title}
-                    </h3>
-                    <p className="text-[#c7c4d8] leading-relaxed">{step.desc}</p>
-                  </div>
-                  <div className={`z-10 w-16 h-16 rounded-full ${step.color} flex items-center justify-center font-bold text-slate-950 text-base font-mono ${step.glow}`}>
+        {/* How it works */}
+        <section className="border-t border-border py-16 sm:py-section">
+          <SectionHeading
+            eyebrow="How it works"
+            title="From career switcher to a PM who can prove it"
+            lede="Three steps. The path starts from where you are, not from where everyone else is."
+          />
+
+          <ol className="flex flex-col gap-6">
+            {STEPS.map((step, i) => (
+              <Reveal key={step.num} index={i}>
+                <li className="flex items-start gap-5 rounded-2xl border border-border bg-surface-1 p-card-sm sm:p-card">
+                  <span
+                    aria-hidden
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-indigo font-mono text-sm font-bold text-white"
+                  >
                     {step.num}
-                  </div>
-                  <div className={`md:w-1/2 ${i % 2 === 0 ? 'md:pl-24' : 'md:pr-24 md:text-right'} hidden md:block`}>
-                    <span className="text-8xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd]/5 select-none">
-                      {step.num}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block font-heading text-lg font-semibold leading-snug text-foreground">
+                      {step.title}
                     </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="mt-20 text-center">
-            <Link href="/quiz">
-              <button className="px-10 py-5 bg-[#ffb95f] hover:bg-amber-400 text-slate-950 font-bold text-lg rounded-full transition-all active:scale-95 shadow-[0_0_32px_rgba(255,185,95,0.3)]">
-                Start the Assessment
-                <ArrowRight className="inline ml-2 w-5 h-5" />
-              </button>
-            </Link>
+                    <span className="mt-2 block text-pretty text-sm leading-relaxed text-card-foreground/80">
+                      {step.desc}
+                    </span>
+                  </span>
+                </li>
+              </Reveal>
+            ))}
+          </ol>
 
-            {/* Destination */}
-            <div className="mt-12 max-w-xl mx-auto bg-gradient-to-br from-teal-500/10 to-indigo-500/10 border border-teal-500/20 rounded-2xl px-8 py-6 text-left">
-              <p className="text-xs font-mono uppercase tracking-widest text-teal-400 mb-3">The destination</p>
-              <p className="text-base font-semibold text-[#dae2fd] leading-relaxed mb-2">
-                You walk into your PM interview knowing your archetype, your strengths, and exactly how you closed the gap.
+          <Reveal className="mt-8">
+            <div className="rounded-2xl border border-brand-indigo/30 bg-surface-1 p-card-sm">
+              <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Where it lands
               </p>
-              <p className="text-sm text-[#918fa1] leading-relaxed">
-                Not just prepared — positioned. You can speak to your background as an asset, not a liability.
+              <p className="mt-3 text-pretty text-base font-semibold leading-relaxed text-foreground">
+                You walk into the interview knowing your archetype, your strengths, and exactly
+                how you closed the gap.
+              </p>
+              <p className="mt-2 text-pretty text-sm leading-relaxed text-card-foreground/80">
+                Not just prepared. Positioned. You can talk about your background as an asset
+                instead of a liability.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
+          </Reveal>
+        </section>
 
-      {/* Archetype Preview */}
-      <section className="py-24 px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14 space-y-3">
-            <p className="text-xs font-mono uppercase tracking-widest text-indigo-400">The framework</p>
-            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
-              6 PM archetypes. Which one are you?
-            </h2>
-            <p className="text-[#c7c4d8] max-w-lg mx-auto text-sm leading-relaxed">
-              Mapped across two axes: your professional background and your natural mindset — execution-first or strategy-first.
-            </p>
-          </div>
+        {/* Archetypes */}
+        <section className="border-t border-border py-16 sm:py-section">
+          <SectionHeading
+            eyebrow="The framework"
+            title="Six PM archetypes. Which one are you?"
+            lede="Mapped on two axes: the background you are coming from, and whether you think execution-first or strategy-first."
+          />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {ARCHETYPES.map((a, i) => (
-              <motion.div
-                key={a.name}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.06 }}
-                className={`p-5 rounded-2xl border ${a.border} ${a.bg2}`}
-              >
-                <h3 className={`text-base font-bold font-[family-name:var(--font-space-grotesk)] ${a.color} mb-2`}>
-                  {a.name}
-                </h3>
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-[#918fa1]">
-                    {a.bg}
-                  </span>
-                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-[#918fa1]">
-                    {a.mindset}
-                  </span>
-                </div>
-                <p className="text-xs text-[#918fa1]">Comes from: {a.from}</p>
-              </motion.div>
+              <Reveal key={a.name} index={i}>
+                <article className="h-full rounded-2xl border border-border bg-surface-1 p-card-sm">
+                  <h3 className="font-heading text-base font-bold text-foreground">{a.name}</h3>
+                  <ul className="mt-3 flex flex-wrap gap-1.5">
+                    {[a.background, a.mindset].map((tag) => (
+                      <li
+                        key={tag}
+                        className="rounded-full border border-brand-indigo/30 bg-brand-indigo/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.1em] text-foreground"
+                      >
+                        {tag}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                    Comes from: {a.from}
+                  </p>
+                </article>
+              </Reveal>
             ))}
           </div>
 
-          <div className="text-center">
-            <Link href="/quiz">
-              <button className="px-8 py-4 border border-indigo-500/30 hover:bg-indigo-500/10 text-indigo-300 text-sm font-semibold rounded-xl transition-all">
-                Find out what&apos;s holding you back →
-              </button>
+          <Reveal className="mt-8">
+            <Link
+              href="/quiz"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-border bg-transparent px-6 text-sm font-semibold text-foreground transition-colors hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+            >
+              Find out which one you are
+              <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
-          </div>
-        </div>
-      </section>
+          </Reveal>
+        </section>
 
-      {/* Features */}
-      <section className="py-24 px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16 space-y-3">
-            <p className="text-xs font-mono uppercase tracking-widest text-indigo-400">Everything included</p>
-            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
-              Built end-to-end for PM transition
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              {
-                icon: '🧭',
-                title: 'PM Archetype Assessment',
-                desc: '10 scenario-based questions mapping your background × mindset to one of 6 archetypes. No jargon. No generic advice.',
-                accent: 'border-indigo-500/20 bg-indigo-500/5',
-                badge: 'Free',
-                badgeStyle: 'bg-indigo-500/10 text-indigo-400',
-              },
-              {
-                icon: '📊',
-                title: 'Skill Gap Report',
-                desc: '5-dimension radar chart showing exactly where you stand on thinking, execution, technical fluency, user research, and communication.',
-                accent: 'border-teal-500/20 bg-teal-500/5',
-                badge: 'Free',
-                badgeStyle: 'bg-teal-500/10 text-teal-400',
-              },
-              {
-                icon: '🗺️',
-                title: 'Personalised Learning Path',
-                desc: 'Chapter-by-chapter roadmap ordered by your gaps. Watch or read. Mark done. Track progress. Not a one-size-fits-all course.',
-                accent: 'border-amber-500/20 bg-amber-500/5',
-                badge: 'Pro',
-                badgeStyle: 'bg-amber-500/10 text-amber-400',
-              },
-              {
-                icon: '🎯',
-                title: 'Interview Readiness Score',
-                desc: 'A 0–100 composite score benchmarked against APM, PM, and Senior PM roles — with a breakdown of exactly what to fix.',
-                accent: 'border-rose-500/20 bg-rose-500/5',
-                badge: 'Pro',
-                badgeStyle: 'bg-rose-500/10 text-rose-400',
-              },
-            ].map((f, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className={`p-6 rounded-2xl border ${f.accent}`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <span className="text-2xl">{f.icon}</span>
-                  <span className={`text-[10px] font-mono uppercase tracking-wider px-2.5 py-1 rounded-full ${f.badgeStyle}`}>
-                    {f.badge}
-                  </span>
-                </div>
-                <h3 className="text-base font-semibold text-[#dae2fd] mb-2">{f.title}</h3>
-                <p className="text-sm text-[#918fa1] leading-relaxed">{f.desc}</p>
-              </motion.div>
+        {/* What is included */}
+        <section className="border-t border-border py-16 sm:py-section">
+          <SectionHeading
+            eyebrow="What is included"
+            title="Built end to end for the PM transition"
+            lede="Six pieces, all of them live. Nothing on this list is a waitlist or a teaser."
+          />
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {FEATURES.map((f, i) => (
+              <Reveal key={f.title} index={i}>
+                <article className="h-full rounded-2xl border border-border bg-surface-1 p-card-sm">
+                  <h3 className="text-sm font-semibold text-foreground">{f.title}</h3>
+                  <p className="mt-2 text-pretty text-sm leading-relaxed text-card-foreground/80">
+                    {f.desc}
+                  </p>
+                </article>
+              </Reveal>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Pricing */}
-      <section className="py-24 bg-[#060e20]/60 px-8" id="pricing">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16 space-y-3">
-            <p className="text-xs font-mono uppercase tracking-widest text-indigo-400">Simple pricing</p>
-            <h2 className="text-4xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] tracking-tight">
-              Start free. Go Pro when you&apos;re ready.
-            </h2>
-            <p className="text-[#918fa1] max-w-md mx-auto">
-              Assessment and report are always free. Unlock the full path when you&apos;re serious about landing the role.
-            </p>
-          </div>
+        {/*
+          Replaces the old pricing section. Pro gating is permanently off and
+          payment integration is out of scope, so a priced tier here would be a
+          false claim. No pricing, upgrade or payment UI belongs on this page.
+        */}
+        <section id="cost" className="border-t border-border py-16 sm:py-section">
+          <SectionHeading eyebrow="What this costs" title="Nothing. Everything is unlocked." />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            {/* Free */}
-            <div className="bg-[#131b2e] border border-white/8 rounded-2xl p-8">
-              <p className="text-xs font-mono uppercase tracking-widest text-[#918fa1] mb-3">Free</p>
-              <p className="text-4xl font-bold text-[#dae2fd] mb-1">₹0</p>
-              <p className="text-xs text-[#918fa1] mb-8">Forever free</p>
-              <ul className="flex flex-col gap-3 mb-8">
-                {['PM Archetype Assessment', '5-dimension skill report', 'Chapter 1 of Learning Path', 'Basic Deep Dive (1 dimension)'].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-[#c7c4d8]">
-                    <span className="text-teal-400 flex-shrink-0">✓</span>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/quiz">
-                <button className="w-full py-3 rounded-xl border border-white/10 text-sm text-[#c7c4d8] hover:bg-white/5 transition-all">
-                  Get started free
-                </button>
+          <Reveal>
+            <div className="rounded-2xl border border-brand-indigo/30 bg-surface-1 p-card-sm sm:p-card">
+              <p className="text-pretty text-base leading-relaxed text-card-foreground/85">
+                PM Pathfinder is a portfolio project, not a business. There is no paid tier, no
+                card to enter, and nothing held back behind an upgrade. Every feature on this
+                page is open to every account: the assessment, the full report, the roadmap, the
+                readiness score, and the public portfolio page.
+              </p>
+              <p className="mt-4 text-pretty text-base leading-relaxed text-card-foreground/85">
+                It was built to show that a product can be researched, designed and shipped end
+                to end. It stays free for as long as it stays up.
+              </p>
+              <Link
+                href="/quiz"
+                className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-brand-amber px-6 text-sm font-semibold text-slate-950 shadow-glow-amber transition-colors hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-amber"
+              >
+                Start the assessment
+                <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
             </div>
+          </Reveal>
+        </section>
+      </div>
 
-            {/* Pro */}
-            <div className="relative bg-[#131b2e] border border-indigo-500/30 rounded-2xl p-8 shadow-[0_0_40px_rgba(99,102,241,0.1)]">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="px-3 py-1 text-[10px] font-mono uppercase tracking-widest bg-indigo-600 text-white rounded-full">
-                  Most popular
-                </span>
-              </div>
-              <p className="text-xs font-mono uppercase tracking-widest text-indigo-400 mb-3">Pro</p>
-              <div className="mb-1">
-                <span className="text-4xl font-bold text-[#dae2fd]">₹799</span>
-                <span className="text-sm text-[#918fa1]"> / month</span>
-              </div>
-              <p className="text-xs text-[#918fa1] mb-1">or ₹5,999/year <span className="text-teal-400">· save 37%</span></p>
-              <p className="text-xs text-indigo-300 mb-8">₹16,999 lifetime access</p>
-              <ul className="flex flex-col gap-3 mb-8">
-                {[
-                  'Everything in Free',
-                  'Full Learning Path (all chapters)',
-                  'Deep Dive on all 5 dimensions',
-                  'Interview Readiness Score + breakdown',
-                  'Public PM Portfolio page',
-                  'Progress tracking across re-evaluations',
-                ].map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-[#c7c4d8]">
-                    <span className="text-indigo-400 flex-shrink-0">✓</span>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/quiz">
-                <button className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all">
-                  Start with Pro
-                  <ArrowRight className="inline ml-2 w-4 h-4" />
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="mt-auto border-t border-white/5 px-8 py-8">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[#918fa1]">
-          <span className="font-[family-name:var(--font-space-grotesk)] font-semibold text-[#dae2fd]">PM Pathfinder</span>
-          <span>Built on primary research with 9 professionals navigating the PM transition.</span>
-          <span className="font-mono text-xs">Rethink AI MPM Cohort 7</span>
+      <footer className="border-t border-border px-6 py-8">
+        <div className="mx-auto flex max-w-4xl flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <span className="font-heading text-sm font-semibold text-foreground">PM Pathfinder</span>
+          <span>Built on primary research with 9 people navigating the PM transition.</span>
+          <span className="font-mono">Rethink AI MPM Cohort 7</span>
         </div>
       </footer>
     </main>
