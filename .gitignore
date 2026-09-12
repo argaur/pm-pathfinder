@@ -48,6 +48,9 @@ next-env.d.ts
 # editor
 .vscode/
 
+# git worktrees
+.worktrees/
+
 # local AI-session notes, not part of the product
 memory/
 GEMINI.md
