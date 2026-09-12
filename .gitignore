@@ -50,6 +50,7 @@ next-env.d.ts
 
 # git worktrees
 .worktrees/
+.claude/worktrees/
 
 # local AI-session notes, not part of the product
 memory/

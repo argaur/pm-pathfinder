@@ -16,7 +16,9 @@
   --color-secondary: #4fdbc8;
   --color-secondary-foreground: #003731;
   --color-muted: #222a3d;
-  --color-muted-foreground: #918fa1;
+  /* Raised L only (OKLCH 0.658 -> 0.700), hue/chroma held, so muted text clears AA 4.5:1
+     on every surface including --color-surface-2 (was 3.91:1, now 4.60:1). */
+  --color-muted-foreground: #9e9cae;
   --color-accent: #222a3d;
   --color-accent-foreground: #dae2fd;
   --color-destructive: #ffb4ab;
@@ -39,7 +41,34 @@
   --color-sidebar-primary: #4f46e5;
   --color-sidebar-foreground: #dae2fd;
   --color-sidebar: #131b2e;
+
+  /* Brand accents — grounded in existing usage, alongside --color-secondary (teal). */
+  /* indigo-600, matches the existing --color-ring/--color-sidebar-primary (#4f46e5) and the
+     rgba(79,70,229,…) glow on step markers in app/page.tsx. */
+  --color-brand-indigo: #4f46e5;
+  /* Custom CTA amber used for bg-[#ffb95f] buttons in app/page.tsx (hover state uses
+     Tailwind's amber-400); also the base color behind the CTA glow shadow below. */
+  --color-brand-amber: #ffb95f;
+
+  /* Elevation aliases — same values as background/card/popover, named by "how elevated". */
+  --color-surface-0: var(--color-background);
+  --color-surface-1: var(--color-card);
+  --color-surface-2: var(--color-popover);
+
+  /* Section/card rhythm — named points on Tailwind's default spacing scale, matching the
+     py-24 section padding and p-8 / p-6 card padding already used in app/page.tsx and
+     app/u/[id]/page.tsx. Not a new scale, just names for the values already in play. */
+  --spacing-section: 6rem;    /* py-24 — landing page section padding */
+  --spacing-card: 2rem;       /* p-8 — landing page card padding (hero, feature, pricing cards) */
+  --spacing-card-sm: 1.5rem;  /* p-6 — portfolio page card padding (app/u/[id]/page.tsx) */
+
+  /* CTA glow — matches shadow-[0_0_32px_rgba(255,185,95,0.3)] used inline on the amber CTA
+     button in app/page.tsx (hero and journey sections), reused on the portfolio page. */
+  --shadow-glow-amber: 0 0 32px rgba(255, 185, 95, 0.3);
 }
+
+/* Dark-only by design: this app has no light theme and no toggle is planned. All tokens above
+   are the only palette; do not add a `prefers-color-scheme: light` or `.light` variant. */
 
 @layer base {
   * {
