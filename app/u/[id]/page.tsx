@@ -1,10 +1,47 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
+import type { Metadata } from 'next'
+import Hero from '@/components/marketing/Hero'
+import CaseStudy from '@/components/marketing/CaseStudy'
 
 interface Props {
   params: Promise<{ id: string }>
+}
+
+/**
+ * Public, no-login case-study page.
+ *
+ * The work leads. Case studies are the page's main content and sit directly
+ * under a compact identity header; the profile material (PM story, verified
+ * strengths) follows as context for the work rather than preceding it.
+ *
+ * Server component on purpose — the two Supabase reads stay here, and the only
+ * client code is the presentational motion inside Hero/CaseStudy.
+ */
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+
+  const { data: portfolio } = await supabase
+    .from('portfolio_profiles')
+    .select('display_name, archetype')
+    .eq('user_id', id)
+    .eq('is_public', true)
+    .single()
+
+  if (!portfolio?.display_name) return {}
+
+  const title = portfolio.archetype
+    ? `${portfolio.display_name} — ${portfolio.archetype} | PM Pathfinder`
+    : `${portfolio.display_name} | PM Pathfinder`
+
+  return {
+    title,
+    description: `PM case studies and verified skills for ${portfolio.display_name}, built with PM Pathfinder.`,
+  }
 }
 
 export default async function PublicPortfolioPage({ params }: Props) {
@@ -30,124 +67,145 @@ export default async function PublicPortfolioPage({ params }: Props) {
 
   const traits: string[] = Array.isArray(portfolio.traits) ? portfolio.traits : []
   const strengths: string[] = Array.isArray(portfolio.strengths) ? portfolio.strengths : []
+  const studies = caseStudies ?? []
+  const hasStudies = studies.length > 0
+
+  const displayName: string = portfolio.display_name ?? 'PM Pathfinder member'
+  const background = (portfolio.background_axis ?? '').replace('_', '-')
+
+  const meta: string[] = []
+  if (background) meta.push(`${background} background`)
+  meta.push(hasStudies ? `${studies.length} case ${studies.length === 1 ? 'study' : 'studies'}` : 'Case studies in progress')
 
   return (
-    <main className="min-h-screen bg-[#0b1326]">
-      {/* Atmosphere */}
-      <div className="fixed -top-40 -right-40 w-[600px] h-[600px] bg-indigo-600/8 rounded-full blur-[130px] pointer-events-none -z-10" />
-
+    <main className="min-h-screen bg-surface-0">
       {/* Nav */}
-      <nav className="border-b border-white/5 px-6 h-14 flex items-center justify-between">
-        <Link href="/">
-          <span className="text-sm font-bold text-[#c3c0ff] font-[family-name:var(--font-space-grotesk)]">
-            PM Pathfinder
-          </span>
+      <nav className="flex h-14 items-center justify-between border-b border-border px-6">
+        <Link href="/" className="font-heading text-sm font-bold text-primary">
+          PM Pathfinder
         </Link>
-        <Link href="/quiz">
-          <button className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
-            Get your own archetype →
-          </button>
+        <Link
+          href="/quiz"
+          className="text-xs text-foreground/80 transition-colors hover:text-foreground"
+        >
+          Get your own archetype →
         </Link>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        {/* Profile header */}
-        <div className="mb-10">
-          <div className="w-16 h-16 rounded-full bg-indigo-500/15 ring-2 ring-indigo-500/30 flex items-center justify-center text-2xl font-bold text-[#c3c0ff] mb-4">
-            {(portfolio.display_name ?? '?').charAt(0).toUpperCase()}
+      <Hero
+        eyebrow={portfolio.archetype ? `${portfolio.archetype} · PM Archetype` : 'PM Archetype'}
+        title={displayName}
+        meta={meta}
+        badges={traits}
+        actions={
+          hasStudies
+            ? [{ label: 'Read the case studies', href: '#case-studies', variant: 'indigo' }]
+            : []
+        }
+        aside={
+          <div
+            aria-hidden
+            className="flex h-20 w-20 items-center justify-center rounded-2xl bg-brand-indigo/20 ring-1 ring-brand-indigo/40 font-heading text-3xl font-bold text-foreground"
+          >
+            {displayName.charAt(0).toUpperCase()}
           </div>
-          <h1 className="text-2xl font-bold text-[#dae2fd] mb-1">
-            {portfolio.display_name}
-          </h1>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
-              {portfolio.archetype}
-            </span>
-            <span className="text-xs font-mono text-[#918fa1] capitalize">
-              {(portfolio.background_axis ?? '').replace('_', '-')} background
-            </span>
-          </div>
-        </div>
+        }
+      />
 
-        {/* PM Story */}
-        {portfolio.pm_story && (
-          <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6 mb-6">
-            <p className="text-[10px] uppercase tracking-widest text-[#918fa1] mb-3">About</p>
-            <p className="text-sm text-[#c7c4d8] leading-relaxed">{portfolio.pm_story}</p>
+      <div className="mx-auto max-w-4xl px-6">
+        {/* The work — main content */}
+        <section id="case-studies" className="scroll-mt-16 py-16 sm:py-section">
+          <div className="mb-8 flex items-baseline justify-between gap-4">
+            <h2 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+              Selected work
+            </h2>
+            {hasStudies && (
+              <span className="font-mono text-xs text-muted-foreground">
+                {studies.length} {studies.length === 1 ? 'study' : 'studies'}
+              </span>
+            )}
           </div>
-        )}
 
-        {/* Skills card */}
-        <div className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6 mb-6">
-          <p className="text-[10px] uppercase tracking-widest text-[#918fa1] mb-3">
-            PM Skills — verified via PM Pathfinder assessment
-          </p>
-          {traits.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {traits.map((t: string) => (
-                <span key={t} className="text-xs px-3 py-1.5 rounded-full bg-[#222a3d] border border-white/10 text-[#c3c0ff]">
-                  {t}
-                </span>
+          {hasStudies ? (
+            <div className="flex flex-col gap-6">
+              {studies.map((cs, i) => (
+                <CaseStudy
+                  key={cs.id}
+                  index={i}
+                  title={cs.title || `Case study ${i + 1}`}
+                  problem={cs.problem}
+                  approach={cs.approach}
+                  outcome={cs.outcome}
+                />
               ))}
             </div>
-          )}
-          {strengths.length > 0 && (
-            <ul className="flex flex-col gap-2">
-              {strengths.map((s: string) => (
-                <li key={s} className="text-sm text-[#dae2fd] flex items-start gap-2">
-                  <span className="text-emerald-500 mt-0.5">✓</span>
-                  {s}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Case studies */}
-        {caseStudies && caseStudies.length > 0 && (
-          <div className="mb-10">
-            <p className="text-[10px] uppercase tracking-widest text-[#918fa1] mb-3">
-              Case Studies
-            </p>
-            <div className="flex flex-col gap-4">
-              {caseStudies.map((cs) => (
-                <div key={cs.id} className="bg-[#171f33] border border-white/[0.06] rounded-2xl p-6">
-                  <h3 className="text-sm font-semibold text-[#dae2fd] mb-4">{cs.title}</h3>
-                  {[
-                    { label: 'Problem', value: cs.problem },
-                    { label: 'Approach', value: cs.approach },
-                    { label: 'Outcome', value: cs.outcome },
-                  ].map(({ label, value }) =>
-                    value ? (
-                      <div key={label} className="mb-3 last:mb-0">
-                        <p className="text-[10px] uppercase tracking-widest text-[#918fa1] mb-1">
-                          {label}
-                        </p>
-                        <p className="text-sm text-[#c7c4d8] leading-relaxed">{value}</p>
-                      </div>
-                    ) : null
-                  )}
-                </div>
-              ))}
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-surface-1 p-card-sm">
+              <p className="text-sm leading-relaxed text-card-foreground/80">
+                {displayName} hasn&apos;t published a case study yet. The skills below are
+                scored from a completed PM Pathfinder diagnostic.
+              </p>
             </div>
+          )}
+        </section>
+
+        {/* Context for the work */}
+        <section className="border-t border-border py-16 sm:py-section">
+          <h2 className="mb-8 font-heading text-2xl font-bold tracking-tight text-foreground">
+            Context
+          </h2>
+
+          <div className="flex flex-col gap-6">
+            {portfolio.pm_story && (
+              <div className="rounded-2xl border border-border bg-surface-1 p-card-sm">
+                <p className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  How {displayName} works
+                </p>
+                <p className="text-pretty text-sm leading-relaxed text-card-foreground/85">
+                  {portfolio.pm_story}
+                </p>
+              </div>
+            )}
+
+            {strengths.length > 0 && (
+              <div className="rounded-2xl border border-border bg-surface-1 p-card-sm">
+                <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  PM skills — verified via PM Pathfinder assessment
+                </p>
+                <ul className="flex flex-col gap-2.5">
+                  {strengths.map((s: string) => (
+                    <li key={s} className="flex items-start gap-2.5 text-sm text-foreground">
+                      <Check
+                        className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400"
+                        aria-hidden
+                      />
+                      <span className="text-pretty leading-relaxed">{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-        )}
+        </section>
 
         {/* CTA */}
-        <div className="bg-[#171f33] border border-indigo-500/20 rounded-2xl p-6 text-center">
-          <p className="text-sm font-medium text-[#dae2fd] mb-1">
-            Want to know your PM Archetype?
-          </p>
-          <p className="text-xs text-[#918fa1] mb-4">
-            Take a free 10-minute assessment and get your personalised career roadmap.
-          </p>
-          <Link href="/quiz">
-            <button className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all">
+        <section className="border-t border-border py-16 sm:py-section">
+          <div className="rounded-2xl border border-brand-indigo/30 bg-surface-1 p-card-sm text-center sm:p-card">
+            <h2 className="font-heading text-xl font-bold text-foreground">
+              Want to know your PM Archetype?
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-card-foreground/80">
+              Take a free 10-minute assessment and get your personalised career roadmap.
+            </p>
+            <Link
+              href="/quiz"
+              className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-brand-amber px-6 text-sm font-semibold text-slate-950 shadow-glow-amber transition-colors hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-amber"
+            >
               Take the Assessment
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </Link>
-        </div>
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+        </section>
       </div>
     </main>
   )
