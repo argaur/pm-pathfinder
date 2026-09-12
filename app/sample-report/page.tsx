@@ -56,10 +56,10 @@ export default function SampleReportPage() {
         </div>
 
         <div className="mb-8">
-          <p className="mb-1 text-xs font-medium uppercase tracking-widest text-indigo-400">
+          <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Diagnostic Report
           </p>
-          <h1 className="font-[family-name:var(--font-space-grotesk)] text-2xl font-bold text-[#dae2fd]">
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
             Sample: Complete Profile
           </h1>
         </div>

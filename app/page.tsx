@@ -329,7 +329,7 @@ export default function LandingPage() {
                 <li className="flex items-start gap-5 rounded-2xl border border-border bg-surface-1 p-card-sm sm:p-card">
                   <span
                     aria-hidden
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-indigo font-mono text-sm font-bold text-white"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-indigo/20 font-mono text-xs font-semibold text-foreground"
                   >
                     {step.num}
                   </span>

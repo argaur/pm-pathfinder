@@ -86,7 +86,7 @@ export default function InsightsPage() {
               }}
               className="rounded-2xl border border-border bg-surface-1 p-card-sm"
             >
-              <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-6 sm:gap-y-3">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
                   <Check
                     className="mt-0.5 h-4 w-4 shrink-0 text-secondary"
@@ -101,7 +101,7 @@ export default function InsightsPage() {
                     </p>
                   </div>
                 </div>
-                <div className="min-w-0 shrink-0 text-right">
+                <div className="min-w-0 pl-7 text-left sm:shrink-0 sm:pl-0 sm:text-right">
                   <p className="mb-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
                     PMs call it
                   </p>

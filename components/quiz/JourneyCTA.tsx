@@ -61,7 +61,7 @@ export default function JourneyCTA({
         onClick={onClick}
         disabled={isDisabled}
         className={cn(
-          'flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold transition-all active:scale-[0.98]',
+          'flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold transition-all active:scale-[0.96]',
           'focus-visible:outline-2 focus-visible:outline-offset-2',
           isDisabled
             ? 'bg-surface-2 text-muted-foreground shadow-none active:scale-100'
