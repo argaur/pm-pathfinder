@@ -59,12 +59,12 @@ const STEPS = [
   {
     num: '02',
     title: 'Get your PM archetype',
-    desc: 'One of 6 archetypes, from your background and your mindset. You learn what kind of PM you are built to be, and which gap to close first.',
+    desc: 'One of 6 archetypes, from your background and your mindset. You learn what kind of PM you are built to be. You also see which gap to close first.',
   },
   {
     num: '03',
     title: 'Follow a path built for you',
-    desc: 'A chapter-by-chapter roadmap aimed at your gaps, not a generic course. Concepts, frameworks and practice in the order you need them.',
+    desc: 'A chapter-by-chapter roadmap aimed at your gaps. Not a generic course. Concepts, frameworks and practice in the order you need them.',
   },
 ]
 
@@ -96,7 +96,7 @@ const FEATURES = [
   },
   {
     title: 'Deep dive per dimension',
-    desc: 'Sub-category scoring inside any dimension, so a low score tells you which part of it is low.',
+    desc: 'Sub-category scoring inside any dimension, so you know exactly which part is low.',
   },
   {
     title: 'Public PM portfolio',
@@ -201,7 +201,7 @@ export default function LandingPage() {
       <Hero
         eyebrow="PM career diagnostic"
         title="You are closer to PM than you think. Find out what is missing."
-        lede="Take a 10-minute assessment. Get a career roadmap built from your background, not from a generic template."
+        lede="Take a 10-minute assessment. Get a career roadmap built from your background. Not a generic template."
         meta={['9 user interviews', '6 archetypes', '10 questions', 'about 8 minutes']}
         badges={['Free', 'No card', 'Everything unlocked']}
         actions={[
@@ -284,7 +284,7 @@ export default function LandingPage() {
           <SectionHeading
             eyebrow="What the interviews found"
             title="Five structural barriers to a PM transition"
-            lede="Each one is a thing the product has to answer. The assessment and the roadmap are built directly against this list."
+            lede="The product answers each one directly. The assessment and the roadmap are built against this list."
           />
 
           <ol className="flex flex-col gap-3">

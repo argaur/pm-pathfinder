@@ -14,7 +14,7 @@ import ReportBody from '@/components/report/ReportBody'
 export const metadata: Metadata = {
   title: 'Sample Report | PM Pathfinder',
   description:
-    'A sample PM Pathfinder diagnostic report — see what the real 5-dimension breakdown and archetype profile look like.',
+    'A sample PM Pathfinder diagnostic report. See what the real 5-dimension breakdown and archetype profile look like.',
 }
 
 export default function SampleReportPage() {
@@ -52,15 +52,15 @@ export default function SampleReportPage() {
               Sample report
             </p>
             <p className="text-sm leading-relaxed text-card-foreground/85">
-              This is a sample diagnostic report so you can see the real thing before signing up.
-              Take the 10-minute assessment to get your own.
+              This is a sample diagnostic report. See the real thing before you sign up. Take the
+              10-minute assessment to get your own.
             </p>
           </div>
           <Link
             href="/quiz"
             className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-amber px-5 text-sm font-semibold text-slate-950 shadow-glow-amber transition-colors hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-amber"
           >
-            Take the real quiz
+            Take the real assessment
           </Link>
         </div>
 
