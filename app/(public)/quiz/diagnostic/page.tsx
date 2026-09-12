@@ -2,9 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import {
   DIAGNOSTIC_QUESTIONS,
   CHUNK_LABELS,
@@ -19,8 +16,33 @@ import {
 import { classifyBackground } from '@/lib/classifiers/background'
 import { runFullScoring } from '@/lib/scoring/engine'
 import { createClient } from '@/lib/supabase/client'
+import QuizShell from '@/components/quiz/QuizShell'
+import OptionButton from '@/components/quiz/OptionButton'
+import JourneyCTA from '@/components/quiz/JourneyCTA'
+
+/**
+ * Stage 3 — the ten-question diagnostic, the long middle of the journey.
+ *
+ * The section intro and the question screen are now the same shell with the
+ * same rail, so crossing a section boundary no longer looks like leaving the
+ * quiz. The rail keeps counting from the onboarding steps rather than
+ * restarting at zero.
+ *
+ * Scoring and persistence are untouched: same runFullScoring call, same
+ * localStorage write, same quiz_sessions update keyed on session_token, same
+ * push to /quiz/results on success and on failure.
+ */
 
 const CHUNK_ORDER = [1, 2, 3, 4]
+
+const CHUNK_INTROS: Record<number, { icon: string; blurb: string }> = {
+  1: { icon: '🎯', blurb: 'How you approach problems and make decisions under ambiguity.' },
+  2: { icon: '⚡', blurb: 'How you plan, deliver, and communicate under pressure.' },
+  3: { icon: '🔧', blurb: 'How you engage with technology and engineering teams.' },
+  4: { icon: '🤝', blurb: 'How you listen to users and build influence without authority.' },
+}
+
+const OPTION_KEYS = ['A', 'B', 'C', 'D']
 
 export default function DiagnosticPage() {
   const router = useRouter()
@@ -33,11 +55,16 @@ export default function DiagnosticPage() {
   const currentChunk = currentQuestion.chunk
   const isFirstInChunk = DIAGNOSTIC_QUESTIONS[currentIndex - 1]?.chunk !== currentChunk || currentIndex === 0
   const answeredCount = Object.keys(answers).length
-  const progress = Math.round((answeredCount / TOTAL_QUESTIONS) * 100)
   const selectedOption = answers[currentQuestion.id]
 
   const handleSelect = (optionId: string) => {
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: optionId }))
+  }
+
+  const handleExit = () => {
+    if (window.confirm('Exit the quiz? Your progress will be lost.')) {
+      router.push('/')
+    }
   }
 
   const handleNext = async () => {
@@ -93,148 +120,77 @@ export default function DiagnosticPage() {
     }
   }
 
-  // Chunk intro card
+  // Section intro — same shell, same rail, just a different thing in the column.
   if (showChunkIntro && isFirstInChunk) {
-    return (
-      <main className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden">
-        {/* Atmospheric orbs */}
-        <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -z-10" />
-        <div className="fixed top-0 left-0 w-[400px] h-[400px] bg-teal-500/[0.07] rounded-full blur-[100px] pointer-events-none -z-10" />
+    const sectionNumber = CHUNK_ORDER.indexOf(currentChunk) + 1
+    const intro = CHUNK_INTROS[currentChunk]
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
-          className="w-full max-w-md text-center"
-        >
-          <div className="text-5xl mb-6">
-            {currentChunk === 1 ? '🎯' : currentChunk === 2 ? '⚡' : currentChunk === 3 ? '🔧' : '🤝'}
-          </div>
-          <p className="text-xs uppercase tracking-widest text-teal-400 font-mono mb-3">
-            Section {CHUNK_ORDER.indexOf(currentChunk) + 1} of 4
-          </p>
-          <h2 className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] mb-3 tracking-tight">
-            {CHUNK_LABELS[currentChunk]}
-          </h2>
-          <p className="text-sm text-[#c7c4d8] leading-relaxed mb-10 max-w-sm mx-auto">
-            {currentChunk === 1 && 'How you approach problems and make decisions under ambiguity.'}
-            {currentChunk === 2 && 'How you plan, deliver, and communicate under pressure.'}
-            {currentChunk === 3 && 'How you engage with technology and engineering teams.'}
-            {currentChunk === 4 && 'How you listen to users and build influence without authority.'}
-          </p>
-          <Button
+    return (
+      <QuizShell
+        stage="diagnostic"
+        completed={answeredCount}
+        positionLabel={`Section ${sectionNumber} of ${CHUNK_ORDER.length}`}
+        transitionKey={`section-${currentChunk}`}
+        width="wide"
+        onExit={handleExit}
+        footer={
+          <JourneyCTA
+            label="Start section"
             onClick={() => setShowChunkIntro(false)}
-            className="bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-semibold h-12 px-10 rounded-full shadow-[0_0_24px_rgba(79,219,200,0.25)] transition-all active:scale-95"
-          >
-            Start section
-          </Button>
-        </motion.div>
-      </main>
+          />
+        }
+      >
+        <div className="flex flex-col items-center text-center">
+          <span aria-hidden className="mb-6 text-5xl">
+            {intro.icon}
+          </span>
+          <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-secondary">
+            Section {sectionNumber} of {CHUNK_ORDER.length}
+          </p>
+          <h1 className="text-balance font-heading text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">
+            {CHUNK_LABELS[currentChunk]}
+          </h1>
+          <p className="mt-3 max-w-sm text-pretty text-sm leading-relaxed text-card-foreground/80">
+            {intro.blurb}
+          </p>
+        </div>
+      </QuizShell>
     )
   }
 
   return (
-    <main className="min-h-screen flex flex-col relative overflow-hidden">
-      {/* Atmospheric orbs */}
-      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -z-10" />
-      <div className="fixed top-0 left-0 w-[400px] h-[400px] bg-teal-500/[0.07] rounded-full blur-[100px] pointer-events-none -z-10" />
-
-      {/* Progress bar */}
-      <div className="flex items-center gap-4 px-6 pt-6 pb-4">
-        <div className="flex-1">
-          <div className="h-1 bg-[#222a3d] rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-gradient-to-r from-indigo-500 to-teal-400 rounded-full"
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.4 }}
-            />
-          </div>
-        </div>
-        <span className="text-xs font-mono text-[#918fa1]">
-          {currentIndex + 1} / {TOTAL_QUESTIONS}
-        </span>
-        <button
-          onClick={() => {
-            if (window.confirm('Exit the quiz? Your progress will be lost.')) {
-              router.push('/')
-            }
-          }}
-          className="text-[#918fa1] hover:text-[#c7c4d8] transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Question + options */}
-      <div className="flex-1 flex items-center justify-center px-6 pb-32">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentQuestion.id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.2 }}
-            className="w-full max-w-xl"
+    <QuizShell
+      stage="diagnostic"
+      completed={answeredCount}
+      positionLabel={`Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`}
+      transitionKey={currentQuestion.id}
+      transition="slide"
+      width="wide"
+      onExit={handleExit}
+      eyebrow={CHUNK_LABELS[currentChunk]}
+      title={currentQuestion.text}
+      footer={
+        <JourneyCTA
+          label={currentIndex === TOTAL_QUESTIONS - 1 ? 'See my results' : 'Continue'}
+          onClick={handleNext}
+          disabled={!selectedOption}
+          loading={saving}
+          loadingLabel="Analysing your profile..."
+        />
+      }
+    >
+      <div className="flex flex-col gap-3">
+        {currentQuestion.options.map((option, i) => (
+          <OptionButton
+            key={option.id}
+            selected={selectedOption === option.id}
+            onSelect={() => handleSelect(option.id)}
+            marker={OPTION_KEYS[i]}
           >
-            {/* Chunk label */}
-            <p className="text-xs uppercase tracking-widest text-teal-400 font-mono mb-5">
-              {CHUNK_LABELS[currentChunk]}
-            </p>
-
-            {/* Question text — no card wrapper */}
-            <h2 className="text-2xl font-bold font-[family-name:var(--font-space-grotesk)] text-[#dae2fd] leading-snug tracking-tight mb-8">
-              {currentQuestion.text}
-            </h2>
-
-            {/* Options */}
-            <div className="flex flex-col gap-3">
-              {currentQuestion.options.map((option, i) => {
-                const optionKeys = ['A', 'B', 'C', 'D']
-                const isSelected = selectedOption === option.id
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => handleSelect(option.id)}
-                    className={`w-full text-left p-5 rounded-2xl transition-all duration-150 flex items-start gap-4 ${
-                      isSelected
-                        ? 'border-2 border-[#4fdbc8] bg-[#222a3d] shadow-[0_0_20px_rgba(79,219,200,0.1)] text-[#dae2fd]'
-                        : 'border border-white/5 bg-[#171f33] text-[#c7c4d8] hover:bg-[#1a2236] hover:border-white/10'
-                    }`}
-                  >
-                    <span
-                      className={`flex-shrink-0 w-10 h-10 rounded-xl text-sm font-bold font-mono flex items-center justify-center transition-colors ${
-                        isSelected
-                          ? 'bg-[#4fdbc8] text-slate-950'
-                          : 'bg-[#222a3d] text-[#918fa1]'
-                      }`}
-                    >
-                      {optionKeys[i]}
-                    </span>
-                    <span className="pt-2 text-sm leading-relaxed">{option.text}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </motion.div>
-        </AnimatePresence>
+            {option.text}
+          </OptionButton>
+        ))}
       </div>
-
-      {/* Fixed footer CTA */}
-      <div className="fixed bottom-0 inset-x-0 bg-gradient-to-t from-[#0b1326] via-[#0b1326]/95 to-transparent px-6 pt-6 pb-8">
-        <div className="max-w-xl mx-auto">
-          <Button
-            onClick={handleNext}
-            disabled={!selectedOption || saving}
-            className="w-full h-14 bg-[#4fdbc8] hover:bg-teal-400 disabled:bg-[#222a3d] disabled:text-[#918fa1] text-slate-950 font-semibold text-base rounded-2xl shadow-[0_0_32px_rgba(79,219,200,0.2)] disabled:shadow-none transition-all active:scale-[0.98]"
-          >
-            {saving
-              ? 'Analysing your profile...'
-              : currentIndex === TOTAL_QUESTIONS - 1
-              ? 'See my results'
-              : 'Continue'}
-          </Button>
-        </div>
-      </div>
-    </main>
+    </QuizShell>
   )
 }

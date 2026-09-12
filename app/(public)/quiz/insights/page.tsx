@@ -3,12 +3,21 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Check } from 'lucide-react'
 import { getInsightsForBackground, InsightMapping } from '@/lib/data/insights-map'
 import { getOnboardingAnswers } from '@/lib/utils/session'
 import { classifyBackground } from '@/lib/classifiers/background'
 import { BackgroundAxis } from '@/lib/data/archetypes'
+import { DURATIONS, fadeUpVariants, staggerDelay } from '@/lib/motion'
+import QuizShell from '@/components/quiz/QuizShell'
+import JourneyCTA from '@/components/quiz/JourneyCTA'
+
+/**
+ * Stage 2 — the payoff for finishing onboarding, and the argument for starting
+ * the diagnostic. Reads nothing new: it re-derives the axis from the
+ * onboarding answers already in localStorage, exactly as before, and bounces
+ * to /quiz if they are missing.
+ */
 
 const AXIS_LABELS: Record<BackgroundAxis, string> = {
   technical: 'Technical',
@@ -39,76 +48,92 @@ export default function InsightsPage() {
   }, [router])
 
   return (
-    <main className="min-h-screen flex flex-col relative overflow-hidden">
-      {/* Centred content */}
-      <div className="flex-1 flex flex-col justify-center px-6 pt-10 pb-28">
-        <div className="w-full max-w-lg mx-auto">
-          {visible && (
+    <QuizShell
+      stage="insights"
+      completed={0}
+      positionLabel="Before the diagnostic"
+      align="top"
+      eyebrow="Early insights"
+      title="You already speak PM."
+      subtitle={
+        backgroundLabel ? (
+          <>
+            Based on your{' '}
+            <span className="text-foreground">{backgroundLabel}</span> background,
+            here&apos;s what you&apos;re already doing — in PM terms.
+          </>
+        ) : undefined
+      }
+      footer={
+        <JourneyCTA
+          label="Take the full diagnostic"
+          onClick={() => router.push('/quiz/diagnostic')}
+          note="~8 minutes · 10 questions"
+        />
+      }
+    >
+      {visible && (
+        <div className="flex flex-col gap-4">
+          {insights.map((insight, i) => (
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
+              key={i}
+              variants={fadeUpVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{
+                duration: DURATIONS.medium,
+                delay: staggerDelay(i, 0.12, 0.1),
+              }}
+              className="rounded-2xl border border-border bg-surface-1 p-card-sm"
             >
-              <p className="text-xs uppercase tracking-widest text-teal-400 font-medium mb-3">
-                Early insights
-              </p>
-              <h2 className="text-2xl font-semibold text-[#dae2fd] mb-2">
-                You already speak PM.
-              </h2>
-              <p className="text-sm text-[#c7c4d8] mb-8">
-                Based on your <span className="text-[#dae2fd]">{backgroundLabel}</span> background,
-                here&apos;s what you&apos;re already doing — in PM terms.
-              </p>
-
-              <div className="flex flex-col gap-4 mb-8">
-                {insights.map((insight, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + i * 0.12 }}
-                    className="bg-[#171f33] rounded-xl p-5"
-                  >
-                    <div className="flex items-start gap-3 mb-3">
-                      <CheckCircle className="w-4 h-4 text-teal-400 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs text-[#918fa1] mb-0.5">You call it</p>
-                        <p className="text-sm text-[#dae2fd]">{insight.yourSkill}</p>
-                      </div>
-                      <div className="ml-auto text-right pl-4">
-                        <p className="text-xs text-[#918fa1] mb-0.5">PMs call it</p>
-                        <p className="text-sm font-medium text-teal-400">{insight.pmCallsIt}</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-[#918fa1] leading-relaxed pl-7">{insight.why}</p>
-                  </motion.div>
-                ))}
+              <div className="flex flex-wrap items-start gap-x-6 gap-y-3">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <Check
+                    className="mt-0.5 h-4 w-4 shrink-0 text-secondary"
+                    aria-hidden
+                  />
+                  <div className="min-w-0">
+                    <p className="mb-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                      You call it
+                    </p>
+                    <p className="text-pretty text-sm text-foreground">
+                      {insight.yourSkill}
+                    </p>
+                  </div>
+                </div>
+                <div className="min-w-0 shrink-0 text-right">
+                  <p className="mb-0.5 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    PMs call it
+                  </p>
+                  <p className="text-pretty text-sm font-medium text-secondary">
+                    {insight.pmCallsIt}
+                  </p>
+                </div>
               </div>
-
-              <div className="bg-[#222a3d] border border-white/10 rounded-xl p-5">
-                <p className="text-sm text-[#c3c0ff] leading-relaxed">
-                  These are surface signals. To understand your full picture — where you&apos;re strong,
-                  where the gaps are, and which PM archetype fits you — take the full diagnostic.
-                </p>
-              </div>
+              <p className="mt-3 text-pretty text-xs leading-relaxed text-muted-foreground sm:pl-7">
+                {insight.why}
+              </p>
             </motion.div>
-          )}
-        </div>
-      </div>
+          ))}
 
-      {/* Fixed footer CTA */}
-      <div className="fixed bottom-0 inset-x-0 bg-gradient-to-t from-[#0b1326] via-[#0b1326]/95 to-transparent px-6 pt-6 pb-8">
-        <div className="max-w-lg mx-auto">
-          <Button
-            onClick={() => router.push('/quiz/diagnostic')}
-            className="w-full h-14 bg-[#4fdbc8] hover:bg-teal-400 text-slate-950 font-semibold text-base rounded-2xl shadow-[0_0_32px_rgba(79,219,200,0.2)] transition-all active:scale-[0.98]"
+          <motion.div
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{
+              duration: DURATIONS.medium,
+              delay: staggerDelay(insights.length, 0.12, 0.1),
+            }}
+            className="rounded-2xl border border-brand-indigo/30 bg-surface-2 p-card-sm"
           >
-            Take the full diagnostic
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-          <p className="text-center text-xs text-[#918fa1] mt-3">~8 minutes · 10 questions</p>
+            <p className="text-pretty text-sm leading-relaxed text-card-foreground/85">
+              These are surface signals. To understand your full picture — where
+              you&apos;re strong, where the gaps are, and which PM archetype fits
+              you — take the full diagnostic.
+            </p>
+          </motion.div>
         </div>
-      </div>
-    </main>
+      )}
+    </QuizShell>
   )
 }

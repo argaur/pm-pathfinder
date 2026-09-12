@@ -2,16 +2,26 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { Lock, ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Lock } from 'lucide-react'
 import { getOnboardingAnswers, getDiagnosticAnswers } from '@/lib/utils/session'
 import { classifyBackground } from '@/lib/classifiers/background'
 import { runFullScoring, DIMENSION_LABELS, TIER_CONFIG } from '@/lib/scoring/engine'
 import { ARCHETYPES } from '@/lib/data/archetypes'
 import { Dimension } from '@/lib/data/questions'
 import type { ScoringResult } from '@/lib/scoring/engine'
+import QuizShell from '@/components/quiz/QuizShell'
+import JourneyCTA from '@/components/quiz/JourneyCTA'
+import DimensionBar from '@/components/quiz/DimensionBar'
+
+/**
+ * Stage 4 — the pre-signup teaser.
+ *
+ * Scoring is re-run client-side from the localStorage answers exactly as
+ * before; nothing is read from or written to Supabase here. The bottom three
+ * dimensions stay blurred behind a plain CSS blur (not BlurGate — BlurGate
+ * opens the pricing modal, which is the wrong signal for "sign in to see
+ * this"), and the only action is still the push to /auth.
+ */
 
 export default function ResultsPage() {
   const router = useRouter()
@@ -38,14 +48,19 @@ export default function ResultsPage() {
     }
   }, [router])
 
-  if (error) return (
-    <main className="min-h-screen flex items-center justify-center">
-      <div className="text-rose-400 text-sm font-mono bg-[#171f33] p-6 rounded-xl max-w-lg">
-        <p className="font-bold mb-2">Scoring error</p>
-        <p>{error}</p>
-      </div>
-    </main>
-  )
+  if (error) {
+    return (
+      <QuizShell stage="results" showProgress={false} transitionKey="error">
+        <div
+          role="alert"
+          className="rounded-2xl border border-destructive/40 bg-surface-1 p-card-sm font-mono text-sm text-destructive"
+        >
+          <p className="mb-2 font-bold">Scoring error</p>
+          <p className="text-pretty">{error}</p>
+        </div>
+      </QuizShell>
+    )
+  }
 
   if (!result) return null
 
@@ -55,114 +70,84 @@ export default function ResultsPage() {
     .filter(([, tier]) => tier === 'growth')
     .slice(0, 2)
 
+  const scoreRows = Object.entries(result.dimensionScores) as [Dimension, number][]
+
   return (
-    <main className="min-h-screen flex flex-col relative overflow-hidden">
-      <div className="flex-1 flex flex-col justify-center px-6 pt-10 pb-28">
-      <div className="w-full max-w-lg mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Archetype reveal */}
-          <div className="bg-[#171f33] rounded-2xl p-6 mb-6">
-            <p className="text-xs uppercase tracking-widest text-indigo-400 font-medium mb-3">
-              Your PM Archetype
-            </p>
-            <h2 className="text-3xl font-bold text-[#dae2fd] mb-2">{archetype.name}</h2>
-            <p className="text-sm text-[#c7c4d8] leading-relaxed mb-4">{archetype.tagline}</p>
+    <QuizShell
+      stage="results"
+      completed={0}
+      positionLabel="Locked preview"
+      align="top"
+      width="narrow"
+      eyebrow="Your PM archetype"
+      title={archetype.name}
+      subtitle={archetype.tagline}
+      transitionKey="results"
+      footer={
+        <JourneyCTA
+          label="Unlock your full report — free"
+          tone="convert"
+          onClick={() => router.push('/auth')}
+          note="Google sign-in · Your results are saved · Takes 10 seconds"
+        />
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <ul className="flex flex-wrap gap-2">
+          {archetype.traits.map((trait) => (
+            <li
+              key={trait}
+              className="rounded-full border border-brand-indigo/30 bg-brand-indigo/10 px-3 py-1.5 text-xs text-foreground"
+            >
+              {trait}
+            </li>
+          ))}
+        </ul>
 
-            <div className="flex flex-wrap gap-2">
-              {archetype.traits.map((trait) => (
-                <Badge
-                  key={trait}
-                  className="bg-[#222a3d] text-[#c3c0ff] border border-white/10 text-xs"
-                >
-                  {trait}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Partial radar — blurred teaser */}
-          <div className="bg-[#171f33] rounded-2xl p-6 mb-6 relative overflow-hidden">
-            <p className="text-xs uppercase tracking-widest text-[#918fa1] font-medium mb-4">
-              Your 5-dimension scores
-            </p>
-
-            <div className="flex flex-col gap-3">
-              {(Object.entries(result.dimensionScores) as [Dimension, number][]).map(([dim, score], i) => {
-                const tier = result.tiers[dim]
-                const config = TIER_CONFIG[tier]
-                const isBlurred = i >= 2 // blur bottom 3
-
-                return (
-                  <div
-                    key={dim}
-                    className={`flex items-center gap-3 transition-all ${isBlurred ? 'blur-sm select-none' : ''}`}
-                  >
-                    <span className="text-xs text-[#c7c4d8] w-40 flex-shrink-0">
-                      {DIMENSION_LABELS[dim]}
-                    </span>
-                    <div className="flex-1 h-2 bg-[#222a3d] rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-teal-500"
-                        style={{ width: isBlurred ? '60%' : `${score * 10}%` }}
-                      />
-                    </div>
-                    <span className={`text-xs font-mono w-8 text-right ${config.color}`}>
-                      {isBlurred ? '?' : `${score}`}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Lock overlay */}
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#171f33] to-transparent flex items-end justify-center pb-4">
-              <div className="flex items-center gap-2 text-[#918fa1] text-xs">
-                <Lock className="w-3.5 h-3.5" />
-                Sign up to unlock your full report
-              </div>
-            </div>
-          </div>
-
-          {/* Growth tease */}
-          {growthDimensions.length > 0 && (
-            <div className="bg-[#171f33] rounded-xl p-4 mb-6">
-              <p className="text-xs text-[#918fa1] mb-2">Your biggest growth opportunities:</p>
-              <div className="flex gap-2 flex-wrap">
-                {growthDimensions.map(([dim]) => (
-                  <span
-                    key={dim}
-                    className="text-xs bg-rose-950/40 text-rose-400 border border-rose-800/50 px-2.5 py-1 rounded-lg"
-                  >
-                    {DIMENSION_LABELS[dim]}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-        </motion.div>
-      </div>
-      </div>
-
-      {/* Fixed footer CTA */}
-      <div className="fixed bottom-0 inset-x-0 bg-gradient-to-t from-[#0b1326] via-[#0b1326]/95 to-transparent px-6 pt-6 pb-8">
-        <div className="max-w-lg mx-auto">
-          <Button
-            onClick={() => router.push('/auth')}
-            className="w-full h-14 bg-[#ffb95f] hover:bg-amber-400 text-slate-950 font-semibold text-base rounded-2xl mb-3"
-          >
-            Unlock your full report — free
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-          <p className="text-center text-xs text-[#918fa1]">
-            Google sign-in · Your results are saved · Takes 10 seconds
+        {/* Blurred 5D teaser — plain CSS blur, deliberately not BlurGate. */}
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-surface-1 p-card-sm">
+          <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            Your 5-dimension scores
           </p>
+
+          <div className="flex flex-col gap-3">
+            {scoreRows.map(([dim, score], i) => (
+              <DimensionBar
+                key={dim}
+                label={DIMENSION_LABELS[dim]}
+                score={score}
+                obscured={i >= 2}
+                valueClassName={TIER_CONFIG[result.tiers[dim]].color}
+              />
+            ))}
+          </div>
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-24 items-end justify-center bg-gradient-to-t from-surface-1 to-transparent pb-4">
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Lock className="h-3.5 w-3.5" aria-hidden />
+              Sign up to unlock your full report
+            </p>
+          </div>
         </div>
+
+        {growthDimensions.length > 0 && (
+          <div className="rounded-2xl border border-border bg-surface-1 p-card-sm">
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              Your biggest growth opportunities
+            </p>
+            <ul className="flex flex-wrap gap-2">
+              {growthDimensions.map(([dim]) => (
+                <li
+                  key={dim}
+                  className="rounded-lg border border-rose-800/50 bg-rose-950/40 px-2.5 py-1 text-xs text-rose-400"
+                >
+                  {DIMENSION_LABELS[dim]}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-    </main>
+    </QuizShell>
   )
 }
