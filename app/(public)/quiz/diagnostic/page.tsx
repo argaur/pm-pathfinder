@@ -147,7 +147,10 @@ export default function DiagnosticPage() {
           <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-secondary">
             Section {sectionNumber} of {CHUNK_ORDER.length}
           </p>
-          <h1 className="text-balance font-heading text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">
+          <h1
+            tabIndex={-1}
+            className="text-balance rounded-md font-heading text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+          >
             {CHUNK_LABELS[currentChunk]}
           </h1>
           <p className="mt-3 max-w-sm text-pretty text-sm leading-relaxed text-card-foreground/80">

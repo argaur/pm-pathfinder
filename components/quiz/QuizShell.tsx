@@ -1,12 +1,13 @@
 'use client'
 
-import type { ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useRef, type ReactNode } from 'react'
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   DURATIONS,
   EASINGS,
+  REDUCED_MOTION,
   fadeUpVariants,
   slideXVariants,
 } from '@/lib/motion'
@@ -95,6 +96,23 @@ export default function QuizShell({
   const columnWidth = WIDTHS[width]
   const hasHeader = Boolean(eyebrow || title || subtitle)
 
+  // Every question/step change re-keys the AnimatePresence content but doesn't navigate — no
+  // Next.js route change happens, so nothing moves focus or announces the new heading to a
+  // screen-reader or keyboard user. Move focus to the new screen's h1 on every change after the
+  // first mount (the first mount is a real route change and Next.js's own route announcer covers
+  // it). Queried from the content container rather than a ref on QuizShell's own <h1> because
+  // some screens (the diagnostic's chunk-intro card) supply their own h1 as `children` instead of
+  // the `title` prop — both need the same tabIndex={-1} + focus() treatment to be reachable here.
+  const contentRef = useRef<HTMLDivElement>(null)
+  const isFirstRender = useRef(true)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    contentRef.current?.querySelector<HTMLElement>('h1')?.focus()
+  }, [transitionKey])
+
   const motionProps =
     transition === 'slide'
       ? {
@@ -115,7 +133,12 @@ export default function QuizShell({
         : {}
 
   return (
+    <MotionConfig reducedMotion={REDUCED_MOTION}>
     <main className="relative flex min-h-screen flex-col overflow-hidden bg-surface-0">
+      <a href="#quiz-content" className="skip-link">
+        Skip to content
+      </a>
+
       {/* Ambient wash. Fill only — indigo is never text. */}
       <div
         aria-hidden
@@ -159,13 +182,14 @@ export default function QuizShell({
 
       {/* Content — one column, one type scale, one transition. */}
       <div
+        id="quiz-content"
         className={cn(
           'flex flex-1 flex-col px-6 pt-10',
           footer ? 'pb-36' : 'pb-16',
           align === 'center' ? 'justify-center' : 'justify-start'
         )}
       >
-        <div className={cn('mx-auto w-full', columnWidth)}>
+        <div ref={contentRef} className={cn('mx-auto w-full', columnWidth)}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={transitionKey ?? stage} {...motionProps}>
               {hasHeader && (
@@ -176,7 +200,10 @@ export default function QuizShell({
                     </p>
                   )}
                   {title && (
-                    <h1 className="text-balance font-heading text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl">
+                    <h1
+                      tabIndex={-1}
+                      className="text-balance font-heading text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+                    >
                       {title}
                     </h1>
                   )}
@@ -199,5 +226,6 @@ export default function QuizShell({
         </div>
       )}
     </main>
+    </MotionConfig>
   )
 }

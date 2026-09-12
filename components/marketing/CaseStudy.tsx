@@ -1,8 +1,8 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, MotionConfig } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { DURATIONS, EASINGS, fadeUpVariants, staggerDelay } from '@/lib/motion'
+import { DURATIONS, EASINGS, REDUCED_MOTION, fadeUpVariants, staggerDelay } from '@/lib/motion'
 
 /**
  * One case study, rendered as the main unit of content on the public portfolio
@@ -48,6 +48,7 @@ export default function CaseStudy({
   const number = String(index + 1).padStart(2, '0')
 
   return (
+    <MotionConfig reducedMotion={REDUCED_MOTION}>
     <motion.article
       variants={fadeUpVariants}
       initial="hidden"
@@ -95,5 +96,6 @@ export default function CaseStudy({
         </dl>
       )}
     </motion.article>
+    </MotionConfig>
   )
 }

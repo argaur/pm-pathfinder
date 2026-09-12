@@ -78,20 +78,29 @@ export default async function PublicPortfolioPage({ params }: Props) {
   meta.push(hasStudies ? `${studies.length} case ${studies.length === 1 ? 'study' : 'studies'}` : 'Case studies in progress')
 
   return (
-    <main className="min-h-screen bg-surface-0">
-      {/* Nav */}
+    <>
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+
+      {/* Nav — a sibling of <main>, not nested inside it: this is site chrome, not the page's
+          primary content region. */}
       <nav className="flex h-14 items-center justify-between border-b border-border px-6">
-        <Link href="/" className="font-heading text-sm font-bold text-primary">
+        <Link
+          href="/"
+          className="rounded-md font-heading text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+        >
           PM Pathfinder
         </Link>
         <Link
           href="/quiz"
-          className="text-xs text-foreground/80 transition-colors hover:text-foreground"
+          className="rounded-md text-xs text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
         >
           Get your own archetype →
         </Link>
       </nav>
 
+      <main id="main-content" className="min-h-screen bg-surface-0">
       <Hero
         eyebrow={portfolio.archetype ? `${portfolio.archetype} · PM Archetype` : 'PM Archetype'}
         title={displayName}
@@ -207,6 +216,7 @@ export default async function PublicPortfolioPage({ params }: Props) {
           </div>
         </section>
       </div>
-    </main>
+      </main>
+    </>
   )
 }

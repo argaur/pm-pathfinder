@@ -1,3 +1,6 @@
+'use client'
+
+import { MotionConfig } from 'framer-motion'
 import { Archetype } from '@/lib/data/archetypes'
 import { DIMENSION_LABELS } from '@/lib/scoring/engine'
 import { Dimension } from '@/lib/data/questions'
@@ -5,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import RadarChart from '@/components/report/RadarChart'
 import DimensionCard from '@/components/report/DimensionCard'
 import type { RadarDataPoint } from '@/lib/report/transform'
+import { REDUCED_MOTION } from '@/lib/motion'
 
 interface ReportBodyProps {
   archetype: Archetype
@@ -30,7 +34,7 @@ export default function ReportBody({
   dimensions,
 }: ReportBodyProps) {
   return (
-    <>
+    <MotionConfig reducedMotion={REDUCED_MOTION}>
       {/* Archetype card */}
       <div className="bg-[#171f33] rounded-2xl p-6 mb-6 border border-white/[0.06]">
         <div className="flex items-start justify-between gap-4 mb-4">
@@ -135,6 +139,6 @@ export default function ReportBody({
           ))}
         </div>
       </div>
-    </>
+    </MotionConfig>
   )
 }

@@ -2,10 +2,10 @@
 
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, MotionConfig } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import Hero from '@/components/marketing/Hero'
-import { DURATIONS, EASINGS, fadeUpVariants, staggerDelay } from '@/lib/motion'
+import { DURATIONS, EASINGS, REDUCED_MOTION, fadeUpVariants, staggerDelay } from '@/lib/motion'
 
 /**
  * Product landing page — the second consumer of components/marketing/Hero.
@@ -172,26 +172,32 @@ function Reveal({
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-surface-0">
-      {/* Nav */}
+    <MotionConfig reducedMotion={REDUCED_MOTION}>
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+
+      {/* Nav — a sibling of <main>, not nested inside it: this is site chrome, not the page's
+          primary content region. */}
       <nav className="flex h-14 items-center justify-between border-b border-border px-6">
         <span className="font-heading text-sm font-bold text-primary">PM Pathfinder</span>
         <div className="flex items-center gap-5">
           <Link
             href="/auth?next=/dashboard"
-            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+            className="rounded-md text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
             Sign in
           </Link>
           <Link
             href="/quiz"
-            className="text-xs text-foreground/80 transition-colors hover:text-foreground"
+            className="rounded-md text-xs text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
             Take the assessment →
           </Link>
         </div>
       </nav>
 
+      <main id="main-content" className="min-h-screen bg-surface-0">
       <Hero
         eyebrow="PM career diagnostic"
         title="You are closer to PM than you think. Find out what is missing."
@@ -466,6 +472,7 @@ export default function LandingPage() {
           <span className="font-mono">Rethink AI MPM Cohort 7</span>
         </div>
       </footer>
-    </main>
+      </main>
+    </MotionConfig>
   )
 }

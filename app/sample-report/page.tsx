@@ -21,20 +21,29 @@ export default function SampleReportPage() {
   const { archetype, dimensionScores, tiers, radarData, dimensions } = toReportViewModel(SAMPLE_REPORT)
 
   return (
-    <main className="min-h-screen bg-surface-0">
-      {/* Nav */}
+    <>
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+
+      {/* Nav — a sibling of <main>, not nested inside it: this is site chrome, not the page's
+          primary content region. */}
       <nav className="flex h-14 items-center justify-between border-b border-border px-6">
-        <Link href="/" className="font-heading text-sm font-bold text-primary">
+        <Link
+          href="/"
+          className="rounded-md font-heading text-sm font-bold text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+        >
           PM Pathfinder
         </Link>
         <Link
           href="/quiz"
-          className="text-xs text-foreground/80 transition-colors hover:text-foreground"
+          className="rounded-md text-xs text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
         >
           Get your own archetype →
         </Link>
       </nav>
 
+      <main id="main-content" className="min-h-screen bg-surface-0">
       <div className="mx-auto max-w-3xl px-6 py-12">
         {/* Sample banner — this page only */}
         <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-brand-indigo/30 bg-surface-1 p-card-sm sm:flex-row sm:items-center sm:justify-between">
@@ -72,6 +81,7 @@ export default function SampleReportPage() {
           dimensions={dimensions}
         />
       </div>
-    </main>
+      </main>
+    </>
   )
 }

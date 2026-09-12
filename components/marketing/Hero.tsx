@@ -2,10 +2,10 @@
 
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, MotionConfig } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { DURATIONS, EASINGS, fadeUpVariants, staggerDelay } from '@/lib/motion'
+import { DURATIONS, EASINGS, REDUCED_MOTION, fadeUpVariants, staggerDelay } from '@/lib/motion'
 
 /**
  * Page-opening hero.
@@ -87,6 +87,7 @@ export default function Hero({
   const nextDelay = () => staggerDelay(step++)
 
   return (
+    <MotionConfig reducedMotion={REDUCED_MOTION}>
     <header
       className={cn(
         'relative overflow-hidden border-b border-border bg-surface-0',
@@ -244,5 +245,6 @@ export default function Hero({
         </div>
       </div>
     </header>
+    </MotionConfig>
   )
 }

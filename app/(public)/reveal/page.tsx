@@ -188,10 +188,11 @@ export default function RevealPage() {
               />
             </svg>
 
-            {/* Pulsing ring */}
+            {/* Pulsing ring — decorative, disabled under reduced motion (it's a continuous
+                large-scale pulse, not a loading spinner the layout depends on). */}
             <div
               aria-hidden
-              className="absolute inset-0 animate-ping rounded-full border border-brand-indigo/20"
+              className="absolute inset-0 animate-ping rounded-full border border-brand-indigo/20 motion-reduce:hidden"
               style={{ animationDuration: '2s' }}
             />
           </div>

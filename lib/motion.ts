@@ -123,3 +123,19 @@ export function staggerDelay(
 ): number {
   return baseDelay + index * increment
 }
+
+/**
+ * framer-motion does not read `prefers-reduced-motion` on its own — every
+ * `fadeUpVariants`/`slideXVariants` entrance in this codebase animates `y`/`x`
+ * regardless of the OS setting unless something opts in to reduced motion.
+ *
+ * The fix is `<MotionConfig reducedMotion={REDUCED_MOTION}>` wrapped around
+ * each surface's root (Hero, CaseStudy, QuizShell, ReportBody, the landing
+ * page). `"user"` makes framer-motion detect `prefers-reduced-motion: reduce`
+ * itself and, for any element under that provider, apply `x`/`y`/`scale`/
+ * `rotate` target values instantly while still crossfading `opacity` —
+ * exactly the "replace slide/scale with an opacity crossfade" rule, with no
+ * per-component branching needed. Height/width animations (e.g. an accordion
+ * expand) are unaffected by this setting; they aren't a vestibular trigger.
+ */
+export const REDUCED_MOTION = 'user' as const

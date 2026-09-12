@@ -46,6 +46,19 @@
   /* indigo-600, matches the existing --color-ring/--color-sidebar-primary (#4f46e5) and the
      rgba(79,70,229,…) glow on step markers in app/page.tsx. */
   --color-brand-indigo: #4f46e5;
+
+  /* Dedicated focus-ring token — same indigo hue as --color-brand-indigo, lightened (OKLCH-ish
+     HSL lightness 59% -> 69%, hue/saturation held) so it clears 3:1 as a UI-boundary indicator
+     against all three surfaces. Measured (WCAG relative-luminance contrast):
+       vs --color-surface-0 #0b1326: 4.89:1
+       vs --color-surface-1 #171f33: 4.34:1
+       vs --color-surface-2 #2d3449: 3.27:1
+     --color-brand-indigo itself is 2.94:1 / 2.61:1 / 1.97:1 against the same three surfaces (and
+     drops further at the 50% opacity the old base-layer rule applied) — it fails and is never
+     used as a focus ring value again. --color-ring, --color-sidebar-ring and
+     --color-sidebar-primary are intentionally untouched; they still carry the original brand
+     value for the sidebar/component styling that already ships against it. */
+  --color-focus-ring: #7b74ec;
   /* Custom CTA amber used for bg-[#ffb95f] buttons in app/page.tsx (hover state uses
      Tailwind's amber-400); also the base color behind the CTA glow shadow below. */
   --color-brand-amber: #ffb95f;
@@ -72,7 +85,15 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    /* Was outline-ring/50 (brand-indigo at 50% opacity): 1.60:1 / 1.55:1 against
+       surface-0/surface-1, well under the 3:1 UI-boundary requirement — every focus ring in the
+       app that didn't set its own outline color was invisible-by-contrast. This is the app-wide
+       default outline color (border-color is unrelated to focus and unchanged), so the fix here
+       is global, not scoped to the four surfaces this pass covers: any element site-wide that
+       relies on the browser's default focus outline color (e.g. DimensionCard's expand button
+       and its "Deep Dive" link, both in components/report/DimensionCard.tsx, out of scope to
+       edit directly) inherits the corrected --color-focus-ring at full opacity instead. */
+    @apply border-border outline-focus-ring;
   }
   body {
     background-color: #0b1326;
@@ -82,4 +103,24 @@
   h1, h2, h3, h4 {
     font-family: var(--font-space-grotesk), var(--font-inter), system-ui, sans-serif;
   }
+}
+
+/* Skip link — shared by every top-level page in this pass (portfolio, landing, sample report,
+   quiz flow). Hidden until focused, first focusable element on the page. */
+.skip-link {
+  position: absolute;
+  z-index: 50;
+  inset-inline-start: -999px;
+  top: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-surface-2);
+  color: var(--color-foreground);
+  padding: 0.625rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.skip-link:focus-visible {
+  inset-inline-start: 1rem;
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
 }
