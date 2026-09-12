@@ -4,5 +4,13 @@
       "path": "/api/cron/keep-alive",
       "schedule": "0 6 * * *"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "pm-pathfinder-pi.vercel.app" }],
+      "destination": "https://pm-pathfinder.gauravg.dev/:path*",
+      "permanent": true
+    }
   ]
 }
