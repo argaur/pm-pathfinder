@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "record_id": "2026-09-12-design-skills-redesign-scope",
+  "created_at": "2026-09-12T05:10:00+00:00",
+  "skill": "council",
+  "peer": {
+    "backend": "codex",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "brief": {
+    "text": "Gaurav has a Claude Code 'better-*' design skill pack installed: better-ui, better-colors, better-layout, better-typography, better-accessibility, better-interface (an orchestrator that routes to all the others and consolidates one ranked verdict), and better-writing. He wants to use these to redesign PM Pathfinder, a Next.js App Router + Tailwind + Supabase app whose current UI reads as dated and generic. PM Pathfinder is a portfolio and proof-of-work project, not a live product with paying customers. It has a marketing landing page (/), a 3-step quiz onboarding flow, an OAuth signup path, a main dashboard, a full report page, a roadmap page, a deep-dive page, an interview-readiness page, a profile page with a public portfolio tab, 15 topic pages, and a public no-auth portfolio page at /u/[id] meant to be shared with recruiters. Pro-tier paywall UI (BlurGate, PricingModal) exists but is permanently unused since Razorpay was ruled out. Decide: full redesign vs targeted polish pass, page priority order for a recruiter spending a couple minutes on it, which of the seven skills fit which surfaces, and the failure mode of applying a prescriptive skill pack to a codebase with no established design-token system yet. Give one non-obvious insight, one failure mode, and the smallest validation experiment per approach.",
+    "inputs": []
+  },
+  "claude_position": {
+    "round": "blind",
+    "text": "Recommend a targeted polish pass ranked by evaluator-visibility, not a full redesign. Priority order: (1) landing page / - first and sometimes only thing seen; (2) /u/[id] public portfolio - explicitly built to be shared with recruiters, zero-auth, must be flawless; (3) the quiz-to-reveal demo path - the interactive flow proven during the last real submission; (4) dashboard - second-order since completing OAuth is a real drop-off point; (5) report/roadmap/deep-dive/topics/interview-readiness/profile - lowest priority. Skill-to-surface mapping: run better-colors and better-typography first, globally, as a systemic token pass. better-ui matters most on the landing page and quiz flow; largely wasted on dense data pages where better-layout matters more. better-accessibility runs everywhere regardless of priority. better-writing matters most on landing/portfolio copy. Explicitly exclude BlurGate/PricingModal from scope, since they are permanently dead UI. Non-obvious insight: with no established design-token system, applying better-ui's exact prescribed values file-by-file risks two competing motion/spacing languages; the fix should land as shared tokens, not per-component overrides. Failure mode: treating this as Phase 2 Design work under the project's Blueprint framework contract when it is Phase 4 in-flight, reopening full redesign scope without running /rubric first. Smallest validation experiment: run better-interface read-only on the landing page alone first; mostly MEDIUM/LOW token-shaped findings validates the systemic-tokens theory, many page-specific HIGH findings falsifies it.",
+    "submitted_at": "2026-09-12T04:53:31+00:00"
+  },
+  "codex_position": {
+    "round": "blind",
+    "verbatim": "SCOPE HOLD: redesign the evaluator journey deeply, then run a lightweight system-consistency pass across the remaining app. Do not redesign every page. Also do not settle for a cosmetic polish pass. Concentrate the bespoke work on the small set of surfaces that can prove Gaurav's product judgment within two minutes. Priority order: establish a small design foundation first (semantic colors, typography roles, spacing scale, page widths, radii, focus treatment, two or three motion patterns), then redesign in this order: 1. Public portfolio /u/[id] - the real recruiter landing page, no authentication, explicitly shareable. 2. Marketing landing page / - orientation and routing, lead with a credible product artifact immediately, do not make an evaluator complete the quiz or OAuth flow before seeing the product's value. 3. The product's proof moment: prioritize /quiz/results and the full report; provide a seeded, no-auth sample if possible, since a recruiter is far more likely to inspect a convincing output than complete onboarding. 4. Main dashboard - prove the visual system survives real data density. 5. Quiz flow as one interaction system. 6. Supporting depth inherits the report/dashboard system. 7. Baseline consistency only for profile, topics, auth plumbing; do not redesign BlurGate or PricingModal, remove dead paths in a separate cleanup instead. Use better-interface first to diagnose and rank per journey, deepen only its most important findings with the relevant specialist skill, then run it again to consolidate; running all seven independently on every page generates contradictory advice. Largest skill-pack failure mode: turning expert prescriptions into a collection of unrelated magic numbers pasted into individual pages instead of semantic tokens (surface, text-primary, accent, focus, a limited spacing/type scale, purpose-based motion). Accessibility values are acceptance criteria that overrule aesthetic prescriptions. Allocate roughly 70 percent to the recruiter journey and core product output, 20 percent to shared tokens and primitives, 10 percent to propagation and regression/accessibility checks elsewhere. Smallest validation experiment: redesign /u/[id] with the proposed tokens and primitives, then apply those same primitives to one untouched dashboard shell without page-specific hacks, then test the public page with five hiring-context reviewers for two minutes; proceed only if at least four can explain what the product does, identify the strongest proof of Gaurav's work, reach a meaningful product artifact without authentication, and describe the experience as intentionally designed rather than merely cleaner.",
+    "gloss": "Codex frames this as a deep, structural redesign of a small evaluator-facing slice (portfolio first, then landing, then a seeded no-auth sample report and quiz), backed by a token foundation, plus a lightweight consistency pass everywhere else. It explicitly rejects both 'redesign everything' and 'cosmetic polish only' as the two failure extremes.",
+    "submitted_at": "2026-09-12T04:57:00+00:00"
+  },
+  "disagreement_matrix": [
+    {
+      "claim": "Whether the landing page (/) or the public portfolio (/u/[id]) should rank first in redesign priority.",
+      "claude_view": "Ranked landing page first on the assumption it is the first and sometimes only thing an evaluator sees. After Codex's rebuttal, this only holds if evaluators actually start at the landing page. If Gaurav sends the /u/[id] link directly (as the Razorpay-style submission did), that page is the true entry point and should rank first or co-equal.",
+      "codex_view": {
+        "verbatim": "I dispute the exact route ranking, particularly landing above /u/[id], without evidence about the evaluator entry point. If the portfolio URL is what recruiters receive, it is the true landing page and should be co-equal or first.",
+        "gloss": "Codex ties the ranking to which URL is actually distributed, not to an assumption about default entry point."
+      },
+      "status": "open",
+      "evidence_needed": "Which URL Gaurav actually sends to recruiters or hiring channels: the landing domain, or a direct /u/[id] link. This decides the ranking; neither model can answer it."
+    },
+    {
+      "claim": "Whether the top-tier work should be a visual/token polish pass or a deeper structural redesign, including new scope like a seeded no-auth sample report.",
+      "claude_view": "Original position framed this as a 'targeted polish pass,' implying tokens plus visual/motion treatment without necessarily rewriting page structure or adding new features. Codex's seeded-sample-report idea and 'authored case study' framing for /u/[id] are legitimate but are new feature scope, not design-skill application, and should be surfaced to Gaurav as a separate scope decision rather than folded silently into a 'redesign.'",
+      "codex_view": {
+        "verbatim": "Do not redesign every page. Also do not settle for a cosmetic polish pass... provide a seeded, no-auth sample if possible. A recruiter is far more likely to inspect a convincing output than complete onboarding.",
+        "gloss": "Codex treats the seeded sample and IA-level rework of the portfolio page as part of the same redesign effort, not a separate scope decision."
+      },
+      "status": "open",
+      "evidence_needed": "Gaurav's call on how much new work he wants here: design-skill-driven visual and interaction polish only, versus also building new product surface (a seeded/sample report, a rewritten portfolio information architecture). The two have very different time costs."
+    },
+    {
+      "claim": "better-ui (motion, elevation, animation) is largely wasted on dense, data-heavy authenticated pages like the dashboard and report.",
+      "claude_view": "Conceded. Codex's distinction between decorative motion (wasted on dense pages) and functional interaction feedback (state transitions, loading, filters, focus, disclosure animations, which do matter on dashboards) is correct and was missing from the original claim.",
+      "codex_view": {
+        "verbatim": "I dispute that better-ui is 'largely wasted on dense data pages.' Decorative motion would be wasteful, but state feedback, loading transitions, filter behavior, focus treatment, and disclosure animations materially affect perceived quality and comprehension on dashboards and reports.",
+        "gloss": null
+      },
+      "status": "claude_conceded",
+      "evidence_needed": null
+    },
+    {
+      "claim": "better-writing matters most on landing and portfolio copy, and least on internal/authenticated page copy.",
+      "claude_view": "Conceded. For a diagnostic and assessment product specifically, quiz question wording, diagnostic explanations, report headings, and recommendation copy carry real comprehension risk and matter as much as marketing copy, arguably more, since they are the evidence of the product's substance.",
+      "codex_view": {
+        "verbatim": "I dispute limiting better-writing mainly to landing and portfolio copy. Quiz questions, diagnostic explanations, report headings, recommendations, and empty/error states carry more comprehension risk than marketing copy.",
+        "gloss": null
+      },
+      "status": "claude_conceded",
+      "evidence_needed": null
+    },
+    {
+      "claim": "The right validation experiment is running better-interface on the landing page alone and reading its severity distribution (mostly MEDIUM/LOW vs many page-specific HIGH findings).",
+      "claude_view": "Conceded that this experiment design is weaker. Severity and systemic reach are different axes; a HIGH finding can still be a token-level fix, and a page full of LOW findings does not prove tokens alone would fix other pages. Codex's version, auditing three representative surfaces and classifying every finding as token-level, shared-component-level, or route-specific, then fixing only the token-level ones and re-auditing to measure percentage eliminated, is a better test of the actual claim (how much of the problem is systemic).",
+      "codex_view": {
+        "verbatim": "The proposed validation logic: MEDIUM/LOW landing-page findings do not prove that systemic tokens will fix most of the product, while HIGH findings do not necessarily imply page-by-page treatment. Severity and systemic reach are different dimensions... Audit three representative surfaces... Classify each finding as token-level, shared-component-level, or route-specific.",
+        "gloss": null
+      },
+      "status": "claude_conceded",
+      "evidence_needed": null
+    },
+    {
+      "claim": "Whether to pre-assign specific better-* skills to specific page types by default (e.g. 'landing gets better-ui, dashboard gets better-layout'), or to run better-interface as a diagnostic first on each surface and only deepen with the specialist skill a finding actually calls for.",
+      "claude_view": "Conceded. Diagnosing first with the orchestrator avoids guessing which skill a given page needs and avoids running all seven independently everywhere, which Codex correctly notes produces contradictory, redundant local fixes.",
+      "codex_view": {
+        "verbatim": "Use better-interface first to diagnose and rank. Deepen only its most important findings with the relevant specialist skills, then run it again to consolidate. Running all seven independently on every page will generate contradictory advice and excessive local fixes.",
+        "gloss": null
+      },
+      "status": "claude_conceded",
+      "evidence_needed": null
+    },
+    {
+      "claim": "BlurGate and PricingModal should be excluded from any design-skill review since they are permanently dead, unused UI.",
+      "claude_view": "Agree. Both sides raised this independently in the blind round.",
+      "codex_view": {
+        "verbatim": "Do not redesign BlurGate or PricingModal. The business decision has already made them irrelevant. Remove dead user-facing paths in a separate cleanup rather than beautifying them.",
+        "gloss": null
+      },
+      "status": "agree",
+      "evidence_needed": null
+    },
+    {
+      "claim": "better-accessibility should be applied as a continuous baseline across every route regardless of redesign priority, not treated as a later polish layer.",
+      "claude_view": "Agree. Both sides raised this independently in the blind round.",
+      "codex_view": {
+        "verbatim": "Continuous gate across every route, especially quiz, navigation, OAuth, charts, modals, and mobile... Contrast, focus, reduced motion, semantics, and touch targets are constraints, not optional styling suggestions.",
+        "gloss": null
+      },
+      "status": "agree",
+      "evidence_needed": null
+    },
+    {
+      "claim": "Applying the skill pack's exact prescribed values (specific cubic-beziers, spacing, animation durations) directly into individual pages, without first establishing shared semantic tokens, creates a second ad hoc design layer instead of fixing the first one.",
+      "claude_view": "Agree. Both sides raised this independently in the blind round as the primary failure mode of using this skill pack on a codebase with no existing token system.",
+      "codex_view": {
+        "verbatim": "Exact spacing, easing, duration, radius, and color recommendations should not be pasted directly into individual pages. In an ad hoc Tailwind codebase, that produces more arbitrary utilities, near-duplicate components, and exceptions than the redesign removes.",
+        "gloss": null
+      },
+      "status": "agree",
+      "evidence_needed": null
+    }
+  ],
+  "decision": {
+    "chosen": "Two-stage plan. Stage 1: build a small shared token layer first, covering color, typography, spacing, elevation, and motion, sourced from better-colors and better-typography plus better-ui's prescribed values, but expressed as semantic tokens, not per-component overrides. Stage 2: run better-interface as a diagnostic pass, one surface at a time, on the recruiter-facing evaluator journey, starting with whichever of the landing page or /u/[id] is the actual entry point Gaurav sends out, then the other, then the quiz-to-reveal proof path, deepening with a specialist better-* skill only where better-interface actually flags a finding there. Stage 3: a baseline-only pass (tokens plus accessibility) on the dashboard, report, roadmap, deep-dive, topics, profile, and auth plumbing, with no bespoke redesign effort unless the validation experiment or real evaluator feedback shows those pages matter. BlurGate and PricingModal stay out of scope entirely. Validate before committing further with Codex's version of the experiment: audit three representative surfaces, classify every finding as token-level, shared-component-level, or route-specific, fix only the token-level findings, re-audit, and use the percentage of findings eliminated as the evidence for how much of the 'boring' problem is systemic versus needing page-specific work.",
+    "rationale": "Rows 3, 4, 5, and 6 of the matrix were Claude's original position being corrected by a more precise distinction from Codex (functional versus decorative motion, comprehension-risk copy beyond marketing pages, a validation experiment that actually isolates the systemic-token variable, and diagnose-first sequencing over pre-assigning skills to page types). Rows 7, 8, and 9 were genuine independent agreement in the blind round on scope exclusion, accessibility as a baseline, and the core failure mode of a prescriptive skill pack meeting a codebase with no token system yet, so those are locked in without further argument. Rows 1 and 2 stay open because they depend on a fact neither model has: which URL Gaurav actually sends to a recruiter, and how much new scope (a seeded sample report, a rewritten portfolio narrative) he wants folded into what was originally framed as a design-skill pass rather than a feature-building pass.",
+    "open_for_gaurav": [
+      "Which URL do you actually send to a recruiter or hiring channel: the landing page, or a direct /u/[id] portfolio link? This decides whether the landing page or the public portfolio ranks first.",
+      "Do you want this scoped as a design-skill-driven visual and interaction polish pass only, or do you also want new product scope folded in, specifically a seeded no-auth sample report so an evaluator does not have to complete the quiz, and a rewrite of the /u/[id] page's information architecture into more of an authored case study? The second option is real additional engineering work, not just a design pass, and changes the size of this project."
+    ]
+  }
+}
