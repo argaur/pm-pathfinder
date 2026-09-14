@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0",
+  "record_id": "2026-09-14-signin-error-live-region",
+  "created_at": "2026-09-14T03:55:00+05:30",
+  "skill": "premortem-pair",
+  "peer": {
+    "backend": "codex",
+    "model": "gpt-5.6-sol",
+    "effort": "medium"
+  },
+  "brief": {
+    "text": "File: app/(public)/auth/page.tsx (full content attached). Lines 57-61 currently render the OAuth sign-in error as a plain div with no ARIA role, showing {error} where error = error.message from supabase.auth.signInWithOAuth(...). Proposed change: add role=\"alert\" and aria-live=\"assertive\" to this div (or aria-live=\"polite\" as a milder alternative) so screen readers announce a failed Google OAuth sign-in attempt. No other logic changes. Find the strongest reason this change is unsafe or wrong: consider raw third-party error string safety (XSS, info disclosure, phishing surface), whether role=\"alert\" vs aria-live=\"polite\" is right for this error, whether JSX text interpolation resolves any of that, and whether setError then setLoading(false) creates a race.",
+    "inputs": ["app/(public)/auth/page.tsx"]
+  },
+  "claude_position": {
+    "round": "blind",
+    "text": "Adding role=\"alert\" (or aria-live=\"assertive\") to the existing error div at app/(public)/auth/page.tsx:57-61 is safe and correct. It changes ARIA semantics only, no new data flow, no new rendering path, no auth logic touched. (1) XSS: {error} is interpolated as JSX text content, React auto-escapes text children, this is not dangerouslySetInnerHTML, so adding an ARIA role does not open any injection surface; the string was already rendered as plain text before this change. (2) Information disclosure: error.message comes from Supabase's signInWithOAuth client call, which at this stage (before token exchange, which happens in /auth/callback) is typically a small set of known error strings (network failure, provider not enabled, popup blocked, rate limit), not a stack trace or PII. The ARIA attributes only change whether assistive tech announces a string that was already visible to sighted users. (3) role=\"alert\"/aria-live=\"assertive\" is appropriate because this is a terminal failure of a user-initiated action that the user needs to know about immediately to retry, and it does not interrupt an in-flight OAuth flow because by the time this div renders the flow has already failed. (4) setError(error.message) and setLoading(false) are two setState calls in the same synchronous block after a single await; React batches them into one re-render, so no intermediate inconsistent state exists. Net: pure ARIA-attribute addition to already-escaped text content, no more risk than the existing unstyled div, closes a real accessibility gap.",
+    "submitted_at": "2026-09-14T03:38:00+05:30"
+  },
+  "codex_position": {
+    "round": "blind",
+    "verbatim": "Strongest failure: this turns an untrusted third-party diagnostic into forced speech.\n\n`error.message` crosses a Supabase/OAuth trust boundary without allowlisting or redaction. Making that raw string an assertive live alert can immediately vocalize email addresses, URLs, configuration details, OAuth state, or other sensitive diagnostics-potentially through speakers, screen-reader history, recordings, or shared assistive sessions. It also creates a phishing surface if any upstream/provider-controlled text can influence the message.\n\nReact escaping only prevents HTML/script execution; it does not prevent information disclosure or deceptive text from being announced.\n\nAdditional defects:\n\n- role=\"alert\" already implies an assertive live region; adding aria-live=\"assertive\" is redundant.\n- setError() followed by setLoading(false) is normally React-batched, so the claimed double-render/race risk is weak.\n- The security flaw-rendering raw authentication diagnostics-is already present, but this change materially increases its exposure by forcing immediate announcement.",
+    "gloss": "Real critique: role=alert/aria-live=assertive doesn't create a new vuln class, but it converts a latent disclosure risk (whatever raw string Supabase returns) into forced, immediate, unavoidable announcement. Also correctly flags aria-live=\"assertive\" as redundant next to role=\"alert\", and correctly downgrades the race-condition angle as weak given React batching.",
+    "submitted_at": "2026-09-14T03:42:00+05:30"
+  },
+  "disagreement_matrix": [
+    {
+      "claim": "Announcing the raw error.message string via role=\"alert\"/aria-live=\"assertive\" is safe because React's text-interpolation escaping prevents any harmful effect.",
+      "claude_view": "Conceded. React escaping only prevents script/HTML injection; it says nothing about whether the plain-text content itself is safe to force-announce. error.message crosses a trust boundary (Supabase/OAuth provider) and could contain an echoed email address, an internal detail, or provider-controlled text, none of which was a problem when it was merely visible on screen but becomes a forced, immediate, unavoidable disclosure once read aloud or logged by assistive tech. Fix: stop rendering error.message directly; render a static, generic message (\"Sign-in failed. Please try again.\") on any error instead, so nothing from the third-party response is ever exposed through this element, on screen or via assistive tech.",
+      "codex_view": {
+        "verbatim": "error.message crosses a Supabase/OAuth trust boundary without allowlisting or redaction. Making that raw string an assertive live alert can immediately vocalize email addresses, URLs, configuration details, OAuth state, or other sensitive diagnostics-potentially through speakers, screen-reader history, recordings, or shared assistive sessions."
+      },
+      "status": "claude_conceded",
+      "evidence_needed": null
+    },
+    {
+      "claim": "Pairing role=\"alert\" with an explicit aria-live=\"assertive\" attribute is necessary to get assertive announcement behaviour.",
+      "claude_view": "Conceded. role=\"alert\" already implies an assertive live region per the ARIA spec; the explicit aria-live=\"assertive\" attribute is redundant. Dropping it, using role=\"alert\" alone.",
+      "codex_view": {
+        "verbatim": "role=\"alert\" already implies an assertive live region; adding aria-live=\"assertive\" is redundant."
+      },
+      "status": "claude_conceded",
+      "evidence_needed": null
+    },
+    {
+      "claim": "setError(error.message) followed by setLoading(false) in the same handler risks a race or an inconsistent intermediate render.",
+      "claude_view": "Agree with Codex's downgrade. Both calls are synchronous state updates in the same event-handler tick after a single await, so React batches them into one re-render; there is no real race here. This was one of several angles I asked Codex to consider, and it correctly did not manufacture a finding here.",
+      "codex_view": {
+        "verbatim": "setError() followed by setLoading(false) is normally React-batched, so the claimed double-render/race risk is weak."
+      },
+      "status": "agree",
+      "evidence_needed": null
+    }
+  ],
+  "decision": {
+    "chosen": "Add role=\"alert\" only (no aria-live attribute) to the OAuth error div in app/(public)/auth/page.tsx, and replace the rendered content from the raw error.message with a static, generic message (\"Sign-in failed. Please try again.\") so no third-party diagnostic text is ever exposed through this element.",
+    "rationale": "Row 1 is the decisive finding: forcing an assertive announcement of an unsanitized cross-trust-boundary string is a real disclosure/forced-speech risk, not a hypothetical one, so the fix must stop displaying error.message verbatim rather than just adding ARIA attributes on top of it. Row 2 is a smaller correctness fix (role=\"alert\" alone is sufficient, aria-live=\"assertive\" was redundant). Row 3 confirms no scope was cut short by skipping a real issue; the race-condition angle I raised in the brief was genuinely weak and Codex said so rather than padding the response.",
+    "open_for_gaurav": []
+  }
+}
