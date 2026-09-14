@@ -76,6 +76,8 @@ export default function JourneyProgress({
         aria-valuemax={100}
         aria-valuenow={Math.round(overall * 100)}
         aria-valuetext={`${current.label}, ${position}`}
+        aria-live="polite"
+        aria-atomic="true"
       >
         {JOURNEY_STAGES.map((s) => {
           const fill = stageFill(s.id, stage, completed)

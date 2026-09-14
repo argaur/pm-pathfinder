@@ -4,6 +4,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* This app is dark-mode-only by design — no toggle, no light variant. Setting
+   color-scheme here (rather than just the .dark class in layout.tsx) makes
+   native controls, scrollbars and form widgets render dark everywhere the
+   page is embedded, not only where Tailwind's dark: variants reach. */
+:root {
+  color-scheme: dark;
+}
+
 @theme inline {
   --color-background: #0b1326;
   --color-foreground: #dae2fd;

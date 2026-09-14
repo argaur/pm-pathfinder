@@ -184,13 +184,13 @@ export default function LandingPage() {
         <div className="flex items-center gap-5">
           <Link
             href="/auth?next=/dashboard"
-            className="rounded-md text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+            className="inline-flex items-center justify-center rounded-md px-3 py-3.5 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
             Sign in
           </Link>
           <Link
             href="/quiz"
-            className="rounded-md text-xs text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+            className="inline-flex items-center justify-center rounded-md px-3 py-3.5 text-xs text-foreground/80 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
           >
             Take the assessment →
           </Link>

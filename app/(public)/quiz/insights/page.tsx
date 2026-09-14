@@ -59,8 +59,8 @@ export default function InsightsPage() {
         backgroundLabel ? (
           <>
             Based on your{' '}
-            <span className="text-foreground">{backgroundLabel}</span> background,
-            here&apos;s what you&apos;re already doing — in PM terms.
+            <span className="text-foreground">{backgroundLabel}</span>{' '}
+            background, here&apos;s what you&apos;re already doing — in PM terms.
           </>
         ) : undefined
       }
