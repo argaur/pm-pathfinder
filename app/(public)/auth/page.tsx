@@ -34,6 +34,7 @@ function AuthForm() {
     })
 
     if (error) {
+      console.error('OAuth sign-in failed:', error)
       setError(error.message)
       setLoading(false)
     }
@@ -55,8 +56,11 @@ function AuthForm() {
 
         <div className="bg-surface-1 rounded-2xl p-6">
           {error && (
-            <div className="bg-[#2d1515] border border-rose-800/50 text-rose-400 text-sm rounded-lg p-3 mb-4">
-              {error}
+            <div
+              role="alert"
+              className="bg-[#2d1515] border border-rose-800/50 text-rose-400 text-sm rounded-lg p-3 mb-4"
+            >
+              Sign-in failed. Please try again.
             </div>
           )}
 

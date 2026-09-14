@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "record_id": "2026-09-14-signin-error-generic-copy",
+  "created_at": "2026-09-14T05:45:00Z",
+  "skill": "premortem-pair",
+  "peer": {
+    "backend": "codex",
+    "model": "gpt-5.6-sol",
+    "effort": "medium"
+  },
+  "brief": {
+    "text": "Red-team this diff. Find the strongest reason it is unsafe or wrong. Full artifact and context in the attached file. Artifact: app/(public)/auth/page.tsx lines 57-61, the OAuth sign-in error display. Proposed edit: add role=\"alert\" to the error container and replace the displayed content with a static \"Sign-in failed. Please try again.\" string instead of interpolating the raw error/message value, so screen readers get an accessible failure announcement without echoing provider-controlled or otherwise untrusted error text. This is a follow-up to an earlier premortem-pair round (collab-runs/2026-09-14-signin-error-live-region/exchange.json) that found rendering the raw error string in an assertive live region risked disclosing provider-controlled or echoed content to screen readers.",
+    "inputs": [
+      "app/(public)/auth/page.tsx",
+      "collab-runs/2026-09-14-signin-error-live-region/exchange.json"
+    ]
+  },
+  "claude_position": {
+    "round": "blind",
+    "text": "This diff is sound and should ship as written. (1) It fixes a real, confirmed accessibility gap: role=\"alert\" is the correct, minimal primitive for a transient failure message, an implicit assertive live region needing no companion aria-live attribute, and exactly the ARIA pattern the WAI-ARIA Authoring Practices recommend for a form-submission failure banner. (2) It closes the disclosure gap the prior round found, without reopening it in a different form: a static string is the strongest way to guarantee provider-controlled text never enters the DOM, stronger than trying to sanitize the raw message. (3) It does not regress functionality: the error state still exists, still gates rendering, still clears with setError(null) on retry; the button's disabled/re-enable behaviour is untouched. (4) Scope is minimal and reversible: three lines change, no state-shape change, no new dependency. I expect Codex to push on differentiated copy per failure type or on losing debugging signal; my position going in is that a single generic string is a strict improvement over the status quo (no announcement at all, or a previously-disclosed raw string) and that a copy-differentiation system is a separate, larger change this gated accessibility fix should not be made to carry.",
+    "submitted_at": "2026-09-14T05:30:00Z"
+  },
+  "codex_position": {
+    "round": "blind",
+    "verbatim": "**Strongest finding — the diff destroys the only actionable error signal and can trap users in a futile retry loop.**\n\n`signInWithOAuth()` can fail for persistent reasons—provider disabled, invalid configuration, blocked request, or rate limiting. Every case now says “Please try again,” even when retrying cannot work. Because the error is neither displayed nor logged, users cannot recover and operators lose the information needed to diagnose the failure.\n\n`role=\"alert\"` is correct; replacing every error with one generic instruction is the problem.\n\nRecommended fix: map known errors to controlled, actionable copy, use a generic fallback, and preserve the original error in safe telemetry. For example:\n\n```tsx\nsetError(toSafeAuthMessage(authError))\nreportAuthError(authError)\n```\n\nUnknown failures can still render “Sign-in failed,” but should offer a recovery path such as retrying later or contacting support—not universally instruct an immediate retry.",
+    "gloss": "Codex agrees role=\"alert\" is correct, but argues that going all the way to a single static string overcorrects: it drops operator-side diagnostics entirely (nothing is logged anywhere, not just not rendered) and gives every user the same \"try again\" instruction even for failures where retrying cannot work.",
+    "submitted_at": "2026-09-14T05:42:00Z"
+  },
+  "disagreement_matrix": [
+    {
+      "claim": "Removing the raw error from the rendered DOM without adding any logging elsewhere means operators lose all diagnostic signal for OAuth sign-in failures.",
+      "claude_view": "Conceded. This is a real gap independent of the accessibility fix: today, on failure, the error is only ever set into React state and never surfaces anywhere for debugging. The codebase already has precedent for this exact pattern elsewhere (app/quiz/page.tsx logs console.error('Failed to save onboarding:', err) on a non-fatal save failure without rendering it to the user). Adding `console.error('OAuth sign-in failed:', error)` alongside `setError(...)` in the auth page's failure branch gives Gaurav real diagnostic signal in Vercel's runtime logs with zero disclosure risk, since console output never reaches a screen reader or the rendered page. This is now part of the diff.",
+      "codex_view": {
+        "verbatim": "Because the error is neither displayed nor logged, users cannot recover and operators lose the information needed to diagnose the failure. ... Recommended fix: map known errors to controlled, actionable copy, use a generic fallback, and preserve the original error in safe telemetry.",
+        "gloss": "Codex's core ask here is just \"log it somewhere safe\" — satisfied by console.error, which is the safe-telemetry mechanism it names."
+      },
+      "status": "claude_conceded",
+      "evidence_needed": null
+    },
+    {
+      "claim": "A single generic \"Sign-in failed. Please try again.\" message is wrong for persistent/unrecoverable failures (misconfigured provider, blocked request, rate limiting), and Codex recommends differentiated copy per error type plus a recovery path such as contacting support.",
+      "claude_view": "Partially held, partially open. The premise that different failure modes deserve different guidance is reasonable in principle, but this app has no support contact channel anywhere (checked: no support@ address, no mailto: link, no contact page in app/) so Codex's specific suggested recovery path (\"contacting support\") would be a false affordance if added now -- it would point users at a channel that does not exist. Building a full error-code-to-copy map (`toSafeAuthMessage`) is also a materially larger change than this gated accessibility fix should carry: it touches a naming/mapping decision with its own design surface, not a 3-line ARIA fix. I am not making that change as part of this gated edit. What I will not defend is the claim that this diff is a regression versus the current state: today, a screen reader user gets zero announcement on failure (the specific bug this diff fixes) and a sighted user already sees only Supabase's raw, undifferentiated message -- neither modality already has differentiated-by-failure-type copy today. This diff is a net improvement for both modalities even without addressing Codex's broader point. Because I'm not running a second round to see whether Codex would accept 'log it, ship the generic message now, treat copy differentiation as separate follow-up work' as sufficient, I'm not marking this resolved -- it goes to Gaurav.",
+      "codex_view": {
+        "verbatim": "Unknown failures can still render “Sign-in failed,” but should offer a recovery path such as retrying later or contacting support—not universally instruct an immediate retry.",
+        "gloss": "Codex's fallback position (even for the generic case) is: don't just say \"try again\", offer some other recovery path too."
+      },
+      "status": "open",
+      "evidence_needed": "Whether Gaurav wants a support contact path added to the app (currently none exists) and/or an error-code-to-copy map built now, versus shipping the generic message + console logging today and treating differentiated copy as separate follow-up work."
+    }
+  ],
+  "decision": {
+    "chosen": "Ship role=\"alert\" plus a static \"Sign-in failed. Please try again.\" string (unchanged from the original plan), and additionally add console.error(error) in the OAuth failure branch so the raw message is preserved for operator diagnostics without ever reaching the rendered DOM or a screen reader.",
+    "rationale": "The disclosure-risk finding from the prior round (collab-runs/2026-09-14-signin-error-live-region) is fully closed: no provider-controlled text is rendered or announced. Codex's diagnostics concern (matrix row 1) is fully addressed by adding console logging, which matches an existing pattern already used elsewhere in this codebase and carries zero disclosure risk. Codex's copy-differentiation concern (matrix row 2) is only partially addressed: the diff is still a strict improvement over the current, actually-shipped behaviour in both accessibility and disclosure terms, but building full differentiated copy and a support-contact recovery path is out of scope for this gated accessibility fix and is left as an open question for Gaurav rather than something either side resolved.",
+    "open_for_gaurav": [
+      "Whether Gaurav wants a support contact path added to the app (none exists today) and/or per-error-type copy for the auth sign-in failure now, or wants to ship the generic message + console logging today and treat differentiated copy as separate follow-up work."
+    ]
+  }
+}
