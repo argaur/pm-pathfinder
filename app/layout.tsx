@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { JetBrains_Mono } from "next/font/google";
 import { Space_Grotesk } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const inter = Inter({
@@ -37,7 +38,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#0b1326] text-[#dae2fd] font-sans">
         {children}
-        <script src="/analytics.js" defer />
+        <Script src="/analytics.js" strategy="afterInteractive" />
       </body>
     </html>
   );

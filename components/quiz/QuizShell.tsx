@@ -190,7 +190,7 @@ export default function QuizShell({
         )}
       >
         <div ref={contentRef} className={cn('mx-auto w-full', columnWidth)}>
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence mode="wait">
             <motion.div key={transitionKey ?? stage} {...motionProps}>
               {hasHeader && (
                 <div className="mb-8">
