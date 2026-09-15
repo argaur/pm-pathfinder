@@ -1,6 +1,6 @@
 # PM Pathfinder
 
-**Live:** [pm-pathfinder-pi.vercel.app](https://pm-pathfinder-pi.vercel.app)
+**Live:** [pm-pathfinder.gauravg.dev](https://pm-pathfinder.gauravg.dev)
 
 An archetype-based career navigation tool for professionals transitioning into Product Management. Instead of generic PM courses, it diagnoses *where you actually stand* — background, mindset, skill gaps — and builds a roadmap from there.
 

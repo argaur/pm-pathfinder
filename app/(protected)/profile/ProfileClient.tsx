@@ -68,7 +68,7 @@ export default function ProfileClient({
   const [portfolioLoaded, setPortfolioLoaded] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://pm-pathfinder.vercel.app'}/u/${userId}`
+  const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://pm-pathfinder.gauravg.dev'}/u/${userId}`
 
   // Load portfolio from API on mount
   useEffect(() => {
