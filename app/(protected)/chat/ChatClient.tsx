@@ -6,7 +6,13 @@ import { Send, Bot, User, Sparkles } from 'lucide-react'
 interface Message {
   role: 'user' | 'model'
   text: string
+  isError?: boolean
 }
+
+// Matches the sentinel route.ts writes into the stream on a mid-response
+// failure. A message split on this marker is excluded from replayed history
+// so a broken turn can't drag the next answer's tone off course.
+const STREAM_ERROR_MARKER = '\u0000__CHAT_STREAM_ERROR__\u0000'
 
 interface GeminiPart { text: string }
 interface GeminiMessage { role: 'user' | 'model'; parts: GeminiPart[] }
@@ -34,10 +40,12 @@ export default function ChatClient({ archetype }: Props) {
   }, [messages])
 
   function buildHistory(): GeminiMessage[] {
-    return messages.map((m) => ({
-      role: m.role,
-      parts: [{ text: m.text }],
-    }))
+    return messages
+      .filter((m) => !m.isError)
+      .map((m) => ({
+        role: m.role,
+        parts: [{ text: m.text }],
+      }))
   }
 
   async function send(userText: string) {
@@ -64,7 +72,7 @@ export default function ChatClient({ archetype }: Props) {
         const errText = await res.text().catch(() => '')
         setMessages((prev) => [
           ...prev.slice(0, -1),
-          { role: 'model', text: `Error ${res.status}: ${errText || 'Something went wrong. Please try again.'}` },
+          { role: 'model', text: `Error ${res.status}: ${errText || 'Something went wrong. Please try again.'}`, isError: true },
         ])
         return
       }
@@ -77,6 +85,24 @@ export default function ChatClient({ archetype }: Props) {
         const { done, value } = await reader.read()
         if (done) break
         accumulated += decoder.decode(value, { stream: true })
+
+        const markerIndex = accumulated.indexOf(STREAM_ERROR_MARKER)
+        if (markerIndex !== -1) {
+          const cleanText = accumulated.slice(0, markerIndex)
+          const errorDetail = accumulated.slice(markerIndex + STREAM_ERROR_MARKER.length)
+          setMessages((prev) => [
+            ...prev.slice(0, -1),
+            {
+              role: 'model',
+              text: cleanText
+                ? `${cleanText}\n\n[Answer cut short: ${errorDetail}. Please try again.]`
+                : `Something went wrong: ${errorDetail}. Please try again.`,
+              isError: true,
+            },
+          ])
+          return
+        }
+
         setMessages((prev) => [
           ...prev.slice(0, -1),
           { role: 'model', text: accumulated },
@@ -85,7 +111,7 @@ export default function ChatClient({ archetype }: Props) {
     } catch {
       setMessages((prev) => [
         ...prev.slice(0, -1),
-        { role: 'model', text: 'Network error. Please try again.' },
+        { role: 'model', text: 'Network error. Please try again.', isError: true },
       ])
     } finally {
       setStreaming(false)

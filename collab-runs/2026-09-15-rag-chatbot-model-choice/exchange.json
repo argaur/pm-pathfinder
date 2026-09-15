@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "record_id": "2026-09-15-rag-chatbot-model-choice",
+  "created_at": "2026-09-15T00:00:00Z",
+  "skill": "council",
+  "peer": {
+    "backend": "codex",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "brief": {
+    "text": "Should PM Pathfinder's RAG chatbot (app/api/chat/route.ts) switch its generation model, and should it move to Claude Haiku instead of Gemini flash-lite-preview? Two live application bugs exist regardless of model choice: (1) a failed upstream call writes raw error text into the visible streamed answer, which the frontend then persists into chat history and replays back to the model as real conversation, dragging tone off course on later turns; (2) a Supabase match_chunks RPC error is silently swallowed, so retrieval failures produce a contextless answer with no signal. Weigh reliability, instruction-following consistency for a PM-tone system prompt, latency/streaming support, and cost, for a low-traffic portfolio project on Vercel plus Supabase with no existing Anthropic key or billing.",
+    "inputs": [
+      "app/api/chat/route.ts",
+      "app/(protected)/chat/ChatClient.tsx"
+    ]
+  },
+  "claude_position": {
+    "round": "blind",
+    "text": "Three approaches: (1) fix the two application bugs only, keep gemini-3.1-flash-lite-preview; (2) fix the bugs, then move generation to a stable non-preview Gemini flash model, keep Gemini embeddings, no new vendor; (3) fix the bugs, then move generation to Claude Haiku 4.5 via a new ANTHROPIC_API_KEY, keep Gemini embeddings untouched. Non-obvious insight: both live bugs are vendor-neutral, they will happen under any model, so the model question is separate from the actual reported symptom, which is an application bug. Failure mode: if Haiku is chosen without fixing bug 1 first, and Haiku fails during initial setup for any reason, the same tone-drift bug reappears under a new vendor, now with two providers to operate. Smallest validation experiment: fix the history-pollution bug alone, ship it, then watch the current model's real error rate in Vercel logs for a few days before deciding anything about the model. Recommendation: fix the two bugs regardless of model, then prefer a stable non-preview Gemini flash model over Haiku, since it keeps one vendor, avoids new billing, and avoids rewriting the streaming response shape. Haiku is a reasonable tone-follower but nothing shown here proves weak instruction-following is the actual problem.",
+    "submitted_at": "2026-09-15T00:00:00Z"
+  },
+  "codex_position": {
+    "round": "blind",
+    "verbatim": "Recommendation: switch generation models, but stay with Gemini for now. Fix both bugs first, then move to the pinned GA gemini-3.8-flash with low thinking. Keep gemini-embedding-001 and the existing vectors. Do not move to Claude solely to cure these symptoms. The history contamination and silent retrieval failure are the dominant causes, and Anthropic would not fix either. However, remaining on gemini-3.1-flash-lite-preview is no longer reasonable: it is already past Google's listed May 25, 2026 shutdown date. Google recommends stable models for production and notes that preview models can have tighter limits. Three approaches: (1) SCOPE HOLD, GA Gemini Flash gemini-3.8-flash, recommended, GA with no announced shutdown, compatible with current REST architecture, use thinking_level low; (2) SCOPE REDUCE, GA Gemini Flash-Lite gemini-3.5-flash-lite, stable GA, cheapest and fastest, but positioned for high-throughput automation rather than rich mentoring dialogue; (3) SCOPE EXPAND, Claude Haiku 4.5 (claude-haiku-4-5-20251001), only if a product-specific blind evaluation shows a material prose/tone advantage, since it still requires new key, billing, streaming parser and error taxonomy, and vendor benchmarks do not establish superiority on this prompt. Non-obvious insight: a naive before/after test will falsely credit the new model, since existing Gemini sessions may contain persisted error text in history while new-provider sessions start clean; normalize history or the comparison is invalid. Also, moving from free/preview capacity to paid/GA capacity is probably a bigger reliability change than moving from Google to Anthropic. Failure mode: a retry or cross-provider fallback after streaming has begun can splice two answers together and persist the hybrid as history; fallback is safe only before the first client-visible token, after that the turn must fail visibly and stay out of model history. Smallest settling experiment: after fixing both bugs, run 10 representative two-turn conversations across gemini-3.5-flash-lite, gemini-3.8-flash low-thinking, and Haiku 4.5, three times each (90 calls), blind-scored on grounded correctness, tone, unsupported claims, and instruction violations, plus completion rate, 429/5xx rate, time-to-first-token and cost. Default to Gemini 3.8. Choose Flash-Lite if quality is tied. Choose Haiku only if it wins at least 7 of 10 conversation-level comparisons without worse reliability or latency.",
+    "submitted_at": "2026-09-15T00:05:00Z"
+  },
+  "disagreement_matrix": [
+    {
+      "claim": "Fixing the two application bugs (error text leaking into persisted history; silently swallowed match_chunks error) is required regardless of which model is used.",
+      "claude_view": "Agree, this was Claude's own core point in the blind round.",
+      "codex_view": {
+        "verbatim": "Fix before comparing models: treat a chat turn as an atomic transaction, only persist an assistant message after a clean upstream completion; never encode infrastructure errors as assistant text; check the match_chunks RPC error and fail closed.",
+        "gloss": "Codex independently reached the same root cause and proposed more specific mechanics for the fix."
+      },
+      "status": "agree",
+      "evidence_needed": null
+    },
+    {
+      "claim": "Whether Claude Haiku should replace Gemini for generation.",
+      "claude_view": "No, not warranted by the evidence in hand. It would be a lateral move that adds a second vendor without proof it solves anything the bug fix doesn't already solve.",
+      "codex_view": {
+        "verbatim": "Do not move to Claude solely to cure these symptoms... I would not take this migration unless Haiku clearly wins the product-specific evaluation... Choose Haiku only if it wins at least 7 of the 10 conversation-level blind comparisons without worse completion reliability or visibly worse latency.",
+        "gloss": "Same conclusion, with a concrete bar for reconsidering it later."
+      },
+      "status": "agree",
+      "evidence_needed": null
+    },
+    {
+      "claim": "Whether gemini-3.1-flash-lite-preview is already past a hard shutdown date and therefore must be replaced independent of the bug fix.",
+      "claude_view": "Could not verify this claim from the code alone in the blind round. Checked live against the actual Google Generative Language API using the project's real GOOGLE_AI_API_KEY: the model still resolves cleanly (GET /v1beta/models/gemini-3.1-flash-lite-preview returns a normal model description, version string 3.1-flash-lite-preview-03-2026, no deprecation or shutdown notice in the response). Codex's specific May 25, 2026 shutdown date does not hold up against this live check, and the version string suggests this preview build shipped in March 2026, after that date. Codex's specific date claim is not supported by the evidence obtainable here.",
+      "codex_view": {
+        "verbatim": "However, remaining on gemini-3.1-flash-lite-preview is no longer reasonable: it is already past Google's listed May 25, 2026 shutdown date.",
+        "gloss": "Codex cited Google's deprecation and model-lifecycle doc pages for this claim but did not have live access to query this project's actual API key or model endpoint to confirm the date applies to this specific model build."
+      },
+      "status": "claude_conceded",
+      "evidence_needed": "The specific shutdown-date claim is not confirmed and the live endpoint check contradicts it, but the underlying caution (a model explicitly labeled Preview carries real deprecation and rate-limit volatility risk that a GA model does not) still stands independent of the disputed date. Claude conceded the general direction, not the specific date."
+    },
+    {
+      "claim": "Which specific model to move to if switching within Gemini.",
+      "claude_view": "Originally left generic (\"a stable non-preview Gemini flash model\") in the blind round. Live-checked both of Codex's named candidates against the real API: gemini-3.8-flash and gemini-3.5-flash-lite both resolve cleanly with the project's key, confirming they are real, callable GA models today.",
+      "codex_view": {
+        "verbatim": "Move generation to pinned gemini-3.8-flash; keep embeddings and retrieval unchanged... Reliability: GA, no announced shutdown, and compatible with streamGenerateContent, systemInstruction, and the current REST architecture.",
+        "gloss": "Concrete, verifiable recommendation with a documented fallback (gemini-3.5-flash-lite) if quality after the bug fix is already good enough."
+      },
+      "status": "codex_conceded",
+      "evidence_needed": null
+    }
+  ],
+  "decision": {
+    "chosen": "Fix the two application bugs first (do not persist error turns into chat history; fail closed and log when match_chunks errors), regardless of model. Then move the generation model from gemini-3.1-flash-lite-preview to gemini-3.8-flash (GA, thinking_level low), keeping gemini-embedding-001 and the existing pgvector store untouched. Do not switch to Claude Haiku 4.5 now.",
+    "rationale": "Both sides independently reached the same root cause: the reported symptoms (visible errors, inconsistent PM-tone guardrail) are explained by one application bug, not by model quality, so the fix is owed regardless of vendor (matrix row 1, agree). Both sides also agree Haiku is not warranted by current evidence and should only be reconsidered against a concrete blind-eval bar (matrix row 2, agree). On the model-swap question itself, Codex's live-checked recommendation (gemini-3.8-flash, GA, no re-embedding needed, same REST architecture) is more specific and directly verified against the real API than Claude's generic \"some stable model\" (matrix row 4, codex_conceded). Codex's specific claim that the current model is already past a named shutdown date did not survive a live check against the real endpoint and is not being relied on (matrix row 3, claude_conceded on the general caution, not the date) — the decision to move off gemini-3.1-flash-lite-preview rests on it being explicitly preview-tier with tighter, less predictable rate limits, not on a disputed deprecation date.",
+    "open_for_gaurav": [
+      "Whether to run Codex's proposed 10-conversation, 3-model blind evaluation (90 calls total) before committing to gemini-3.8-flash, or accept the live-verified GA status and ship the swap directly given this is a low-traffic portfolio project.",
+      "Whether the cost difference between gemini-3.8-flash (~$0.0068/answer at illustrative token counts) and gemini-3.5-flash-lite (~$0.0033/answer) matters enough to start with the cheaper Flash-Lite model instead, given traffic is low."
+    ]
+  }
+}

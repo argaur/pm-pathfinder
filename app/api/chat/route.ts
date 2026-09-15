@@ -24,6 +24,12 @@ Do NOT:
 // ── Google AI REST helpers (no SDK — avoids Vercel runtime incompatibility) ──
 
 const GOOGLE_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
+const GENERATION_MODEL = 'gemini-3.5-flash-lite'
+
+// Sentinel prefix for a mid-stream failure. Never shown as-is: the frontend
+// strips it and excludes that turn from the history it replays to the model,
+// so a broken turn can't drag the next answer's tone off course.
+const STREAM_ERROR_MARKER = '\u0000__CHAT_STREAM_ERROR__\u0000'
 
 async function fetchWithRetry(
   url: string,
@@ -68,7 +74,7 @@ async function* streamGemini(
   message: string
 ): AsyncGenerator<string> {
   const res = await fetchWithRetry(
-    `${GOOGLE_API_BASE}/models/gemini-3.1-flash-lite-preview:streamGenerateContent?key=${apiKey}&alt=sse`,
+    `${GOOGLE_API_BASE}/models/${GENERATION_MODEL}:streamGenerateContent?key=${apiKey}&alt=sse`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -78,7 +84,10 @@ async function* streamGemini(
           ...history,
           { role: 'user', parts: [{ text: message }] },
         ],
-        generationConfig: { temperature: 0.7 },
+        generationConfig: {
+          temperature: 0.7,
+          thinkingConfig: { thinkingLevel: 'low' },
+        },
       }),
     }
   )
@@ -146,19 +155,25 @@ export async function POST(req: NextRequest) {
     // ── Retrieve relevant chunks ───────────────────────────────────────────
     const queryEmbedding = await embedText(message, apiKey)
 
-    const { data: chunks } = await supabaseAdmin.rpc('match_chunks', {
+    const { data: chunks, error: chunksError } = await supabaseAdmin.rpc('match_chunks', {
       query_embedding: queryEmbedding,
       match_count: 4,
       filter: archetype ? { archetype } : {},
     })
 
-    const contextBlock = chunks && chunks.length > 0
-      ? `\n\n---\nRelevant context:\n\n${
-          chunks.map((c: { content: string; source: string }, i: number) =>
-            `[${i + 1}] (${c.source})\n${c.content}`
-          ).join('\n\n')
-        }\n---`
-      : ''
+    if (chunksError) {
+      console.error('[/api/chat] match_chunks failed:', chunksError.message)
+    }
+
+    const contextBlock = chunksError
+      ? '\n\n---\nRelevant context: unavailable right now (retrieval failed). Answer from general PM knowledge and say so briefly, per your instructions above.\n---'
+      : chunks && chunks.length > 0
+        ? `\n\n---\nRelevant context:\n\n${
+            chunks.map((c: { content: string; source: string }, i: number) =>
+              `[${i + 1}] (${c.source})\n${c.content}`
+            ).join('\n\n')
+          }\n---`
+        : ''
 
     const systemInstruction = SYSTEM_PROMPT + contextBlock
 
@@ -171,7 +186,8 @@ export async function POST(req: NextRequest) {
           }
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e)
-          controller.enqueue(new TextEncoder().encode(`\n[Error: ${msg}]`))
+          console.error('[/api/chat] stream failed mid-response:', msg)
+          controller.enqueue(new TextEncoder().encode(`${STREAM_ERROR_MARKER}${msg}`))
         } finally {
           controller.close()
         }
