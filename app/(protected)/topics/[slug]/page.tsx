@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Clock } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { slugToTopic } from '@/lib/data/topics'
 import { DIMENSION_LABELS } from '@/lib/scoring/engine'
 
@@ -29,17 +29,6 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
           {topic.title}
         </h1>
         <p className="text-sm text-[#918fa1]">{topic.tagline}</p>
-      </div>
-
-      {/* Coming Soon banner */}
-      <div className="flex items-center gap-2.5 bg-teal-500/5 border border-teal-500/15 rounded-xl px-4 py-3 mb-8">
-        <Clock className="w-4 h-4 text-teal-400 flex-shrink-0" />
-        <div>
-          <p className="text-xs font-medium text-teal-300">Full content coming soon</p>
-          <p className="text-[11px] text-[#918fa1] mt-0.5">
-            Frameworks, practice exercises, and curated resources are being prepared for this topic.
-          </p>
-        </div>
       </div>
 
       {/* Concept — visible */}
