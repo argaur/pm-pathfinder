@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "record_id": "2026-09-17-halfvec-hnsw-migration",
+  "created_at": "2026-09-17T00:00:00Z",
+  "skill": "premortem-pair",
+  "peer": {
+    "backend": "codex",
+    "model": "gpt-5.6-sol",
+    "effort": "medium"
+  },
+  "brief": {
+    "text": "Red-team this Postgres/Supabase migration SQL (draft of supabase/migrations/003_halfvec_hnsw_index.sql). Find the strongest reasons it is unsafe or wrong. Consider: CREATE INDEX/function syntax correctness, safety of running DROP INDEX IF EXISTS then CREATE INDEX IF NOT EXISTS twice, whether CREATE OR REPLACE FUNCTION preserves the exact call signature api/chat/route.ts depends on (supabaseAdmin.rpc('match_chunks', {query_embedding, match_count, filter})), whether casting to halfvec(3072) changes similarity semantics/return type in a way that breaks callers, and any other risk of running this by hand in the Supabase SQL Editor against a live table.",
+    "inputs": [
+      "supabase/migrations/001_document_chunks.sql",
+      "draft SQL for supabase/migrations/003_halfvec_hnsw_index.sql (drop old ivfflat index, create hnsw index over halfvec(3072) cast, recreate match_chunks with halfvec cast in order-by and similarity calc)"
+    ]
+  },
+  "claude_position": {
+    "round": "blind",
+    "text": "This migration is safe SQL to hand-run in the Supabase SQL editor. DROP INDEX IF EXISTS is idempotent and touches only the derived index structure, never table data, so there is no data-loss risk from running it twice. CREATE INDEX IF NOT EXISTS ... USING hnsw ((embedding::halfvec(3072)) halfvec_cosine_ops) is valid pgvector syntax for an expression index over a cast and builds fresh from the existing embedding column with no re-embedding needed. CREATE OR REPLACE FUNCTION match_chunks(...) preserves the exact same parameter names, types and defaults, and the exact same RETURNS TABLE shape, so the RPC contract app/api/chat/route.ts depends on (supabaseAdmin.rpc('match_chunks', {query_embedding, match_count, filter})) is unchanged: callers still pass a vector(3072), the halfvec cast happens inside the function body, invisible to the caller. The similarity float returned is still 1 - cosine_distance, just computed at half precision, so return type and semantics are preserved; only the precision of the distance calculation changes slightly, which is the documented, expected tradeoff of the halfvec approach and is what the audit recommended.",
+    "submitted_at": "2026-09-17T00:00:00Z"
+  },
+  "codex_position": {
+    "round": "blind",
+    "verbatim": "## Verdict\n\n**Do not run this against production.** The index syntax is valid, but the migration is operationally unsafe and silently changes retrieval correctness.\n\n## Critical findings\n\n1. Filtered searches can silently return fewer than match_count. HNSW applies the WHERE filter after approximate candidate selection. With the default hnsw.ef_search = 40, a selective archetype may return only a handful of rows-or none-even when enough matching rows exist. The function promises LIMIT match_count; it does not guarantee that many results. pgvector explicitly documents this failure mode and recommends iterative scans or an appropriate filtering/index strategy.\n\n2. This changes ranking and similarity values, not merely index storage. Both operands are converted from single-precision vector to half-precision halfvec before cosine distance is calculated. That quantizes every component before scoring: similarity values change; ordering can change; near-ties can flip; HNSW adds a second, approximate-recall change; callers using score thresholds may behave differently. The SQL return type itself does not change (still double precision / JS number), but the semantic contract changes anyway.\n\n3. vector(3072) does not preserve or establish a 3072-dimensional function identity. PostgreSQL discards parenthesized type modifiers in function declarations, so the function is identified as accepting vector, not vector(3072). Dimension enforcement happens later when the body casts to halfvec(3072), producing a runtime error for a wrong-sized embedding.\n\n4. CREATE OR REPLACE FUNCTION does not prove that it preserves the route's RPC contract. This migration is safe only if the existing live function already has match_chunks(vector, integer, jsonb) with exactly those input names and the exact same output row type. Otherwise: different input types create a new overload instead of replacing the old function; overloads with the same argument names but different types are unsupported/ambiguous through PostgREST and can produce PGRST203; different existing input names can make replacement fail; any difference in output types or output column names makes CREATE OR REPLACE fail; different argument count/order may leave the route calling the old function or no matching function.\n\n5. The archetype predicate appears logically wrong. When an archetype is provided, this returns dc.source = 'builders-bible' OR dc.metadata->>'archetype' = requested_archetype. Every builders-bible chunk passes regardless of its archetype, which can dominate the HNSW candidate set and crowd out actual archetype matches. Unless this broad inclusion is an explicit product requirement, the filter is broken.\n\n## Index and rerun safety\n\nThe expression-index syntax itself is correct and matches pgvector's documented half-precision expression-index form. The drop/create sequence is not safely idempotent: DROP INDEX IF EXISTS destroys the working index before the replacement has successfully built or been verified; if the new build fails (extension version, dimension mismatch, timeout, disk, memory, locking), production loses the old index. CREATE INDEX IF NOT EXISTS checks only the relation name, not that the existing index has the requested definition, so a wrong/stale object with that name makes the statement silently skip. On a second run, the drop is normally a no-op and the create is normally skipped; it does not repair drift or validate anything. All names are unqualified, so search_path determines resolution.\n\n## Live-production hazards\n\nCREATE INDEX (without CONCURRENTLY) blocks inserts/updates/deletes for the duration of the HNSW build. DROP INDEX (without CONCURRENTLY) takes an ACCESS EXCLUSIVE lock. Supabase's SQL Editor has a one-minute timeout, while HNSW creation is specifically the kind of administrative operation that can run much longer. HNSW builds can consume substantial memory, CPU, temp space and disk. There is no explicit transaction strategy, rollback plan, lock timeout, preflight validation, post-build EXPLAIN, row-count comparison, recall test, or index-validity check. match_count is unvalidated (NULL means no limit, huge values are expensive, negative errors). filter accepts arbitrary JSON but silently ignores every key except archetype. CREATE OR REPLACE preserves ownership/grants only when it truly replaces the same function, and resets unspecified properties to implied defaults -- an existing SECURITY DEFINER, STABLE, PARALLEL SAFE, SET search_path, cost or row estimate can be lost; if it creates a new overload instead, functions may receive broad default EXECUTE privileges.\n\n## Required preflight\n\nInspect before writing a replacement migration: pg_get_functiondef / pg_get_function_arguments / pg_get_function_result / prosecdef / provolatile / proparallel / proacl / proconfig for match_chunks via pg_proc/pg_namespace; extversion for the vector extension; a count of embeddings that are null or not exactly 3072 dimensions; and indexname/indexdef from pg_indexes for document_chunks. The safe deployment order is: build the new index concurrently under a fresh name, verify validity and query plans, deploy and test the function contract and recall, then drop the old index concurrently in a separate operation. This file does the destructive step first and performs no verification.",
+    "gloss": "Codex ran with --permission review (no filesystem access), so all findings are inference from the pasted SQL plus general PostgreSQL/pgvector/Supabase knowledge, not verified against the live schema. It was not told that the ivfflat index likely never built successfully (>2000-dim hard error), which shapes how much weight to give the 'destroys a working index' framing.",
+    "submitted_at": "2026-09-17T00:00:00Z"
+  },
+  "disagreement_matrix": [
+    {
+      "claim": "CREATE OR REPLACE FUNCTION is guaranteed to cleanly replace the existing match_chunks and preserve the exact RPC contract app/api/chat/route.ts depends on.",
+      "claude_view": "Codex is right that vector(3072) collapses to vector for function-identity purposes, so whether this cleanly replaces the live function (vs. creating an ambiguous overload or failing to replace at all) depends on the live function's exact current signature, which this agent has no DB access to verify. I cannot confirm this from the repo alone. Mitigation: the migration header now instructs Gaurav to run a pg_get_functiondef preflight query against the live match_chunks before applying, in addition to the pg_indexes check already required.",
+      "codex_view": {
+        "verbatim": "CREATE OR REPLACE FUNCTION does not prove that it preserves the route's RPC contract... This migration is safe only if the existing function already has match_chunks(vector, integer, jsonb) with exactly those input names and the exact same output row type."
+      },
+      "status": "claude_conceded",
+      "evidence_needed": null
+    },
+    {
+      "claim": "Dropping the old ivfflat index before the new hnsw index is built and verified risks losing a working index if the new build fails.",
+      "claude_view": "The severity is lower than Codex's framing implies given context Codex was not given: pgvector hard-errors building an ivfflat/hnsw index above 2000 dimensions, and this column is vector(3072), so the original CREATE INDEX in 001_document_chunks.sql almost certainly never succeeded -- there is very likely no working index to lose. That said, Codex's underlying sequencing point stands independent of that fact: build-then-verify-then-drop is strictly safer than drop-then-build, and CREATE INDEX IF NOT EXISTS only checks the index name exists, not that it has the intended definition, so it cannot substitute for verification. I am reordering the migration to create the new index first (using CONCURRENTLY to avoid blocking writes) and drop the old one after, rather than drop-first.",
+      "codex_view": {
+        "verbatim": "DROP INDEX IF EXISTS destroys the working index before the replacement has successfully built or been verified; if the new build fails... production loses the old index."
+      },
+      "status": "claude_conceded",
+      "evidence_needed": null
+    },
+    {
+      "claim": "CREATE INDEX / DROP INDEX without CONCURRENTLY blocks table writes/reads for the duration, and Supabase's SQL Editor has a timeout shorter than an HNSW build can take.",
+      "claude_view": "Agreed as stated, and directly actionable: switching to CREATE INDEX CONCURRENTLY IF NOT EXISTS avoids the write-blocking ACCESS EXCLUSIVE-style lock during the build. The SQL Editor timeout risk is a real operational constraint outside this file's control (Gaurav may need to run it via psql/CLI instead of the editor for a large table); the migration header now flags this explicitly so he sees it before running by hand.",
+      "codex_view": {
+        "verbatim": "CREATE INDEX is not concurrent. It blocks inserts, updates, and deletes for the duration of the HNSW build... Supabase's SQL Editor has a one-minute timeout, while HNSW creation is specifically the kind of administrative operation that can run much longer."
+      },
+      "status": "agree",
+      "evidence_needed": null
+    },
+    {
+      "claim": "Casting to halfvec(3072) changes similarity values and ranking (quantization), so any downstream score-thresholding needs re-validation, even though the SQL return type (float/double precision) is unchanged.",
+      "claude_view": "Agreed. This is an expected, documented tradeoff of the halfvec approach (the whole point is a faster approximate index at slightly reduced precision) and matches what the stacksmith audit already flagged as acceptable. Grep of app/api/chat/route.ts shows it does not threshold on the similarity score, it only uses the returned rows as context text, so no downstream logic needs updating. Noting the tradeoff in the migration's header comment for the record.",
+      "codex_view": {
+        "verbatim": "That quantizes every component before scoring. Consequences: similarity values change; ordering can change; near-ties can flip; HNSW adds a second, approximate-recall change; callers using score thresholds may behave differently."
+      },
+      "status": "agree",
+      "evidence_needed": null
+    },
+    {
+      "claim": "HNSW applies the WHERE filter after approximate candidate selection, so a selective archetype filter can silently return fewer than match_count rows (or none), even when enough matching rows exist in the table.",
+      "claude_view": "Agreed as a real property of HNSW + post-filtering; noting it as a caveat in the migration header so Gaurav is aware retrieval recall may shift slightly for narrow archetype filters. Not fixing it in this migration: increasing hnsw.ef_search or switching to iterative scans is a tuning change orthogonal to the index-type fix this migration exists to make, and the corpus is small (about 60 archetype chunks) so the practical impact is likely minor. Flagging as a follow-up rather than blocking this fix.",
+      "codex_view": {
+        "verbatim": "With the default hnsw.ef_search = 40, a selective archetype may return only a handful of rows-or none-even when enough matching rows exist. The function promises LIMIT match_count; it does not guarantee that many results."
+      },
+      "status": "open",
+      "evidence_needed": "Whether recall against the small archetype corpus is measurably affected is an empirical question that needs a live query against the seeded table; cannot be settled from static SQL review."
+    },
+    {
+      "claim": "The archetype WHERE clause (dc.source = 'builders-bible' OR dc.metadata->>'archetype' = filter->>'archetype') lets every builders-bible chunk through regardless of the requested archetype, which may be a pre-existing logic bug.",
+      "claude_view": "This is a pre-existing bug in the WHERE clause carried over unchanged from 001_document_chunks.sql; it is not introduced by this migration and the assigned task's scope is explicitly limited to the index type and the embedding cast, not the filter logic. Out of scope for this change -- flagging it in the migration header comment as a known pre-existing issue and in this session's report to Gaurav, not fixing it silently as a drive-by change to a function neither this task nor Gaurav asked to have its filter behavior altered.",
+      "codex_view": {
+        "verbatim": "Every builders-bible chunk passes regardless of its archetype. Those global rows can dominate the HNSW candidate set and crowd out actual archetype matches. Unless this broad inclusion is an explicit product requirement, the filter is broken."
+      },
+      "status": "open",
+      "evidence_needed": "Gaurav needs to confirm whether letting all builders-bible chunks through regardless of archetype is intentional (general PM knowledge fallback) or a bug, before anyone touches the filter logic."
+    }
+  ],
+  "decision": {
+    "chosen": "Write supabase/migrations/003_halfvec_hnsw_index.sql with: (1) the new hnsw index created CONCURRENTLY and verified-by-instruction before the old ivfflat index is dropped, instead of drop-first; (2) an added preflight query for the live match_chunks function definition (pg_get_functiondef) alongside the existing pg_indexes check; (3) header comments flagging the halfvec precision/ranking tradeoff, the HNSW-plus-post-filter recall caveat, the Supabase SQL Editor timeout risk for a long-running index build, and the pre-existing (unfixed) archetype OR-logic behavior. The RPC signature and embedding cast approach are kept as originally planned since Codex's syntax-level review found no fault in them.",
+    "rationale": "Matrix rows 1-3 (RPC contract risk, drop-before-verify ordering, no-CONCURRENTLY locking/timeout) are cheap, low-risk changes to the migration file itself that directly reduce operational risk with no functional cost, so they were adopted. Row 4 (halfvec ranking shift) was already an accepted, expected tradeoff per the stacksmith audit and confirmed not to affect any downstream logic in app/api/chat/route.ts, so it needed only documentation, not a code change. Rows 5 and 6 are genuine open questions -- recall behavior under filtering needs a live query this agent cannot run, and the archetype filter bug is out of the assigned task's scope and needs a product-intent call only Gaurav can make -- so both are surfaced to him rather than resolved unilaterally.",
+    "open_for_gaurav": [
+      "Whether the HNSW-plus-post-filter recall behavior (a selective archetype filter can return fewer than match_count rows) is acceptable at the current small corpus size, or whether hnsw.ef_search should be tuned after this migration lands.",
+      "Whether the match_chunks archetype filter letting every builders-bible chunk through regardless of the requested archetype (pre-existing, unchanged by this migration) is intentional or a bug worth fixing separately."
+    ]
+  }
+}

@@ -56,3 +56,6 @@ next-env.d.ts
 memory/
 GEMINI.md
 pm-pathfinder-redesign.html
+
+# stacksmith audit output, local only
+.stacksmith/

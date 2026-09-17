@@ -8,7 +8,6 @@
  *  2. The-Builders-Bible.pdf — chunked at ~500 words with 50-word overlap
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 import pdfParse from 'pdf-parse'
@@ -25,19 +24,36 @@ const CHUNK_WORDS = 500
 const CHUNK_OVERLAP_WORDS = 50
 const BATCH_SIZE = 5 // embed N chunks at a time to avoid rate limits
 
+// Google AI REST call (no SDK — matches app/api/chat/route.ts, which avoids
+// the @google/generative-ai SDK for a Vercel runtime incompatibility).
+const GOOGLE_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
+
 // ── Clients ─────────────────────────────────────────────────────────────────
 
-const genai = new GoogleGenerativeAI(GOOGLE_AI_API_KEY)
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 async function embed(text: string, retries = 4): Promise<number[]> {
-  const model = genai.getGenerativeModel({ model: 'gemini-embedding-001' })
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const result = await model.embedContent(text)
-      return result.embedding.values
+      const res = await fetch(
+        `${GOOGLE_API_BASE}/models/gemini-embedding-001:embedContent?key=${GOOGLE_AI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'models/gemini-embedding-001',
+            content: { parts: [{ text }] },
+          }),
+        }
+      )
+      if (!res.ok) {
+        const body = await res.text()
+        throw new Error(`Embed failed: ${res.status} ${body}`)
+      }
+      const data = await res.json()
+      return data.embedding.values
     } catch (e) {
       if (attempt === retries) throw e
       const wait = 1000 * 2 ** attempt // 1s, 2s, 4s, 8s
